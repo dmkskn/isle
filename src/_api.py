@@ -1,0 +1,55 @@
+import os
+import json
+from urllib.parse import urljoin, urlencode
+from urllib.request import urlopen
+
+from ._objects import Movie
+
+
+__all__ = ["search_movie", ]
+
+
+_BASEURL = "https://api.themoviedb.org/"
+_SEARCH_MOVIE_SUFFIX = "3/search/movie"
+
+
+TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
+
+
+
+def search_movie(query: str, **kwargs):
+    """Search for movies.
+
+    The `query` argument is a text query to search (required).
+    
+    The optional `language` argument specifies a ISO 639-1 code
+    to display translated data for the fields that support it.
+    (Default: "en-US")
+
+    The optional `include_adult` argument specifies whether
+    to include adult (pornography) content in the results.
+    (Default: False)
+
+    The optional `region` argument specifies a ISO 3166-1 code
+    to filter release dates. Must be uppercase.
+
+    Returns a generator. Each item is a `Movie` object.
+    """
+    url = urljoin(_BASEURL, _SEARCH_MOVIE_SUFFIX)
+    params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
+    for item in _search_results_for(url, params):
+        yield Movie(**item)
+
+
+def _search_results_for(url: str, params: dict):
+    def get_page(url, *, page, **params):
+        params = urlencode({**params, 'page': page})
+        response = urlopen(f"{url}?{params}")
+        return json.loads(response.read().decode("utf-8"))
+    
+    def get_total_pages_for(url, params):
+        first_page = get_page(url, page=1, **params)
+        return first_page["total_pages"] 
+
+    for page in range(1, get_total_pages_for(url, params) + 1):
+        yield from get_page(url, page=page, **params)["results"]
