@@ -61,7 +61,7 @@ class SearchMovieTestCase(unittest.TestCase):
 
     def test_api_response_and_search_movie_response_are_the_same(self):
         api_response_tmdb_ids = {m["id"] for m in self.api_response_movies}
-        search_movie_tmdb_ids = {m["tmdb_id"] for m in self.results_list}
+        search_movie_tmdb_ids = {m.tmdb_id for m in self.results_list}
         self.assertSetEqual(api_response_tmdb_ids, search_movie_tmdb_ids)
 
 
