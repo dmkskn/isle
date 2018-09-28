@@ -67,7 +67,54 @@ class SearchMovieTestCase(unittest.TestCase):
 
 
 class SearchShowTestCase(unittest.TestCase):
-    pass
+    BASEURL = "https://api.themoviedb.org/3/search/tv?"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.show_name = "lost"
+        cls.results = src.search_show(cls.show_name)
+        cls.results_list = list(cls.results)
+        params = {
+            "api_key": os.environ["TMDB_API_KEY"],
+            "language": "en-US",
+            "query": cls.show_name,
+        }
+        response = cls.get_api_response(**params, page=1)
+        cls.total_pages = response["total_pages"]
+        cls.total_results = response["total_results"]
+        cls.api_response_shows = []
+        for page in range(1, cls.total_pages + 1):
+            results = cls.get_api_response(**params, page=page)["results"]
+            for movie in results:
+                cls.api_response_shows.append(movie)
+
+    @classmethod
+    def get_api_response(cls, **params):
+        params = urlencode(params)
+        response = urlopen(f"{cls.BASEURL}{params}")
+        return json.loads(response.read().decode("utf-8"))
+    
+    def test_output_is_generator(self):
+        self.assertTrue(inspect.isgenerator(self.results))
+
+    def test_output_item_is_Show_instance(self):
+        self.assertIsInstance(self.results_list[0], src.Show)
+
+    def test_query_is_required(self):
+        kwargs = {"first_air_date_year": 2004}
+        self.assertRaises(TypeError, src.search_show, **kwargs)
+
+    def test_all_args_except_the_first_one_are_kwargs(self):
+        args = (self.show_name, 2004)
+        self.assertRaises(TypeError, src.search_show, *args)
+
+    def test_amount_of_results(self):
+        self.assertEqual(len(self.results_list), self.total_results)
+
+    def test_api_response_and_search_movie_response_are_the_same(self):
+        api_response_tmdb_ids = {m["id"] for m in self.api_response_shows}
+        search_movie_tmdb_ids = {m.tmdb_id for m in self.results_list}
+        self.assertSetEqual(api_response_tmdb_ids, search_movie_tmdb_ids)
 
 
 
