@@ -22,6 +22,9 @@ def search_movie(query: str, **kwargs):
 
     The `query` argument is a text query to search (required).
     
+    The optional `year` argument specifies the release year of 
+    the movie.
+
     The optional `language` argument specifies a ISO 639-1 code
     to display translated data for the fields that support it.
     (Default: "en-US")
