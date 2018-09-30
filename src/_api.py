@@ -3,14 +3,15 @@ import json
 from urllib.parse import urljoin, urlencode
 from urllib.request import urlopen
 
-from ._objects import Movie
+from ._objects import Movie, Show
 
 
-__all__ = ["search_movie", ]
+__all__ = ["search_movie", "search_show",]
 
 
 _BASEURL = "https://api.themoviedb.org/"
 _SEARCH_MOVIE_SUFFIX = "3/search/movie"
+_SEARCH_SHOW_SUFFIX = "3/search/tv"
 
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
@@ -21,7 +22,7 @@ def search_movie(query: str, **kwargs):
     """Search for movies.
 
     The `query` argument is a text query to search (required).
-    
+
     The optional `year` argument specifies the release year of 
     the movie.
 
@@ -42,6 +43,26 @@ def search_movie(query: str, **kwargs):
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Movie(**item)
+
+
+def search_show(query: str, **kwargs):
+    """Search for TV shows.
+
+    The `query` argument is a text query to search (required).
+
+    The optional `language` argument specifies a ISO 639-1 code
+    to display translated data for the fields that support it.
+    (Default: "en-US")
+
+    The optional `first_air_date_year` argument specifies 
+    the year when the show was first aired.
+
+    Returns a generator. Each item is a `Movie` object.
+    """
+    url = urljoin(_BASEURL, _SEARCH_SHOW_SUFFIX)
+    params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
+    for item in _search_results_for(url, params):
+        yield Show(**item)
 
 
 def _search_results_for(url: str, params: dict):
