@@ -3,16 +3,16 @@ import json
 from urllib.parse import urljoin, urlencode
 from urllib.request import urlopen
 
-from ._objects import Movie, Show
+from ._objects import Movie, Show, Person
 
 
-__all__ = ["search_movie", "search_show",]
+__all__ = ["search_movie", "search_show", "search_person"]
 
 
 _BASEURL = "https://api.themoviedb.org/"
 _SEARCH_MOVIE_SUFFIX = "3/search/movie"
 _SEARCH_SHOW_SUFFIX = "3/search/tv"
-
+_SEARCH_PERSON_SUFFIX = "3/search/person"
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
 
@@ -63,6 +63,30 @@ def search_show(query: str, **kwargs):
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Show(**item)
+
+
+def search_person(query: str, **kwargs):
+    """Search for people.
+
+    The `query` argument is a text query to search (required).
+
+    The optional `language` argument specifies a ISO 639-1 code
+    to display translated data for the fields that support it.
+    (Default: "en-US")
+
+    The optional `include_adult` argument specifies whether
+    to include adult (pornography) content in the results.
+    (Default: False)
+
+    The optional `region` argument specifies a ISO 3166-1 code
+    to filter release dates. Must be uppercase.
+
+    Returns a generator. Each item is a `Movie` object.
+    """
+    url = urljoin(_BASEURL, _SEARCH_PERSON_SUFFIX)
+    params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
+    for item in _search_results_for(url, params):
+        yield Person(**item)
 
 
 def _search_results_for(url: str, params: dict):
