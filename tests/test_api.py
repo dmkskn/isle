@@ -122,7 +122,50 @@ class SearchShowTestCase(unittest.TestCase):
 
 
 class SearchPersonTestCase(unittest.TestCase):
-    pass
+    BASEURL = "https://api.themoviedb.org/3/search/person?"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.person_name = "Abrams"
+        cls.results = src.search_person(cls.person_name)
+        cls.results_list = list(cls.results)
+        params = {
+            "api_key": os.environ["TMDB_API_KEY"],
+            "language": "en-US",
+            "include_adult": "false",
+            "query": cls.person_name,
+        }
+        response = cls.get_api_response(**params, page=1)
+        cls.total_pages = response["total_pages"]
+        cls.total_results = response["total_results"]
+        cls.api_response_people = []
+        for page in range(1, cls.total_pages + 1):
+            results = cls.get_api_response(**params, page=page)["results"]
+            for movie in results:
+                cls.api_response_people.append(movie)
+
+    @classmethod
+    def get_api_response(cls, **params):
+        params = urlencode(params)
+        response = urlopen(f"{cls.BASEURL}{params}")
+        return json.loads(response.read().decode("utf-8"))
+    
+    def test_output_is_generator(self):
+        self.assertTrue(inspect.isgenerator(self.results))
+
+    def test_output_item_is_Person_instance(self):
+        self.assertIsInstance(self.results_list[0], src.Person)
+
+    def test_query_is_required(self):
+        kwargs = {"language": "en-US"}
+        self.assertRaises(TypeError, src.search_person, **kwargs)
+
+    def test_all_args_except_the_first_one_are_kwargs(self):
+        args = (self.person_name, True)
+        self.assertRaises(TypeError, src.search_person, *args)
+
+    def test_amount_of_results(self):
+        self.assertEqual(len(self.results_list), self.total_results)
 
 
 
