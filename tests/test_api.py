@@ -170,7 +170,43 @@ class SearchPersonTestCase(unittest.TestCase):
 
 
 class SearchCompanyTestCase(unittest.TestCase):
-    pass
+    BASEURL = "https://api.themoviedb.org/3/search/company?"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.company_name = "Sony"
+        cls.results = src.search_company(cls.company_name)
+        cls.results_list = list(cls.results)
+        params = {
+            "api_key": os.environ["TMDB_API_KEY"],
+            "query": cls.company_name,
+        }
+        response = cls.get_api_response(**params, page=1)
+        cls.total_pages = response["total_pages"]
+        cls.total_results = response["total_results"]
+        cls.api_response_companies = []
+        for page in range(1, cls.total_pages + 1):
+            results = cls.get_api_response(**params, page=page)["results"]
+            for movie in results:
+                cls.api_response_companies.append(movie)
+
+    @classmethod
+    def get_api_response(cls, **params):
+        params = urlencode(params)
+        response = urlopen(f"{cls.BASEURL}{params}")
+        return json.loads(response.read().decode("utf-8"))
+    
+    def test_output_is_generator(self):
+        self.assertTrue(inspect.isgenerator(self.results))
+
+    def test_output_item_is_Company_instance(self):
+        self.assertIsInstance(self.results_list[0], src.Company)
+
+    def test_query_is_required(self):
+        self.assertRaises(TypeError, src.search_company)
+
+    def test_amount_of_results(self):
+        self.assertEqual(len(self.results_list), self.total_results)
 
 
 
