@@ -58,7 +58,7 @@ def search_show(query: str, **kwargs):
     The optional `first_air_date_year` argument specifies 
     the year when the show was first aired.
 
-    Returns a generator. Each item is a `Movie` object.
+    Returns a generator. Each item is a `Show` object.
     """
     url = urljoin(_BASEURL, _SEARCH_SHOW_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
@@ -82,7 +82,7 @@ def search_person(query: str, **kwargs):
     The optional `region` argument specifies a ISO 3166-1 code
     to filter release dates. Must be uppercase.
 
-    Returns a generator. Each item is a `Movie` object.
+    Returns a generator. Each item is a `Person` object.
     """
     url = urljoin(_BASEURL, _SEARCH_PERSON_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
