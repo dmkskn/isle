@@ -3,16 +3,17 @@ import json
 from urllib.parse import urljoin, urlencode
 from urllib.request import urlopen
 
-from ._objects import Movie, Show, Person
+from ._objects import Movie, Show, Person, Company
 
 
-__all__ = ["search_movie", "search_show", "search_person"]
+__all__ = ["search_movie", "search_show", "search_person", "search_company"]
 
 
 _BASEURL = "https://api.themoviedb.org/"
 _SEARCH_MOVIE_SUFFIX = "3/search/movie"
 _SEARCH_SHOW_SUFFIX = "3/search/tv"
 _SEARCH_PERSON_SUFFIX = "3/search/person"
+_SEARCH_COMPANY_SUFFIX = "3/search/company"
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
 
@@ -87,6 +88,19 @@ def search_person(query: str, **kwargs):
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Person(**item)
+
+
+def search_company(query: str, **kwargs):
+    """Search for companies.
+
+    The `query` argument is a text query to search (required).
+
+    Returns a generator. Each item is a `Company` object.
+    """
+    url = urljoin(_BASEURL, _SEARCH_COMPANY_SUFFIX)
+    params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
+    for item in _search_results_for(url, params):
+        yield Company(**item)
 
 
 def _search_results_for(url: str, params: dict):
