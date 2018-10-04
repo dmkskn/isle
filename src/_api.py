@@ -6,7 +6,13 @@ from urllib.request import urlopen
 from ._objects import Movie, Show, Person, Company
 
 
-__all__ = ["search_movie", "search_show", "search_person", "search_company"]
+__all__ = [
+    "search_movie", 
+    "search_show", 
+    "search_person", 
+    "search_company",
+    "discover_movies",
+]
 
 
 _BASEURL = "https://api.themoviedb.org/"
@@ -14,6 +20,7 @@ _SEARCH_MOVIE_SUFFIX = "3/search/movie"
 _SEARCH_SHOW_SUFFIX = "3/search/tv"
 _SEARCH_PERSON_SUFFIX = "3/search/person"
 _SEARCH_COMPANY_SUFFIX = "3/search/company"
+_DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
 
@@ -101,6 +108,21 @@ def search_company(query: str, **kwargs):
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Company(**item)
+
+
+def discover_movies(options: dict):
+    """Discover movies by different types of data like
+    average rating, number of votes, genres and certifications.
+
+    See available options: 
+    https://developers.themoviedb.org/3/discover/movie-discover
+    
+    Returns a generator. Each item is a `Movie` object.
+    """
+    url = urljoin(_BASEURL, _DISCOVER_MOVIES_SUFFIX)
+    params = {"api_key": TMDB_API_KEY, **options}
+    for item in _search_results_for(url, params):
+        yield Movie(**item)
 
 
 def _search_results_for(url: str, params: dict):
