@@ -12,6 +12,7 @@ __all__ = [
     "search_person", 
     "search_company",
     "discover_movies",
+    "discover_shows",
 ]
 
 
@@ -21,6 +22,7 @@ _SEARCH_SHOW_SUFFIX = "3/search/tv"
 _SEARCH_PERSON_SUFFIX = "3/search/person"
 _SEARCH_COMPANY_SUFFIX = "3/search/company"
 _DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
+_DISCOVER_SHOWS_SUFFIX = "3/discover/tv"
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
 
@@ -123,6 +125,22 @@ def discover_movies(options: dict):
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
         yield Movie(**item)
+
+
+def discover_shows(options: dict):
+    """Discover TV shows by different types of data like
+    average rating, number of votes, genres, the network
+    they aired on and air dates.
+
+    See available options: 
+    https://developers.themoviedb.org/3/discover/tv-discover
+    
+    Returns a generator. Each item is a `Show` object.
+    """
+    url = urljoin(_BASEURL, _DISCOVER_SHOWS_SUFFIX)
+    params = {"api_key": TMDB_API_KEY, **options}
+    for item in _search_results_for(url, params):
+        yield Show(**item)
 
 
 def _search_results_for(url: str, params: dict):
