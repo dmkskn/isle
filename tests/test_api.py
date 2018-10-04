@@ -211,7 +211,35 @@ class SearchCompanyTestCase(unittest.TestCase):
 
 
 class DiscoverMovieTestCase(unittest.TestCase):
-    pass
+    BASEURL = "https://api.themoviedb.org/3/discover/movie?"
+    
+    @classmethod
+    def setUpClass(cls):
+        options = {
+            'sort_by': 'popularity.desc',
+            'with_crew': 488, # Steven Spielberg
+            'with_cast': 3, # Harrison Ford
+        }
+        cls.results = src.discover_movies(options)
+        cls.results_list = list(cls.results)
+        cls.api_response = cls.get_api_response(options)
+        cls.total_results = cls.api_response["total_results"]
+    
+    @classmethod
+    def get_api_response(cls, options):
+        params = {"api_key": os.environ["TMDB_API_KEY"], **options}
+        params = urlencode(params)
+        response = urlopen(f"{cls.BASEURL}{params}")
+        return json.loads(response.read().decode("utf-8"))
+
+    def test_output_is_generator(self):
+        self.assertTrue(inspect.isgenerator(self.results))
+
+    def test_output_item_is_Movie_instance(self):
+        self.assertIsInstance(self.results_list[0], src.Movie)
+
+    def test_amount_of_results(self):
+        self.assertEqual(len(self.results_list), self.total_results)
 
 
 
