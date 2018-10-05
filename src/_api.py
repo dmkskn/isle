@@ -7,9 +7,9 @@ from ._objects import Movie, Show, Person, Company
 
 
 __all__ = [
-    "search_movie", 
-    "search_show", 
-    "search_person", 
+    "search_movie",
+    "search_show",
+    "search_person",
     "search_company",
     "discover_movies",
     "discover_shows",
@@ -25,7 +25,6 @@ _DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
 _DISCOVER_SHOWS_SUFFIX = "3/discover/tv"
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
-
 
 
 def search_movie(query: str, **kwargs):
@@ -145,13 +144,13 @@ def discover_shows(options: dict):
 
 def _search_results_for(url: str, params: dict):
     def get_page(url, *, page, **params):
-        params = urlencode({**params, 'page': page})
+        params = urlencode({**params, "page": page})
         response = urlopen(f"{url}?{params}")
         return json.loads(response.read().decode("utf-8"))
-    
+
     def get_total_pages_for(url, params):
         first_page = get_page(url, page=1, **params)
-        return first_page["total_pages"] 
+        return first_page["total_pages"]
 
     for page in range(1, get_total_pages_for(url, params) + 1):
         yield from get_page(url, page=page, **params)["results"]

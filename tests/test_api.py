@@ -8,11 +8,6 @@ from urllib.request import urlopen
 import src
 
 
-class TMDbAPITestCase(unittest.TestCase):
-    pass
-
-
-
 class SearchMovieTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/movie?"
 
@@ -59,12 +54,6 @@ class SearchMovieTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
 
-    # def test_api_response_and_search_movie_response_are_the_same(self):
-    #     api_response_tmdb_ids = {m["id"] for m in self.api_response_movies}
-    #     search_movie_tmdb_ids = {m.tmdb_id for m in self.results_list}
-    #     self.assertSetEqual(api_response_tmdb_ids, search_movie_tmdb_ids)
-
-
 
 class SearchShowTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/tv?"
@@ -93,7 +82,7 @@ class SearchShowTestCase(unittest.TestCase):
         params = urlencode(params)
         response = urlopen(f"{cls.BASEURL}{params}")
         return json.loads(response.read().decode("utf-8"))
-    
+
     def test_output_is_generator(self):
         self.assertTrue(inspect.isgenerator(self.results))
 
@@ -110,15 +99,6 @@ class SearchShowTestCase(unittest.TestCase):
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
-
-    # def test_api_response_and_search_show_response_are_the_same(self):
-    #     api_response_tmdb_ids = {m["id"] for m in self.api_response_shows}
-    #     search_show_tmdb_ids = {m.tmdb_id for m in self.results_list}
-    #     self.assertSetEqual(
-    #         api_response_tmdb_ids, 
-    #         search_show_tmdb_ids,
-    #         msg=f'{len(api_response_tmdb_ids)} not {len(search_show_tmdb_ids)}')
-
 
 
 class SearchPersonTestCase(unittest.TestCase):
@@ -149,7 +129,7 @@ class SearchPersonTestCase(unittest.TestCase):
         params = urlencode(params)
         response = urlopen(f"{cls.BASEURL}{params}")
         return json.loads(response.read().decode("utf-8"))
-    
+
     def test_output_is_generator(self):
         self.assertTrue(inspect.isgenerator(self.results))
 
@@ -168,7 +148,6 @@ class SearchPersonTestCase(unittest.TestCase):
         self.assertEqual(len(self.results_list), self.total_results)
 
 
-
 class SearchCompanyTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/company?"
 
@@ -177,10 +156,7 @@ class SearchCompanyTestCase(unittest.TestCase):
         cls.company_name = "Sony"
         cls.results = src.search_company(cls.company_name)
         cls.results_list = list(cls.results)
-        params = {
-            "api_key": os.environ["TMDB_API_KEY"],
-            "query": cls.company_name,
-        }
+        params = {"api_key": os.environ["TMDB_API_KEY"], "query": cls.company_name}
         response = cls.get_api_response(**params, page=1)
         cls.total_pages = response["total_pages"]
         cls.total_results = response["total_results"]
@@ -195,7 +171,7 @@ class SearchCompanyTestCase(unittest.TestCase):
         params = urlencode(params)
         response = urlopen(f"{cls.BASEURL}{params}")
         return json.loads(response.read().decode("utf-8"))
-    
+
     def test_output_is_generator(self):
         self.assertTrue(inspect.isgenerator(self.results))
 
@@ -209,22 +185,21 @@ class SearchCompanyTestCase(unittest.TestCase):
         self.assertEqual(len(self.results_list), self.total_results)
 
 
-
 class DiscoverMovieTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/discover/movie?"
-    
+
     @classmethod
     def setUpClass(cls):
         options = {
-            'sort_by': 'popularity.desc',
-            'with_crew': 488, # Steven Spielberg
-            'with_cast': 3, # Harrison Ford
+            "sort_by": "popularity.desc",
+            "with_crew": 488,  # Steven Spielberg
+            "with_cast": 3,  # Harrison Ford
         }
         cls.results = src.discover_movies(options)
         cls.results_list = list(cls.results)
         cls.api_response = cls.get_api_response(options)
         cls.total_results = cls.api_response["total_results"]
-    
+
     @classmethod
     def get_api_response(cls, options):
         params = {"api_key": os.environ["TMDB_API_KEY"], **options}
@@ -242,21 +217,20 @@ class DiscoverMovieTestCase(unittest.TestCase):
         self.assertEqual(len(self.results_list), self.total_results)
 
 
-
 class DiscoverShowTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/discover/tv?"
-    
+
     @classmethod
     def setUpClass(cls):
         options = {
-            'sort_by': 'popularity.desc',
-            'with_companies': 278, # Propaganda Films
+            "sort_by": "popularity.desc",
+            "with_companies": 278,  # Propaganda Films
         }
         cls.results = src.discover_shows(options)
         cls.results_list = list(cls.results)
         cls.api_response = cls.get_api_response(options)
         cls.total_results = cls.api_response["total_results"]
-    
+
     @classmethod
     def get_api_response(cls, options):
         params = {"api_key": os.environ["TMDB_API_KEY"], **options}
@@ -272,12 +246,6 @@ class DiscoverShowTestCase(unittest.TestCase):
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
-
-
-
-class DiscoverPersonTestCase(unittest.TestCase):
-    pass
-
 
 
 if __name__ == "__main__":
