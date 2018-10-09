@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 
 from ._tools import search_results_for as _search_results_for
 from ._objects import Movie, Show, Person, Company
+from .config import TMDB_API_KEY
 
 
 __all__ = [
@@ -22,8 +23,6 @@ _SEARCH_PERSON_SUFFIX = "3/search/person"
 _SEARCH_COMPANY_SUFFIX = "3/search/company"
 _DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
 _DISCOVER_SHOWS_SUFFIX = "3/discover/tv"
-
-TMDB_API_KEY = os.environ.get("TMDB_API_KEY", None)
 
 
 def search_movie(query: str, **kwargs):
