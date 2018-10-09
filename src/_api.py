@@ -4,6 +4,15 @@ from urllib.parse import urljoin
 from ._tools import search_results_for as _search_results_for
 from ._objects import Movie, Show, Person, Company
 from .config import TMDB_API_KEY
+from ._urls import (
+    BASEURL,
+    SEARCH_MOVIE_SUFFIX,
+    SEARCH_SHOW_SUFFIX,
+    SEARCH_PERSON_SUFFIX,
+    SEARCH_COMPANY_SUFFIX,
+    DISCOVER_MOVIES_SUFFIX,
+    DISCOVER_SHOWS_SUFFIX,
+)
 
 
 __all__ = [
@@ -14,15 +23,6 @@ __all__ = [
     "discover_movies",
     "discover_shows",
 ]
-
-
-_BASEURL = "https://api.themoviedb.org/"
-_SEARCH_MOVIE_SUFFIX = "3/search/movie"
-_SEARCH_SHOW_SUFFIX = "3/search/tv"
-_SEARCH_PERSON_SUFFIX = "3/search/person"
-_SEARCH_COMPANY_SUFFIX = "3/search/company"
-_DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
-_DISCOVER_SHOWS_SUFFIX = "3/discover/tv"
 
 
 def search_movie(query: str, **kwargs):
@@ -46,7 +46,7 @@ def search_movie(query: str, **kwargs):
 
     Returns a generator. Each item is a `Movie` object.
     """
-    url = urljoin(_BASEURL, _SEARCH_MOVIE_SUFFIX)
+    url = urljoin(BASEURL, SEARCH_MOVIE_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Movie(**item)
@@ -66,7 +66,7 @@ def search_show(query: str, **kwargs):
 
     Returns a generator. Each item is a `Show` object.
     """
-    url = urljoin(_BASEURL, _SEARCH_SHOW_SUFFIX)
+    url = urljoin(BASEURL, SEARCH_SHOW_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Show(**item)
@@ -90,7 +90,7 @@ def search_person(query: str, **kwargs):
 
     Returns a generator. Each item is a `Person` object.
     """
-    url = urljoin(_BASEURL, _SEARCH_PERSON_SUFFIX)
+    url = urljoin(BASEURL, SEARCH_PERSON_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Person(**item)
@@ -103,7 +103,7 @@ def search_company(query: str, **kwargs):
 
     Returns a generator. Each item is a `Company` object.
     """
-    url = urljoin(_BASEURL, _SEARCH_COMPANY_SUFFIX)
+    url = urljoin(BASEURL, SEARCH_COMPANY_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
         yield Company(**item)
@@ -118,7 +118,7 @@ def discover_movies(options: dict):
     
     Returns a generator. Each item is a `Movie` object.
     """
-    url = urljoin(_BASEURL, _DISCOVER_MOVIES_SUFFIX)
+    url = urljoin(BASEURL, DISCOVER_MOVIES_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
         yield Movie(**item)
@@ -134,7 +134,7 @@ def discover_shows(options: dict):
     
     Returns a generator. Each item is a `Show` object.
     """
-    url = urljoin(_BASEURL, _DISCOVER_SHOWS_SUFFIX)
+    url = urljoin(BASEURL, DISCOVER_SHOWS_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
         yield Show(**item)
