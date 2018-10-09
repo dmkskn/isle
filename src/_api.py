@@ -1,8 +1,7 @@
 import os
-import json
-from urllib.parse import urljoin, urlencode
-from urllib.request import urlopen
+from urllib.parse import urljoin
 
+from ._tools import search_results_for as _search_results_for
 from ._objects import Movie, Show, Person, Company
 
 
@@ -140,17 +139,3 @@ def discover_shows(options: dict):
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
         yield Show(**item)
-
-
-def _search_results_for(url: str, params: dict):
-    def get_page(url, *, page, **params):
-        params = urlencode({**params, "page": page})
-        response = urlopen(f"{url}?{params}")
-        return json.loads(response.read().decode("utf-8"))
-
-    def get_total_pages_for(url, params):
-        first_page = get_page(url, page=1, **params)
-        return first_page["total_pages"]
-
-    for page in range(1, get_total_pages_for(url, params) + 1):
-        yield from get_page(url, page=page, **params)["results"]
