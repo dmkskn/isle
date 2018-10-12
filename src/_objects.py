@@ -143,7 +143,7 @@ class Movie(_BaseTMDbObject):
         release_dates = self._request(
             f"{BASEURL}{MOVIE_RELEASE_DATES_SUFFIX.format(self.tmdb_id)}", **params
         )
-        self._set_attrs(release_dates)
+        self._set_attrs({"release_dates": release_dates})
         return release_dates
 
     def get_videos(self, **params) -> dict:
@@ -151,7 +151,7 @@ class Movie(_BaseTMDbObject):
         videos = self._request(
             f"{BASEURL}{MOVIE_VIDEOS_SUFFIX.format(self.tmdb_id)}", **params
         )
-        self._set_attrs(videos)
+        self._set_attrs({"videos": videos})
         return videos
 
     def get_translations(self, **params) -> dict:

@@ -14,7 +14,7 @@ class BaseTMDbObjectTestCase(unittest.TestCase):
         params = {}
         res = self.base._request(url, **params)
         self.assertEqual(res["original_title"], "東京物語")
-    
+
     def test_iter_request(self):
         url = f"https://api.themoviedb.org/3/movie/{self.movie_id}/reviews"
         params = {}
@@ -27,7 +27,7 @@ class BaseTMDbObjectTestCase(unittest.TestCase):
         attrs = dict.fromkeys(["id", "__is_first_init__", "one", "two"], 1)
 
         exp_attrs = attrs.keys() - {"id", "__is_first_init__"}
-        self.base._set_attrs(**attrs)
+        self.base._set_attrs(attrs)
         self.assertTrue(
             all([attr in self.base.__dict__.keys() for attr in exp_attrs])
         )
@@ -67,7 +67,7 @@ class MovieTestCase(unittest.TestCase):
             self.assertIn(key, self.changed_movie.__dict__)
             self.assertEqual(alternative_titles[key], getattr(self.changed_movie, key))
             self.assertNotIn(key, self.not_changed_movie.__dict__)
-    
+
     def test_get_changes(self):
         changes = self.changed_movie.get_changes()
         self.assertIsInstance(changes, dict)
@@ -75,7 +75,7 @@ class MovieTestCase(unittest.TestCase):
             self.assertIn(key, self.changed_movie.__dict__)
             self.assertEqual(changes[key], getattr(self.changed_movie, key))
             self.assertNotIn(key, self.not_changed_movie.__dict__)
-    
+
     def test_get_credits(self):
         credits = self.changed_movie.get_credits()
         self.assertIsInstance(credits, dict)
@@ -111,18 +111,14 @@ class MovieTestCase(unittest.TestCase):
     def test_get_release_dates(self):
         release_dates = self.changed_movie.get_release_dates()
         self.assertIsInstance(release_dates, dict)
-        for key in release_dates.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(release_dates[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertIn("results", release_dates)
+        self.assertEqual(release_dates["results"], self.changed_movie.release_dates)
 
     def test_get_videos(self):
         videos = self.changed_movie.get_videos()
         self.assertIsInstance(videos, dict)
-        for key in videos.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(videos[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertIn("results", videos)
+        self.assertEqual(videos["results"], self.changed_movie.videos)
 
     def test_get_translations(self):
         translations = self.changed_movie.get_translations()
