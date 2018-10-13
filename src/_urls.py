@@ -68,3 +68,23 @@ ALL_SHOW_SECOND_SUFFIXES = [
     "translations",
     "videos",
 ]
+
+PERSON_DETAILS_SUFFIX = "3/person/{}" # {person_id}
+PERSON_CHANGES_SUFFIX = "3/person/{}/changes"
+PERSON_MOVIE_CREDITS_SUFFIX = "3/person/{}/movie_credits"
+PERSON_SHOW_CREDITS_SUFFIX = "3/person/{}/tv_credits"
+PERSON_COMBINED_CREDITS_SUFFIX = "3/person/{}/combined_credits"
+PERSON_EXTERNAL_IDS_SUFFIX = "3/person/{}/external_ids"
+PERSON_IMAGES_SUFFIX = "3/person/{}/images"
+PERSON_TAGGED_IMAGES_SUFFIX = "3/person/{}/tagged_images"
+PERSON_TRANSLATIONS_SUFFIX = "3/person/{}/translations"
+ALL_PERSON_SECOND_SUFFIXES= [
+    "changes",
+    "movie_credits",
+    "tv_credits",
+    "combined_credits",
+    "external_ids",
+    "images",
+    "tagged_images",
+    "translations",
+]

@@ -36,6 +36,16 @@ from ._urls import (
     SHOW_TRANSLATIONS_SUFFIX,
     SHOW_VIDEOS_SUFFIX,
     ALL_SHOW_SECOND_SUFFIXES,
+    PERSON_DETAILS_SUFFIX,
+    PERSON_CHANGES_SUFFIX,
+    PERSON_MOVIE_CREDITS_SUFFIX,
+    PERSON_SHOW_CREDITS_SUFFIX,
+    PERSON_COMBINED_CREDITS_SUFFIX,
+    PERSON_EXTERNAL_IDS_SUFFIX,
+    PERSON_IMAGES_SUFFIX,
+    PERSON_TAGGED_IMAGES_SUFFIX,
+    PERSON_TRANSLATIONS_SUFFIX,
+    ALL_PERSON_SECOND_SUFFIXES,
 )
 
 
@@ -322,11 +332,96 @@ class Show(_BaseTMDbObject):
         return videos
 
 
-class Person:
-    def __init__(self, tmdb_id=None, **kwargs):
-        self.tmdb_id = tmdb_id or kwargs["id"]
-        for key in kwargs.keys() - {"id"}:
-            setattr(self, key, kwargs[key])
+class Person(_BaseTMDbObject):
+    def _first_init(self):
+        self.get_all()
+
+    def get_all(self, **params):
+        """Get all information about a person in a single
+        response."""
+        methods = ",".join(ALL_PERSON_SECOND_SUFFIXES)
+        all_data = self.get_details(**{"append_to_response": methods, **params})
+        self._set_attrs(all_data)
+        return all_data
+
+    def get_details(self, **params) -> dict:
+        """Get the primary person details."""
+        details = self._request(
+            f"{BASEURL}{PERSON_DETAILS_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(details)
+        return details
+
+    def get_changes(self, **params) -> dict:
+        """Get the changes for a person. By default only the
+        last 24 hours are returned."""
+        changes = self._request(
+            f"{BASEURL}{PERSON_CHANGES_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(changes)
+        return changes
+
+    def get_movie_credits(self, **params) -> dict:
+        """Get the movie credits for a person."""
+        movie_credits = self._request(
+            f"{BASEURL}{PERSON_MOVIE_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(
+            {"movie_cast": movie_credits["cast"], "movie_crew": movie_credits["crew"]}
+        )
+        return movie_credits
+
+    def get_show_credits(self, **params) -> dict:
+        """Get the TV show credits for a person."""
+        show_credits = self._request(
+            f"{BASEURL}{PERSON_SHOW_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(
+            {"show_cast": show_credits["cast"], "show_crew": show_credits["crew"]}
+        )
+        return show_credits
+
+    def get_combined_credits(self, **params) -> dict:
+        """Get the movie and TV credits together in a single
+        response."""
+        combined_credits = self._request(
+            f"{BASEURL}{PERSON_COMBINED_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(combined_credits)
+        return combined_credits
+
+    def get_external_ids(self, **params) -> dict:
+        """Get the external ids for a person. Such as 
+        Facebook, Instagram, Twitter and IMDb and others"""
+        external_ids = self._request(
+            f"{BASEURL}{PERSON_EXTERNAL_IDS_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(external_ids)
+        return external_ids
+
+    def get_images(self, **params) -> dict:
+        """Get the images for a person."""
+        images = self._request(
+            f"{BASEURL}{PERSON_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(images)
+        return images
+
+    def iter_tagged_images(self, **params) -> Iterator[dict]:
+        """Get the images that this person has been tagged
+        in."""
+        yield from self._iter_request(
+            f"{BASEURL}{PERSON_TAGGED_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
+        )
+
+    def get_translations(self, **params) -> dict:
+        """Get a list of translations that have been created
+        for a person."""
+        translations = self._request(
+            f"{BASEURL}{PERSON_TRANSLATIONS_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(translations)
+        return translations
 
 
 class Company:
