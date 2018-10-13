@@ -46,6 +46,9 @@ from ._urls import (
     PERSON_TAGGED_IMAGES_SUFFIX,
     PERSON_TRANSLATIONS_SUFFIX,
     ALL_PERSON_SECOND_SUFFIXES,
+    COMPANY_DETAILS_SUFFIX,
+    COMPANY_ALTERNATIVE_NAMES_SUFFIX,
+    COMPANY_IMAGES_SUFFIX,
 )
 
 
@@ -424,8 +427,31 @@ class Person(_BaseTMDbObject):
         return translations
 
 
-class Company:
-    def __init__(self, tmdb_id=None, **kwargs):
-        self.tmdb_id = tmdb_id or kwargs["id"]
-        for key in kwargs.keys() - {"id"}:
-            setattr(self, key, kwargs[key])
+class Company(_BaseTMDbObject):
+    def _first_init(self):
+        self.get_details()
+
+    def get_details(self, **params) -> dict:
+        """Get a companies details."""
+        details = self._request(
+            f"{BASEURL}{COMPANY_DETAILS_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(details)
+        return details
+
+    def get_alternative_names(self, **params) -> dict:
+        """Get the alternative names of a company."""
+        alternative_names = self._request(
+            f"{BASEURL}{COMPANY_ALTERNATIVE_NAMES_SUFFIX.format(self.tmdb_id)}",
+            **params,
+        )
+        self._set_attrs({"alternative_names": alternative_names["results"]})
+        return alternative_names
+
+    def get_images(self, **params) -> dict:
+        """Get a companies logos."""
+        images = self._request(
+            f"{BASEURL}{COMPANY_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self._set_attrs(images)
+        return images

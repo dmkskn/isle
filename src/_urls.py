@@ -7,7 +7,7 @@ SEARCH_COMPANY_SUFFIX = "3/search/company"
 DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
 DISCOVER_SHOWS_SUFFIX = "3/discover/tv"
 
-MOVIE_DETAILS_SUFFIX = "3/movie/{}" # {movie_id}
+MOVIE_DETAILS_SUFFIX = "3/movie/{}"  # {movie_id}
 MOVIE_ALTERNATIVE_TITLES_SUFFIX = "3/movie/{}/alternative_titles"
 MOVIE_CHANGES_SUFFIX = "3/movie/{}/changes"
 MOVIE_CREDITS_SUFFIX = "3/movie/{}/credits"
@@ -37,7 +37,7 @@ ALL_MOVIE_SECOND_SUFFIXES = [
     "lists",
 ]
 
-SHOW_DETAILS_SUFFIX = "3/tv/{}" # {tv_id}
+SHOW_DETAILS_SUFFIX = "3/tv/{}"  # {tv_id}
 SHOW_ALTERNATIVE_TITLES_SUFFIX = "3/tv/{}/alternative_titles"
 SHOW_CHANGES_SUFFIX = "3/tv/{}/changes"
 SHOW_CONTENT_RATINGS_SUFFIX = "3/tv/{}/content_ratings"
@@ -69,7 +69,7 @@ ALL_SHOW_SECOND_SUFFIXES = [
     "videos",
 ]
 
-PERSON_DETAILS_SUFFIX = "3/person/{}" # {person_id}
+PERSON_DETAILS_SUFFIX = "3/person/{}"  # {person_id}
 PERSON_CHANGES_SUFFIX = "3/person/{}/changes"
 PERSON_MOVIE_CREDITS_SUFFIX = "3/person/{}/movie_credits"
 PERSON_SHOW_CREDITS_SUFFIX = "3/person/{}/tv_credits"
@@ -78,7 +78,7 @@ PERSON_EXTERNAL_IDS_SUFFIX = "3/person/{}/external_ids"
 PERSON_IMAGES_SUFFIX = "3/person/{}/images"
 PERSON_TAGGED_IMAGES_SUFFIX = "3/person/{}/tagged_images"
 PERSON_TRANSLATIONS_SUFFIX = "3/person/{}/translations"
-ALL_PERSON_SECOND_SUFFIXES= [
+ALL_PERSON_SECOND_SUFFIXES = [
     "changes",
     "movie_credits",
     "tv_credits",
@@ -88,3 +88,7 @@ ALL_PERSON_SECOND_SUFFIXES= [
     "tagged_images",
     "translations",
 ]
+
+COMPANY_DETAILS_SUFFIX = "3/company/{}"  # {company_id}
+COMPANY_ALTERNATIVE_NAMES_SUFFIX = "3/company/{}/alternative_names"
+COMPANY_IMAGES_SUFFIX = "3/company/{}/images"

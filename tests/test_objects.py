@@ -1,6 +1,6 @@
 import unittest
 import inspect
-from src._objects import _BaseTMDbObject, Movie, Show, Person
+from src._objects import _BaseTMDbObject, Movie, Show, Person, Company
 
 
 class BaseTMDbObjectTestCase(unittest.TestCase):
@@ -386,7 +386,34 @@ class PersonTestCase(unittest.TestCase):
 
 
 class CompanyTestCase(unittest.TestCase):
-    pass
+    def setUp(self):
+        self.company_id = 1
+        self.changed_company = Company(self.company_id, preload=True)
+        self.not_changed_company = Company(self.company_id, preload=False)
+
+    def test_get_details(self):
+        details = self.changed_company.get_details()
+        self.assertIsInstance(details, dict)
+        for key in details.keys() - {"id"}:
+            self.assertIn(key, self.changed_company.__dict__)
+            self.assertEqual(details[key], getattr(self.changed_company, key))
+            self.assertNotIn(key, self.not_changed_company.__dict__)
+
+    def test_get_alternative_names(self):
+        alternative_names = self.changed_company.get_alternative_names()
+        self.assertIsInstance(alternative_names, dict)
+        self.assertIn("results", alternative_names)
+        self.assertIn("alternative_names", self.changed_company.__dict__)
+        self.assertEqual(
+            self.changed_company.alternative_names, alternative_names["results"]
+        )
+
+    def test_get_images(self):
+        images = self.changed_company.get_images()
+        self.assertIsInstance(images, dict)
+        self.assertIn("logos", images)
+        self.assertIn("logos", self.changed_company.__dict__)
+        self.assertEqual(self.changed_company.logos, images["logos"])
 
 
 if __name__ == "__main__":
