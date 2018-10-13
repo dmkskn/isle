@@ -1,6 +1,6 @@
 import unittest
 import inspect
-from src._objects import _BaseTMDbObject, Movie, Show, Person, Company
+from themoviedb._objects import _BaseTMDbObject, Movie, Show, Person, Company
 
 
 class BaseTMDbObjectTestCase(unittest.TestCase):

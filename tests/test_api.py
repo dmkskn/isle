@@ -5,7 +5,7 @@ import unittest
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-import src
+import themoviedb as tmdb
 
 
 class SearchMovieTestCase(unittest.TestCase):
@@ -14,7 +14,7 @@ class SearchMovieTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.movie_title = "harry potter"
-        cls.results = src.search_movie(cls.movie_title)
+        cls.results = tmdb.search_movie(cls.movie_title)
         cls.results_list = list(cls.results)
         params = {
             "api_key": os.environ["TMDB_API_KEY"],
@@ -41,15 +41,15 @@ class SearchMovieTestCase(unittest.TestCase):
         self.assertTrue(inspect.isgenerator(self.results))
 
     def test_output_item_is_Movie_instance(self):
-        self.assertIsInstance(self.results_list[0], src.Movie)
+        self.assertIsInstance(self.results_list[0], tmdb.Movie)
 
     def test_title_is_required(self):
         kwargs = {"year": 1953}
-        self.assertRaises(TypeError, src.search_movie, **kwargs)
+        self.assertRaises(TypeError, tmdb.search_movie, **kwargs)
 
     def test_all_args_except_the_first_one_are_kwargs(self):
         args = (self.movie_title, 1953)
-        self.assertRaises(TypeError, src.search_movie, *args)
+        self.assertRaises(TypeError, tmdb.search_movie, *args)
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
@@ -61,7 +61,7 @@ class SearchShowTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.show_name = "lost"
-        cls.results = src.search_show(cls.show_name)
+        cls.results = tmdb.search_show(cls.show_name)
         cls.results_list = list(cls.results)
         params = {
             "api_key": os.environ["TMDB_API_KEY"],
@@ -87,15 +87,15 @@ class SearchShowTestCase(unittest.TestCase):
         self.assertTrue(inspect.isgenerator(self.results))
 
     def test_output_item_is_Show_instance(self):
-        self.assertIsInstance(self.results_list[0], src.Show)
+        self.assertIsInstance(self.results_list[0], tmdb.Show)
 
     def test_query_is_required(self):
         kwargs = {"first_air_date_year": 2004}
-        self.assertRaises(TypeError, src.search_show, **kwargs)
+        self.assertRaises(TypeError, tmdb.search_show, **kwargs)
 
     def test_all_args_except_the_first_one_are_kwargs(self):
         args = (self.show_name, 2004)
-        self.assertRaises(TypeError, src.search_show, *args)
+        self.assertRaises(TypeError, tmdb.search_show, *args)
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
@@ -107,7 +107,7 @@ class SearchPersonTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.person_name = "Abrams"
-        cls.results = src.search_person(cls.person_name)
+        cls.results = tmdb.search_person(cls.person_name)
         cls.results_list = list(cls.results)
         params = {
             "api_key": os.environ["TMDB_API_KEY"],
@@ -134,15 +134,15 @@ class SearchPersonTestCase(unittest.TestCase):
         self.assertTrue(inspect.isgenerator(self.results))
 
     def test_output_item_is_Person_instance(self):
-        self.assertIsInstance(self.results_list[0], src.Person)
+        self.assertIsInstance(self.results_list[0], tmdb.Person)
 
     def test_query_is_required(self):
         kwargs = {"language": "en-US"}
-        self.assertRaises(TypeError, src.search_person, **kwargs)
+        self.assertRaises(TypeError, tmdb.search_person, **kwargs)
 
     def test_all_args_except_the_first_one_are_kwargs(self):
         args = (self.person_name, True)
-        self.assertRaises(TypeError, src.search_person, *args)
+        self.assertRaises(TypeError, tmdb.search_person, *args)
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
@@ -154,7 +154,7 @@ class SearchCompanyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.company_name = "Sony"
-        cls.results = src.search_company(cls.company_name)
+        cls.results = tmdb.search_company(cls.company_name)
         cls.results_list = list(cls.results)
         params = {"api_key": os.environ["TMDB_API_KEY"], "query": cls.company_name}
         response = cls.get_api_response(**params, page=1)
@@ -176,10 +176,10 @@ class SearchCompanyTestCase(unittest.TestCase):
         self.assertTrue(inspect.isgenerator(self.results))
 
     def test_output_item_is_Company_instance(self):
-        self.assertIsInstance(self.results_list[0], src.Company)
+        self.assertIsInstance(self.results_list[0], tmdb.Company)
 
     def test_query_is_required(self):
-        self.assertRaises(TypeError, src.search_company)
+        self.assertRaises(TypeError, tmdb.search_company)
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
@@ -195,7 +195,7 @@ class DiscoverMovieTestCase(unittest.TestCase):
             "with_crew": 488,  # Steven Spielberg
             "with_cast": 3,  # Harrison Ford
         }
-        cls.results = src.discover_movies(options)
+        cls.results = tmdb.discover_movies(options)
         cls.results_list = list(cls.results)
         cls.api_response = cls.get_api_response(options)
         cls.total_results = cls.api_response["total_results"]
@@ -211,7 +211,7 @@ class DiscoverMovieTestCase(unittest.TestCase):
         self.assertTrue(inspect.isgenerator(self.results))
 
     def test_output_item_is_Movie_instance(self):
-        self.assertIsInstance(self.results_list[0], src.Movie)
+        self.assertIsInstance(self.results_list[0], tmdb.Movie)
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
@@ -226,7 +226,7 @@ class DiscoverShowTestCase(unittest.TestCase):
             "sort_by": "popularity.desc",
             "with_companies": 278,  # Propaganda Films
         }
-        cls.results = src.discover_shows(options)
+        cls.results = tmdb.discover_shows(options)
         cls.results_list = list(cls.results)
         cls.api_response = cls.get_api_response(options)
         cls.total_results = cls.api_response["total_results"]
@@ -242,7 +242,7 @@ class DiscoverShowTestCase(unittest.TestCase):
         self.assertTrue(inspect.isgenerator(self.results))
 
     def test_output_item_is_Show_instance(self):
-        self.assertIsInstance(self.results_list[0], src.Show)
+        self.assertIsInstance(self.results_list[0], tmdb.Show)
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)

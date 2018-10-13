@@ -52,6 +52,9 @@ from ._urls import (
 )
 
 
+__all__ = ["Movie", "Show", "Person", "Company"]
+
+
 class _BaseTMDbObject(ABC):
     def __init__(self, tmdb_id=None, *, preload=True, **kwargs):
         self.tmdb_id = tmdb_id or kwargs["id"]
