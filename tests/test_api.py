@@ -264,5 +264,15 @@ class GetCertificationsTestCase(unittest.TestCase):
         self.assertIsInstance(res["US"], list)
 
 
+class GetGenresTestCase(unittest.TestCase):
+    def test_get_movie_genres(self):
+        res = tmdb.get_movie_genres()
+        self.assertIsInstance(res, list)
+    
+    def test_get_show_genres(self):
+        res = tmdb.get_show_genres()
+        self.assertIsInstance(res, list)
+
+
 if __name__ == "__main__":
     unittest.main()

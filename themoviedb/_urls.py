@@ -97,3 +97,6 @@ COMPANY_IMAGES_SUFFIX = "3/company/{}/images"
 
 KEYWORD_DETAILS_SUFFIX = "3/keyword/{}"  # {keyword_id}
 KEYWORD_MOVIES_SUFFIX = "3/keyword/{}/movies"  # {keyword_id}
+
+MOVIE_GENRES_SUFFIX = "3/genre/movie/list"
+SHOW_GENRES_SUFFIX = "3/genre/tv/list"

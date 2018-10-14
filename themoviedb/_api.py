@@ -15,6 +15,8 @@ from ._urls import (
     DISCOVER_SHOWS_SUFFIX,
     MOVIE_CERTIFICATION_SUFFIX,
     SHOW_CERTIFICATION_SUFFIX,
+    MOVIE_GENRES_SUFFIX,
+    SHOW_GENRES_SUFFIX,
 )
 
 
@@ -27,6 +29,8 @@ __all__ = [
     "discover_shows",
     "get_movie_certifications",
     "get_show_certifications",
+    "get_movie_genres",
+    "get_show_genres",
 ]
 
 
@@ -163,3 +167,21 @@ def get_show_certifications():
     if res.get("status_message"):
         raise ValueError(res["status_message"])
     return res["certifications"]
+
+
+def get_movie_genres():
+    """Get the list of official genres for movies."""
+    url = urljoin(BASEURL, MOVIE_GENRES_SUFFIX)
+    res = get_response(url, **{"api_key": TMDB_API_KEY})
+    if res.get("status_message"):
+        raise ValueError(res["status_message"])
+    return res["genres"]
+
+
+def get_show_genres():
+    """Get the list of official genres for TV shows."""
+    url = urljoin(BASEURL, SHOW_GENRES_SUFFIX)
+    res = get_response(url, **{"api_key": TMDB_API_KEY})
+    if res.get("status_message"):
+        raise ValueError(res["status_message"])
+    return res["genres"]
