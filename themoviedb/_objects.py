@@ -49,10 +49,12 @@ from ._urls import (
     COMPANY_DETAILS_SUFFIX,
     COMPANY_ALTERNATIVE_NAMES_SUFFIX,
     COMPANY_IMAGES_SUFFIX,
+    KEYWORD_DETAILS_SUFFIX,
+    KEYWORD_MOVIES_SUFFIX,
 )
 
 
-__all__ = ["Movie", "Show", "Person", "Company"]
+__all__ = ["Movie", "Show", "Person", "Company", "Keyword"]
 
 
 class _BaseTMDbObject(ABC):
@@ -458,3 +460,26 @@ class Company(_BaseTMDbObject):
         )
         self._set_attrs(images)
         return images
+
+
+class Keyword(_BaseTMDbObject):
+    def _first_init(self):
+        self.get_details()
+
+    def get_details(self) -> dict:
+        """Get the primary information about a keyword."""
+        details = self._request(
+            f"{BASEURL}{KEYWORD_DETAILS_SUFFIX.format(self.tmdb_id)}", **{}
+        )
+        self._set_attrs(details)
+        return details
+
+    def iter_movies(self, **params) -> Iterator[Movie]:
+        """Get the movies that belong to a keyword."""
+        results = self._iter_request(
+            f"{BASEURL}{KEYWORD_MOVIES_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        yield from map(lambda x: Movie(**x), results)
+
+    def __str__(self):
+        return self.name

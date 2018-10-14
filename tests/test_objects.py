@@ -1,6 +1,6 @@
 import unittest
 import inspect
-from themoviedb._objects import _BaseTMDbObject, Movie, Show, Person, Company
+from themoviedb._objects import _BaseTMDbObject, Movie, Show, Person, Company, Keyword
 
 
 class BaseTMDbObjectTestCase(unittest.TestCase):
@@ -414,6 +414,27 @@ class CompanyTestCase(unittest.TestCase):
         self.assertIn("logos", images)
         self.assertIn("logos", self.changed_company.__dict__)
         self.assertEqual(self.changed_company.logos, images["logos"])
+
+
+class KeywordTestCase(unittest.TestCase):
+    def setUp(self):
+        self.keyword_id = 3417
+        self.keyword_name = "wormhole"
+        self.keyword = Keyword(self.keyword_id)
+
+    def test_init_keyword(self):
+        self.assertEqual(self.keyword.tmdb_id, self.keyword_id)
+        self.assertEqual(self.keyword.name, self.keyword_name)
+        self.assertNotIn("id",self.keyword.__dict__)
+
+    def test_iter_movies(self):
+        res = self.keyword.iter_movies()
+        item = next(res)
+        self.assertTrue(inspect.isgenerator(res))
+        self.assertIsInstance(item, Movie)
+
+    def test_keyword_to_str(self):
+        self.assertEqual(str(self.keyword), self.keyword_name)
 
 
 if __name__ == "__main__":

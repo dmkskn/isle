@@ -94,3 +94,6 @@ ALL_PERSON_SECOND_SUFFIXES = [
 COMPANY_DETAILS_SUFFIX = "3/company/{}"  # {company_id}
 COMPANY_ALTERNATIVE_NAMES_SUFFIX = "3/company/{}/alternative_names"
 COMPANY_IMAGES_SUFFIX = "3/company/{}/images"
+
+KEYWORD_DETAILS_SUFFIX = "3/keyword/{}"  # {keyword_id}
+KEYWORD_MOVIES_SUFFIX = "3/keyword/{}/movies"  # {keyword_id}
