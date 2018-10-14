@@ -2,6 +2,7 @@ import os
 from urllib.parse import urljoin
 
 from ._tools import search_results_for as _search_results_for
+from ._tools import get_response
 from ._objects import Movie, Show, Person, Company
 from .config import TMDB_API_KEY
 from ._urls import (
@@ -12,6 +13,8 @@ from ._urls import (
     SEARCH_COMPANY_SUFFIX,
     DISCOVER_MOVIES_SUFFIX,
     DISCOVER_SHOWS_SUFFIX,
+    MOVIE_CERTIFICATION_SUFFIX,
+    SHOW_CERTIFICATION_SUFFIX,
 )
 
 
@@ -22,6 +25,8 @@ __all__ = [
     "search_company",
     "discover_movies",
     "discover_shows",
+    "get_movie_certifications",
+    "get_show_certifications",
 ]
 
 
@@ -138,3 +143,23 @@ def discover_shows(options: dict):
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
         yield Show(**item)
+
+
+def get_movie_certifications():
+    """Get an up to date list of the officially supported
+    movie certifications on TMDb."""
+    url = urljoin(BASEURL, MOVIE_CERTIFICATION_SUFFIX)
+    res = get_response(url, **{"api_key": TMDB_API_KEY})
+    if res.get("status_message"):
+        raise ValueError(res["status_message"])
+    return res["certifications"]
+
+
+def get_show_certifications():
+    """Get an up to date list of the officially supported TV
+    show certifications on TMDb."""
+    url = urljoin(BASEURL, SHOW_CERTIFICATION_SUFFIX)
+    res = get_response(url, **{"api_key": TMDB_API_KEY})
+    if res.get("status_message"):
+        raise ValueError(res["status_message"])
+    return res["certifications"]

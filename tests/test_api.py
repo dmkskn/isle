@@ -248,5 +248,21 @@ class DiscoverShowTestCase(unittest.TestCase):
         self.assertEqual(len(self.results_list), self.total_results)
 
 
+class GetCertificationsTestCase(unittest.TestCase):
+    def test_get_movie_certifications(self):
+        res = tmdb.get_movie_certifications()
+        self.assertIsInstance(res, dict)
+        self.assertNotIn("certifications", res)
+        self.assertIn("US", res)
+        self.assertIsInstance(res["US"], list)
+
+    def test_get_show_certifications(self):
+        res = tmdb.get_show_certifications()
+        self.assertIsInstance(res, dict)
+        self.assertNotIn("certifications", res)
+        self.assertIn("US", res)
+        self.assertIsInstance(res["US"], list)
+
+
 if __name__ == "__main__":
     unittest.main()
