@@ -153,35 +153,23 @@ def get_movie_certifications():
     """Get an up to date list of the officially supported
     movie certifications on TMDb."""
     url = urljoin(BASEURL, MOVIE_CERTIFICATION_SUFFIX)
-    res = get_response(url, **{"api_key": TMDB_API_KEY})
-    if res.get("status_message"):
-        raise ValueError(res["status_message"])
-    return res["certifications"]
+    return get_response(url, **{"api_key": TMDB_API_KEY})["certifications"]
 
 
 def get_show_certifications():
     """Get an up to date list of the officially supported TV
     show certifications on TMDb."""
     url = urljoin(BASEURL, SHOW_CERTIFICATION_SUFFIX)
-    res = get_response(url, **{"api_key": TMDB_API_KEY})
-    if res.get("status_message"):
-        raise ValueError(res["status_message"])
-    return res["certifications"]
+    return get_response(url, **{"api_key": TMDB_API_KEY})["certifications"]
 
 
 def get_movie_genres():
     """Get the list of official genres for movies."""
     url = urljoin(BASEURL, MOVIE_GENRES_SUFFIX)
-    res = get_response(url, **{"api_key": TMDB_API_KEY})
-    if res.get("status_message"):
-        raise ValueError(res["status_message"])
-    return res["genres"]
+    return get_response(url, **{"api_key": TMDB_API_KEY})["genres"]
 
 
 def get_show_genres():
     """Get the list of official genres for TV shows."""
     url = urljoin(BASEURL, SHOW_GENRES_SUFFIX)
-    res = get_response(url, **{"api_key": TMDB_API_KEY})
-    if res.get("status_message"):
-        raise ValueError(res["status_message"])
-    return res["genres"]
+    return get_response(url, **{"api_key": TMDB_API_KEY})["genres"]
