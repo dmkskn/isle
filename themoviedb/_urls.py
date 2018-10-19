@@ -8,6 +8,12 @@ DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
 DISCOVER_SHOWS_SUFFIX = "3/discover/tv"
 MOVIE_CERTIFICATION_SUFFIX = "3/certification/movie/list"
 SHOW_CERTIFICATION_SUFFIX = "3/certification/tv/list"
+IMAGE_CONFIGURATION_SUFFIX = "3/configuration"
+COUNTRIES_CONFIGURATION_SUFFIX = "3/configuration/countries"
+JOBS_CONFIGURATION_SUFFIX = "3/configuration/jobs"
+LANGUAGES_CONFIGURATION_SUFFIX = "3/configuration/languages"
+PRIMARY_TRANSLATIONS_CONFIGURATION_SUFFIX = "3/configuration/primary_translations"
+TIMEZONES_CONFIGURATION_SUFFIX = "3/configuration/timezones"
 
 MOVIE_DETAILS_SUFFIX = "3/movie/{}"  # {movie_id}
 MOVIE_ALTERNATIVE_TITLES_SUFFIX = "3/movie/{}/alternative_titles"

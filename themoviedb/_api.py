@@ -17,6 +17,12 @@ from ._urls import (
     SHOW_CERTIFICATION_SUFFIX,
     MOVIE_GENRES_SUFFIX,
     SHOW_GENRES_SUFFIX,
+    IMAGE_CONFIGURATION_SUFFIX,
+    COUNTRIES_CONFIGURATION_SUFFIX,
+    JOBS_CONFIGURATION_SUFFIX,
+    LANGUAGES_CONFIGURATION_SUFFIX,
+    PRIMARY_TRANSLATIONS_CONFIGURATION_SUFFIX,
+    TIMEZONES_CONFIGURATION_SUFFIX,
 )
 
 
@@ -31,6 +37,12 @@ __all__ = [
     "get_show_certifications",
     "get_movie_genres",
     "get_show_genres",
+    "get_image_configurations",
+    "get_countries",
+    "get_jobs",
+    "get_languages",
+    "get_primary_translations",
+    "get_timezones",
 ]
 
 
@@ -58,7 +70,8 @@ def search_movie(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_MOVIE_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Movie(**item)
+        item["__is_first_init__"] = True
+        yield Movie(**item, preload=False)
 
 
 def search_show(query: str, **kwargs):
@@ -78,7 +91,8 @@ def search_show(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_SHOW_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Show(**item)
+        item["__is_first_init__"] = True
+        yield Show(**item, preload=False)
 
 
 def search_person(query: str, **kwargs):
@@ -102,7 +116,8 @@ def search_person(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_PERSON_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Person(**item)
+        item["__is_first_init__"] = True
+        yield Person(**item, preload=False)
 
 
 def search_company(query: str, **kwargs):
@@ -115,7 +130,8 @@ def search_company(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_COMPANY_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Company(**item)
+        item["__is_first_init__"] = True
+        yield Company(**item, preload=False)
 
 
 def discover_movies(options: dict):
@@ -130,7 +146,8 @@ def discover_movies(options: dict):
     url = urljoin(BASEURL, DISCOVER_MOVIES_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
-        yield Movie(**item)
+        item["__is_first_init__"] = True
+        yield Movie(**item, preload=False)
 
 
 def discover_shows(options: dict):
@@ -146,6 +163,7 @@ def discover_shows(options: dict):
     url = urljoin(BASEURL, DISCOVER_SHOWS_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
+        item["__is_first_init__"] = True
         yield Show(**item)
 
 
@@ -173,3 +191,44 @@ def get_show_genres():
     """Get the list of official genres for TV shows."""
     url = urljoin(BASEURL, SHOW_GENRES_SUFFIX)
     return get_response(url, **{"api_key": TMDB_API_KEY})["genres"]
+
+
+def get_image_configurations():
+    """Get the data relevant to building image URLs as well
+    as the change key map."""
+    url = urljoin(BASEURL, IMAGE_CONFIGURATION_SUFFIX)
+    return get_response(url, **{"api_key": TMDB_API_KEY})
+
+
+def get_countries():
+    """Get the list of countries (ISO 3166-1 tags) used
+    throughout TMDb."""
+    url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
+    return get_response(url, **{"api_key": TMDB_API_KEY})
+
+
+def get_jobs():
+    """Get a list of the jobs and departments we use on 
+    TMDb."""
+    url = urljoin(BASEURL, JOBS_CONFIGURATION_SUFFIX)
+    return get_response(url, **{"api_key": TMDB_API_KEY})
+
+
+def get_languages():
+    """Get the list of languages (ISO 639-1 tags) used 
+    throughout TMDb."""
+    url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
+    return get_response(url, **{"api_key": TMDB_API_KEY})
+
+
+def get_primary_translations():
+    """Get a list of the officially supported translations
+    on TMDb."""
+    url = urljoin(BASEURL, PRIMARY_TRANSLATIONS_CONFIGURATION_SUFFIX)
+    return get_response(url, **{"api_key": TMDB_API_KEY})
+
+
+def get_timezones():
+    """Get the list of timezones used throughout TMDb."""
+    url = urljoin(BASEURL, TIMEZONES_CONFIGURATION_SUFFIX)
+    return get_response(url, **{"api_key": TMDB_API_KEY})

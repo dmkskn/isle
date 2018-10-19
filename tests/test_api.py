@@ -268,10 +268,48 @@ class GetGenresTestCase(unittest.TestCase):
     def test_get_movie_genres(self):
         res = tmdb.get_movie_genres()
         self.assertIsInstance(res, list)
-    
+
     def test_get_show_genres(self):
         res = tmdb.get_show_genres()
         self.assertIsInstance(res, list)
+
+
+class GetConfigurationsTestCase(unittest.TestCase):
+    def test_get_image_configurations(self):
+        res = tmdb.get_image_configurations()
+        self.assertIsInstance(res, dict)
+        self.assertIn("images", res)
+        self.assertIn("base_url", res["images"])
+
+    def test_get_countries(self):
+        res = tmdb.get_countries()
+        self.assertIsInstance(res, list)
+        self.assertIn("english_name", res[0])
+
+    def test_get_jobs(self):
+        res = tmdb.get_jobs()
+        self.assertIsInstance(res, list)
+        self.assertIsInstance(res[0], dict)
+        self.assertIn("department", res[0])
+
+    def test_get_languages(self):
+        res = tmdb.get_languages()
+        self.assertIsInstance(res, list)
+        self.assertIsInstance(res[0], dict)
+        self.assertIn("english_name", res[0])
+        self.assertIn("iso_639_1", res[0])
+        self.assertIn("name", res[0])
+
+    def test_get_primary_translations(self):
+        res = tmdb.get_primary_translations()
+        self.assertIsInstance(res, list)
+        self.assertIsInstance(res[0], str)
+
+    def test_get_timezones(self):
+        res = tmdb.get_timezones()
+        self.assertIsInstance(res, list)
+        self.assertIsInstance(res[0], dict)
+        self.assertIn("zones", res[0])
 
 
 if __name__ == "__main__":
