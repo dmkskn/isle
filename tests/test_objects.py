@@ -1,13 +1,13 @@
 import unittest
 import inspect
-from themoviedb._objects import _BaseTMDbObject, Movie, Show, Person, Company, Keyword
+from themoviedb._objects import TMDb, Movie, Show, Person, Company, Keyword
 
 
-class BaseTMDbObjectTestCase(unittest.TestCase):
+class TMDbTestCase(unittest.TestCase):
     def setUp(self):
         self.movie_id = 18148
-        _BaseTMDbObject.__abstractmethods__ = frozenset()
-        self.base = _BaseTMDbObject(self.movie_id)  # pylint: disable=E0110
+        TMDb.__abstractmethods__ = frozenset()
+        self.base = TMDb(self.movie_id)  # pylint: disable=E0110
 
     def test_request(self):
         url = f"https://api.themoviedb.org/3/movie/{self.movie_id}"

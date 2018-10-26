@@ -57,7 +57,7 @@ from ._urls import (
 __all__ = ["Movie", "Show", "Person", "Company", "Keyword"]
 
 
-class _BaseTMDbObject(ABC):
+class TMDb(ABC):
     def __init__(self, tmdb_id, *, preload=True):
         self.tmdb_id = tmdb_id
         self.data = {"id": tmdb_id}
@@ -75,7 +75,7 @@ class _BaseTMDbObject(ABC):
         return search_results_for(url, {"api_key": TMDB_API_KEY, **params})
 
 
-class Movie(_BaseTMDbObject):
+class Movie(TMDb):
     def _first_init(self):
         return self.get_all()
 
@@ -196,7 +196,7 @@ class Movie(_BaseTMDbObject):
         )
 
 
-class Show(_BaseTMDbObject):
+class Show(TMDb):
     def _first_init(self):
         return self.get_all()
 
@@ -330,7 +330,7 @@ class Show(_BaseTMDbObject):
         return videos
 
 
-class Person(_BaseTMDbObject):
+class Person(TMDb):
     def _first_init(self):
         self.get_all()
 
@@ -418,7 +418,7 @@ class Person(_BaseTMDbObject):
         return translations
 
 
-class Company(_BaseTMDbObject):
+class Company(TMDb):
     def _first_init(self):
         self.get_details()
 
@@ -448,7 +448,7 @@ class Company(_BaseTMDbObject):
         return images
 
 
-class Keyword(_BaseTMDbObject):
+class Keyword(TMDb):
     def _first_init(self):
         self.get_details()
 
