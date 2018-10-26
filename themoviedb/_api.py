@@ -51,7 +51,7 @@ def search_movie(query: str, **kwargs):
 
     The `query` argument is a text query to search (required).
 
-    The optional `year` argument specifies the release year of 
+    The optional `year` argument specifies the release year of
     the movie.
 
     The optional `language` argument specifies a ISO 639-1 code
@@ -70,8 +70,7 @@ def search_movie(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_MOVIE_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        item["__is_first_init__"] = True
-        yield Movie(**item, preload=False)
+        yield Movie(item["id"], preload=False)
 
 
 def search_show(query: str, **kwargs):
@@ -83,7 +82,7 @@ def search_show(query: str, **kwargs):
     to display translated data for the fields that support it.
     (Default: "en-US")
 
-    The optional `first_air_date_year` argument specifies 
+    The optional `first_air_date_year` argument specifies
     the year when the show was first aired.
 
     Returns a generator. Each item is a `Show` object.
@@ -91,8 +90,7 @@ def search_show(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_SHOW_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        item["__is_first_init__"] = True
-        yield Show(**item, preload=False)
+        yield Show(item["id"], preload=False)
 
 
 def search_person(query: str, **kwargs):
@@ -116,8 +114,7 @@ def search_person(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_PERSON_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        item["__is_first_init__"] = True
-        yield Person(**item, preload=False)
+        yield Person(item["id"], preload=False)
 
 
 def search_company(query: str, **kwargs):
@@ -130,24 +127,22 @@ def search_company(query: str, **kwargs):
     url = urljoin(BASEURL, SEARCH_COMPANY_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        item["__is_first_init__"] = True
-        yield Company(**item, preload=False)
+        yield Company(item["id"], preload=False)
 
 
 def discover_movies(options: dict):
     """Discover movies by different types of data like
     average rating, number of votes, genres and certifications.
 
-    See available options: 
+    See available options:
     https://developers.themoviedb.org/3/discover/movie-discover
-    
+
     Returns a generator. Each item is a `Movie` object.
     """
     url = urljoin(BASEURL, DISCOVER_MOVIES_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
-        item["__is_first_init__"] = True
-        yield Movie(**item, preload=False)
+        yield Movie(item["id"], preload=False)
 
 
 def discover_shows(options: dict):
@@ -155,16 +150,15 @@ def discover_shows(options: dict):
     average rating, number of votes, genres, the network
     they aired on and air dates.
 
-    See available options: 
+    See available options:
     https://developers.themoviedb.org/3/discover/tv-discover
-    
+
     Returns a generator. Each item is a `Show` object.
     """
     url = urljoin(BASEURL, DISCOVER_SHOWS_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
-        item["__is_first_init__"] = True
-        yield Show(**item)
+        yield Show(item["id"], preload=False)
 
 
 def get_movie_certifications():
@@ -208,14 +202,14 @@ def get_countries():
 
 
 def get_jobs():
-    """Get a list of the jobs and departments we use on 
+    """Get a list of the jobs and departments we use on
     TMDb."""
     url = urljoin(BASEURL, JOBS_CONFIGURATION_SUFFIX)
     return get_response(url, **{"api_key": TMDB_API_KEY})
 
 
 def get_languages():
-    """Get the list of languages (ISO 639-1 tags) used 
+    """Get the list of languages (ISO 639-1 tags) used
     throughout TMDb."""
     url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
     return get_response(url, **{"api_key": TMDB_API_KEY})

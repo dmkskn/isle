@@ -23,18 +23,6 @@ class BaseTMDbObjectTestCase(unittest.TestCase):
         self.assertTrue(inspect.isgenerator(res))
         self.assertIsInstance(item, dict)
 
-    def test_set_attrs(self):
-        attrs = dict.fromkeys(["id", "__is_first_init__", "one", "two"], 1)
-
-        exp_attrs = attrs.keys() - {"id", "__is_first_init__"}
-        self.base._set_attrs(attrs)
-        self.assertTrue(all([attr in self.base.__dict__.keys() for attr in exp_attrs]))
-        self.assertTrue(
-            all(
-                [attr not in self.base.__dict__ for attr in {"id", "__is_first_init__"}]
-            )
-        )
-
 
 class MovieTestCase(unittest.TestCase):
     def setUp(self):
@@ -44,89 +32,55 @@ class MovieTestCase(unittest.TestCase):
         self.preloaded_movie = Movie(self.movie_id, preload=True)
 
     def test_raise_error_when_init_without_id(self):
-        with self.assertRaises(KeyError):
-            _ = Movie()
+        with self.assertRaises(TypeError):
+            _ = Movie() # pylint: disable=E1120
 
     def test_preloaded(self):
-        movie = Movie(18148)
-        movie.get_all()
-        self.assertDictEqual(self.preloaded_movie.__dict__, movie.__dict__)
+        movie = Movie(self.movie_id)
+        self.assertDictEqual(self.preloaded_movie.data, movie.get_all())
 
     def test_get_details(self):
         details = self.changed_movie.get_details()
-        self.assertIsInstance(details, dict)
-        for key in details.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(details[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(details, self.changed_movie.data)
 
     def test_get_alternative_titles(self):
         alternative_titles = self.changed_movie.get_alternative_titles()
-        self.assertIsInstance(alternative_titles, dict)
-        for key in alternative_titles.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(alternative_titles[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(
+            alternative_titles, self.changed_movie.data["alternative_titles"]
+        )
 
     def test_get_changes(self):
         changes = self.changed_movie.get_changes()
-        self.assertIsInstance(changes, dict)
-        for key in changes.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(changes[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(changes, self.changed_movie.data["changes"])
 
     def test_get_credits(self):
         credits = self.changed_movie.get_credits()
-        self.assertIsInstance(credits, dict)
-        for key in credits.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(credits[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(credits, self.changed_movie.data["credits"])
 
     def test_get_external_ids(self):
         external_ids = self.changed_movie.get_external_ids()
-        self.assertIsInstance(external_ids, dict)
-        for key in external_ids.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(external_ids[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(external_ids, self.changed_movie.data["external_ids"])
 
     def test_get_images(self):
         images = self.changed_movie.get_images()
-        self.assertIsInstance(images, dict)
-        for key in images.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(images[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(images, self.changed_movie.data["images"])
 
     def test_get_keywords(self):
         keywords = self.changed_movie.get_keywords()
-        self.assertIsInstance(keywords, dict)
-        for key in keywords.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(keywords[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(keywords, self.changed_movie.data["keywords"])
 
     def test_get_release_dates(self):
         release_dates = self.changed_movie.get_release_dates()
-        self.assertIsInstance(release_dates, dict)
-        self.assertIn("results", release_dates)
-        self.assertEqual(release_dates["results"], self.changed_movie.release_dates)
+        self.assertDictEqual(release_dates, self.changed_movie.data["release_dates"])
 
     def test_get_videos(self):
         videos = self.changed_movie.get_videos()
         self.assertIsInstance(videos, dict)
-        self.assertIn("results", videos)
-        self.assertEqual(videos["results"], self.changed_movie.videos)
+        self.assertDictEqual(videos, self.changed_movie.data["videos"])
 
     def test_get_translations(self):
         translations = self.changed_movie.get_translations()
-        self.assertIsInstance(translations, dict)
-        for key in translations.keys() - {"id"}:
-            self.assertIn(key, self.changed_movie.__dict__)
-            self.assertEqual(translations[key], getattr(self.changed_movie, key))
-            self.assertNotIn(key, self.not_changed_movie.__dict__)
+        self.assertDictEqual(translations, self.changed_movie.data["translations"])
 
     def test_iter_recommendations(self):
         gen = self.changed_movie.iter_recommendations()
@@ -167,83 +121,50 @@ class ShowTestCase(unittest.TestCase):
         self.preloaded_show = Show(self.show_id, preload=True)
 
     def test_raise_error_when_init_without_id(self):
-        with self.assertRaises(KeyError):
-            _ = Show()
+        with self.assertRaises(TypeError):
+            _ = Show() # pylint: disable=E1120
 
     def test_preloaded(self):
         show = Show(self.show_id)
-        show.get_all()
-        self.assertDictEqual(self.preloaded_show.__dict__, show.__dict__)
+        self.assertDictEqual(self.preloaded_show.data, show.get_all())
 
     def test_get_details(self):
         details = self.changed_show.get_details()
-        self.assertIsInstance(details, dict)
-        for key in details.keys() - {"id"}:
-            self.assertIn(key, self.changed_show.__dict__)
-            self.assertEqual(details[key], getattr(self.changed_show, key))
-            self.assertNotIn(key, self.not_changed_show.__dict__)
+        self.assertDictEqual(details, self.changed_show.data)
 
     def test_get_alternative_titles(self):
         alternative_titles = self.changed_show.get_alternative_titles()
-        self.assertIsInstance(alternative_titles, dict)
-        self.assertIn("results", alternative_titles)
-        self.assertIn("id", alternative_titles)
-        self.assertEqual(
-            alternative_titles["results"], self.changed_show.alternative_titles
+        self.assertDictEqual(
+            alternative_titles, self.changed_show.data["alternative_titles"]
         )
 
     def test_get_changes(self):
         changes = self.changed_show.get_changes()
-        self.assertIsInstance(changes, dict)
-        for key in changes.keys() - {"id"}:
-            self.assertIn(key, self.changed_show.__dict__)
-            self.assertEqual(changes[key], getattr(self.changed_show, key))
-            self.assertNotIn(key, self.not_changed_show.__dict__)
+        self.assertDictEqual(changes, self.changed_show.data["changes"])
 
     def test_get_content_ratings(self):
         content_ratings = self.changed_show.get_content_ratings()
-        self.assertIsInstance(content_ratings, dict)
-        self.assertIn("results", content_ratings)
-        self.assertIn("id", content_ratings)
-        self.assertEqual(content_ratings["results"], self.changed_show.content_ratings)
+        self.assertDictEqual(content_ratings, self.changed_show.data["content_ratings"])
 
     def test_get_credits(self):
         credits = self.changed_show.get_credits()
-        self.assertIsInstance(credits, dict)
-        for key in credits.keys() - {"id"}:
-            self.assertIn(key, self.changed_show.__dict__)
-            self.assertEqual(credits[key], getattr(self.changed_show, key))
-            self.assertNotIn(key, self.not_changed_show.__dict__)
+        self.assertDictEqual(credits, self.changed_show.data["credits"])
 
     def test_get_episode_groups(self):
         episode_groups = self.changed_show.get_episode_groups()
-        self.assertIsInstance(episode_groups, dict)
-        self.assertIn("results", episode_groups)
-        self.assertIn("id", episode_groups)
-        self.assertEqual(episode_groups["results"], self.changed_show.episode_groups)
+        self.assertDictEqual(episode_groups, self.changed_show.data["episode_groups"])
 
     def test_get_external_ids(self):
         external_ids = self.changed_show.get_external_ids()
-        self.assertIsInstance(external_ids, dict)
-        for key in external_ids.keys() - {"id"}:
-            self.assertIn(key, self.changed_show.__dict__)
-            self.assertEqual(external_ids[key], getattr(self.changed_show, key))
-            self.assertNotIn(key, self.not_changed_show.__dict__)
+        self.assertDictEqual(external_ids, self.changed_show.data["external_ids"])
 
     def test_get_images(self):
         images = self.changed_show.get_images()
-        self.assertIsInstance(images, dict)
-        for key in images.keys() - {"id"}:
-            self.assertIn(key, self.changed_show.__dict__)
-            self.assertEqual(images[key], getattr(self.changed_show, key))
-            self.assertNotIn(key, self.not_changed_show.__dict__)
+        self.assertDictEqual(images, self.changed_show.data["images"])
 
     def test_get_keywords(self):
         keywords = self.changed_show.get_keywords()
-        self.assertIsInstance(keywords, dict)
-        self.assertIn("results", keywords)
-        self.assertIn("id", keywords)
-        self.assertEqual(keywords["results"], self.changed_show.keywords)
+        self.assertDictEqual(keywords, self.changed_show.data["keywords"])
 
     def test_iter_recommendations(self):
         gen = self.changed_show.iter_recommendations()
@@ -262,11 +183,8 @@ class ShowTestCase(unittest.TestCase):
 
     def test_get_screened_theatrically(self):
         screened_theatrically = self.changed_show.get_screened_theatrically()
-        self.assertIsInstance(screened_theatrically, dict)
-        self.assertIn("results", screened_theatrically)
-        self.assertIn("id", screened_theatrically)
-        self.assertEqual(
-            screened_theatrically["results"], self.changed_show.screened_theatrically
+        self.assertDictEqual(
+            screened_theatrically, self.changed_show.data["screened_theatrically"]
         )
 
     def test_iter_similar_shows(self):
@@ -278,18 +196,11 @@ class ShowTestCase(unittest.TestCase):
 
     def test_get_translations(self):
         translations = self.changed_show.get_translations()
-        self.assertIsInstance(translations, dict)
-        for key in translations.keys() - {"id"}:
-            self.assertIn(key, self.changed_show.__dict__)
-            self.assertEqual(translations[key], getattr(self.changed_show, key))
-            self.assertNotIn(key, self.not_changed_show.__dict__)
+        self.assertDictEqual(translations, self.changed_show.data["translations"])
 
     def test_get_videos(self):
         videos = self.changed_show.get_videos()
-        self.assertIsInstance(videos, dict)
-        self.assertIn("results", videos)
-        self.assertIn("id", videos)
-        self.assertEqual(videos["results"], self.changed_show.videos)
+        self.assertDictEqual(videos, self.changed_show.data["videos"])
 
 
 class PersonTestCase(unittest.TestCase):
@@ -301,71 +212,36 @@ class PersonTestCase(unittest.TestCase):
 
     def test_preloaded(self):
         person = Person(self.person_id)
-        person.get_all()
-        self.assertDictEqual(self.preloaded_person.__dict__, person.__dict__)
+        self.assertDictEqual(self.preloaded_person.data, person.get_all())
 
     def test_get_details(self):
         details = self.changed_person.get_details()
-        self.assertIsInstance(details, dict)
-        for key in details.keys() - {"id"}:
-            self.assertIn(key, self.changed_person.__dict__)
-            self.assertEqual(details[key], getattr(self.changed_person, key))
-            self.assertNotIn(key, self.not_changed_person.__dict__)
+        self.assertDictEqual(details, self.changed_person.data)
 
     def test_get_changes(self):
         changes = self.changed_person.get_changes()
-        self.assertIsInstance(changes, dict)
-        for key in changes.keys() - {"id"}:
-            self.assertIn(key, self.changed_person.__dict__)
-            self.assertEqual(changes[key], getattr(self.changed_person, key))
-            self.assertNotIn(key, self.not_changed_person.__dict__)
+        self.assertDictEqual(changes, self.changed_person.data["changes"])
 
     def test_get_movie_credits(self):
         credits = self.changed_person.get_movie_credits()
-        self.assertIsInstance(credits, dict)
-        self.assertIn("cast", credits)
-        self.assertIn("crew", credits)
-        self.assertIn("movie_cast", self.changed_person.__dict__)
-        self.assertIn("movie_crew", self.changed_person.__dict__)
-        self.assertNotIn("movie_cast", self.not_changed_person.__dict__)
-        self.assertNotIn("movie_crew", self.not_changed_person.__dict__)
+        self.assertDictEqual(credits, self.changed_person.data["movie_credits"])
 
     def test_get_show_credits(self):
         credits = self.changed_person.get_show_credits()
-        self.assertIsInstance(credits, dict)
-        self.assertIn("cast", credits)
-        self.assertIn("crew", credits)
-        self.assertIn("show_cast", self.changed_person.__dict__)
-        self.assertIn("show_crew", self.changed_person.__dict__)
-        self.assertNotIn("show_cast", self.not_changed_person.__dict__)
-        self.assertNotIn("show_crew", self.not_changed_person.__dict__)
+        self.assertDictEqual(credits, self.changed_person.data["tv_credits"])
 
     def test_get_combined_credits(self):
         # Get the movie and TV credits together in a single response.
         credits = self.changed_person.get_combined_credits()
-        self.assertIsInstance(credits, dict)
-        self.assertIn("cast", credits)
-        self.assertIn("crew", credits)
-        self.assertIn("cast", self.changed_person.__dict__)
-        self.assertIn("crew", self.changed_person.__dict__)
-        self.assertNotIn("cast", self.not_changed_person.__dict__)
-        self.assertNotIn("crew", self.not_changed_person.__dict__)
+        self.assertDictEqual(credits, self.changed_person.data["combined_credits"])
 
     def test_get_external_ids(self):
         external_ids = self.changed_person.get_external_ids()
-        self.assertIsInstance(external_ids, dict)
-        for key in external_ids.keys() - {"id"}:
-            self.assertIn(key, self.changed_person.__dict__)
-            self.assertEqual(external_ids[key], getattr(self.changed_person, key))
-            self.assertNotIn(key, self.not_changed_person.__dict__)
+        self.assertDictEqual(external_ids, self.changed_person.data["external_ids"])
 
     def test_get_images(self):
         images = self.changed_person.get_images()
-        self.assertIsInstance(images, dict)
-        for key in images.keys() - {"id"}:
-            self.assertIn(key, self.changed_person.__dict__)
-            self.assertEqual(images[key], getattr(self.changed_person, key))
-            self.assertNotIn(key, self.not_changed_person.__dict__)
+        self.assertDictEqual(images, self.changed_person.data["images"])
 
     def test_iter_tagged_images(self):
         gen = self.changed_person.iter_tagged_images()
@@ -378,11 +254,7 @@ class PersonTestCase(unittest.TestCase):
 
     def test_get_translations(self):
         translations = self.changed_person.get_translations()
-        self.assertIsInstance(translations, dict)
-        for key in translations.keys() - {"id"}:
-            self.assertIn(key, self.changed_person.__dict__)
-            self.assertEqual(translations[key], getattr(self.changed_person, key))
-            self.assertNotIn(key, self.not_changed_person.__dict__)
+        self.assertDictEqual(translations, self.changed_person.data["translations"])
 
 
 class CompanyTestCase(unittest.TestCase):
@@ -393,39 +265,30 @@ class CompanyTestCase(unittest.TestCase):
 
     def test_get_details(self):
         details = self.changed_company.get_details()
-        self.assertIsInstance(details, dict)
-        for key in details.keys() - {"id"}:
-            self.assertIn(key, self.changed_company.__dict__)
-            self.assertEqual(details[key], getattr(self.changed_company, key))
-            self.assertNotIn(key, self.not_changed_company.__dict__)
+        self.assertDictEqual(details, self.changed_company.data)
 
     def test_get_alternative_names(self):
         alternative_names = self.changed_company.get_alternative_names()
-        self.assertIsInstance(alternative_names, dict)
-        self.assertIn("results", alternative_names)
-        self.assertIn("alternative_names", self.changed_company.__dict__)
-        self.assertEqual(
-            self.changed_company.alternative_names, alternative_names["results"]
+        self.assertDictEqual(
+            alternative_names, self.changed_company.data["alternative_names"]
         )
 
     def test_get_images(self):
         images = self.changed_company.get_images()
-        self.assertIsInstance(images, dict)
-        self.assertIn("logos", images)
-        self.assertIn("logos", self.changed_company.__dict__)
-        self.assertEqual(self.changed_company.logos, images["logos"])
+        self.assertDictEqual(images, self.changed_company.data["images"])
 
 
 class KeywordTestCase(unittest.TestCase):
     def setUp(self):
         self.keyword_id = 3417
         self.keyword_name = "wormhole"
-        self.keyword = Keyword(self.keyword_id)
+        self.keyword = Keyword(self.keyword_id)._with_name(self.keyword_name)
 
     def test_init_keyword(self):
         self.assertEqual(self.keyword.tmdb_id, self.keyword_id)
-        self.assertEqual(self.keyword.name, self.keyword_name)
-        self.assertNotIn("id",self.keyword.__dict__)
+        self.assertDictEqual(
+            self.keyword.data, {"id": self.keyword_id, "name": self.keyword_name}
+        )
 
     def test_iter_movies(self):
         res = self.keyword.iter_movies()
