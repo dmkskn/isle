@@ -54,6 +54,19 @@ class SearchMovieTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
 
+    def test_preloaded_attr(self):
+        gen = tmdb.search_movie(self.movie_title, preload=False)
+        movie = next(gen)
+        self.assertSetEqual(set(movie.data.keys()), {"id"})
+
+        gen = tmdb.search_movie(self.movie_title, preload=True)
+        movie = next(gen)
+        self.assertIn("original_title", movie.data.keys())
+        self.assertIn("alternative_titles", movie.data.keys())
+        self.assertIn("credits", movie.data.keys())
+        self.assertIn("changes", movie.data.keys())
+        # and so on
+
 
 class SearchShowTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/tv?"
@@ -99,6 +112,19 @@ class SearchShowTestCase(unittest.TestCase):
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
+
+    def test_preloaded_attr(self):
+        gen = tmdb.search_show(self.show_name, preload=False)
+        show = next(gen)
+        self.assertSetEqual(set(show.data.keys()), {"id"})
+
+        gen = tmdb.search_show(self.show_name, preload=True)
+        show = next(gen)
+        self.assertIn("original_name", show.data.keys())
+        self.assertIn("alternative_titles", show.data.keys())
+        self.assertIn("screened_theatrically", show.data.keys())
+        self.assertIn("external_ids", show.data.keys())
+        # and so on
 
 
 class SearchPersonTestCase(unittest.TestCase):
@@ -147,6 +173,19 @@ class SearchPersonTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
 
+    def test_preloaded_attr(self):
+        gen = tmdb.search_person(self.person_name, preload=False)
+        person = next(gen)
+        self.assertSetEqual(set(person.data.keys()), {"id"})
+
+        gen = tmdb.search_person(self.person_name, preload=True)
+        person = next(gen)
+        self.assertIn("name", person.data.keys())
+        self.assertIn("movie_credits", person.data.keys())
+        self.assertIn("tv_credits", person.data.keys())
+        self.assertIn("also_known_as", person.data.keys())
+        # and so on
+
 
 class SearchCompanyTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/company?"
@@ -184,20 +223,32 @@ class SearchCompanyTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
 
+    def test_preloaded_attr(self):
+        gen = tmdb.search_company(self.company_name, preload=False)
+        company = next(gen)
+        self.assertSetEqual(set(company.data.keys()), {"id"})
+
+        gen = tmdb.search_company(self.company_name, preload=True)
+        company = next(gen)
+        self.assertIn("name", company.data.keys())
+        self.assertIn("origin_country", company.data.keys())
+        self.assertIn("parent_company", company.data.keys())
+        # and so on
+
 
 class DiscoverMovieTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/discover/movie?"
 
     @classmethod
     def setUpClass(cls):
-        options = {
+        cls.options = {
             "sort_by": "popularity.desc",
             "with_crew": 488,  # Steven Spielberg
             "with_cast": 3,  # Harrison Ford
         }
-        cls.results = tmdb.discover_movies(options)
+        cls.results = tmdb.discover_movies(cls.options)
         cls.results_list = list(cls.results)
-        cls.api_response = cls.get_api_response(options)
+        cls.api_response = cls.get_api_response(cls.options)
         cls.total_results = cls.api_response["total_results"]
 
     @classmethod
@@ -216,19 +267,32 @@ class DiscoverMovieTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
 
+    def test_preloaded_attr(self):
+        gen = tmdb.discover_movies(self.options, preload=False)
+        movie = next(gen)
+        self.assertSetEqual(set(movie.data.keys()), {"id"})
+
+        gen = tmdb.discover_movies(self.options, preload=False)
+        movie = next(gen)
+        self.assertIn("original_title", movie.data.keys())
+        self.assertIn("alternative_titles", movie.data.keys())
+        self.assertIn("credits", movie.data.keys())
+        self.assertIn("changes", movie.data.keys())
+        # and so on
+
 
 class DiscoverShowTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/discover/tv?"
 
     @classmethod
     def setUpClass(cls):
-        options = {
+        cls.options = {
             "sort_by": "popularity.desc",
             "with_companies": 278,  # Propaganda Films
         }
-        cls.results = tmdb.discover_shows(options)
+        cls.results = tmdb.discover_shows(cls.options)
         cls.results_list = list(cls.results)
-        cls.api_response = cls.get_api_response(options)
+        cls.api_response = cls.get_api_response(cls.options)
         cls.total_results = cls.api_response["total_results"]
 
     @classmethod
@@ -246,6 +310,19 @@ class DiscoverShowTestCase(unittest.TestCase):
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.total_results)
+
+    def test_preloaded_attr(self):
+        gen = tmdb.discover_shows(self.options, preload=False)
+        show = next(gen)
+        self.assertSetEqual(set(show.data.keys()), {"id"})
+
+        gen = tmdb.discover_shows(self.options, preload=True)
+        show = next(gen)
+        self.assertIn("original_name", show.data.keys())
+        self.assertIn("alternative_titles", show.data.keys())
+        self.assertIn("screened_theatrically", show.data.keys())
+        self.assertIn("external_ids", show.data.keys())
+        # and so on
 
 
 class GetCertificationsTestCase(unittest.TestCase):
