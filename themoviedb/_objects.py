@@ -54,7 +54,7 @@ from ._urls import (
 )
 
 
-__all__ = ["Movie", "Show", "Person", "Company", "Keyword"]
+__all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre"]
 
 
 class TMDb(ABC):
@@ -473,3 +473,15 @@ class Keyword(TMDb):
 
     def __str__(self):
         return self.data.get("name", self.get_details()["name"])
+
+
+class Genre(TMDb):
+    def _first_init(self):
+        pass
+
+    def _with_name(self, name):
+        self.data["name"] = name
+        return self
+
+    def __str__(self):
+        return self.data["name"]

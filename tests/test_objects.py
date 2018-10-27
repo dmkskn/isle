@@ -1,6 +1,6 @@
 import unittest
 import inspect
-from themoviedb._objects import TMDb, Movie, Show, Person, Company, Keyword
+from themoviedb._objects import TMDb, Movie, Show, Person, Company, Keyword, Genre
 
 
 class TMDbTestCase(unittest.TestCase):
@@ -33,7 +33,7 @@ class MovieTestCase(unittest.TestCase):
 
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
-            _ = Movie() # pylint: disable=E1120
+            _ = Movie()  # pylint: disable=E1120
 
     def test_preloaded(self):
         movie = Movie(self.movie_id)
@@ -122,7 +122,7 @@ class ShowTestCase(unittest.TestCase):
 
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
-            _ = Show() # pylint: disable=E1120
+            _ = Show()  # pylint: disable=E1120
 
     def test_preloaded(self):
         show = Show(self.show_id)
@@ -298,6 +298,20 @@ class KeywordTestCase(unittest.TestCase):
 
     def test_keyword_to_str(self):
         self.assertEqual(str(self.keyword), self.keyword_name)
+
+
+class GenreTestCase(unittest.TestCase):
+    def setUp(self):
+        self.id = 12
+        self.name = "Adventure"
+        self.genre = Genre(self.id)._with_name(self.name)
+
+    def test_init_genre(self):
+        self.assertEqual(self.genre.tmdb_id, self.id)
+        self.assertDictEqual(self.genre.data, {"id": self.id, "name": self.name})
+
+    def test_genre_to_str(self):
+        self.assertEqual(str(self.genre), self.name)
 
 
 if __name__ == "__main__":
