@@ -8,64 +8,61 @@ from urllib.request import urlopen
 import themoviedb as tmdb
 
 
+def get_api_response(url, **params):
+    params = urlencode(params)
+    response = urlopen(f"{url}{params}")
+    return json.loads(response.read().decode("utf-8"))
+
+
 class SearchMovieTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/movie?"
 
     @classmethod
     def setUpClass(cls):
-        cls.movie_title = "harry potter"
-        cls.results = tmdb.search_movie(cls.movie_title)
-        cls.results_list = list(cls.results)
+        cls.title = "harry potter"
+        cls.results_genr = tmdb.search_movie(cls.title)
+        cls.results_list = list(cls.results_genr)
+        cls.n_pages, cls.n_results = cls.get_totals()
+
+    @classmethod
+    def get_totals(cls):
         params = {
             "api_key": os.environ["TMDB_API_KEY"],
             "language": "en-US",
             "include_adult": "false",
-            "query": cls.movie_title,
+            "query": cls.title,
+            "page": 1,
         }
-        response = cls.get_api_response(**params, page=1)
-        cls.total_pages = response["total_pages"]
-        cls.total_results = response["total_results"]
-        cls.api_response_movies = []
-        for page in range(1, cls.total_pages + 1):
-            results = cls.get_api_response(**params, page=page)["results"]
-            for movie in results:
-                cls.api_response_movies.append(movie)
-
-    @classmethod
-    def get_api_response(cls, **params):
-        params = urlencode(params)
-        response = urlopen(f"{cls.BASEURL}{params}")
-        return json.loads(response.read().decode("utf-8"))
+        response = get_api_response(cls.BASEURL, **params)
+        return response["total_pages"], response["total_results"]
 
     def test_output_is_generator(self):
-        self.assertTrue(inspect.isgenerator(self.results))
+        self.assertTrue(inspect.isgenerator(self.results_genr))
 
     def test_output_item_is_Movie_instance(self):
         self.assertIsInstance(self.results_list[0], tmdb.Movie)
 
     def test_title_is_required(self):
-        kwargs = {"year": 1953}
-        self.assertRaises(TypeError, tmdb.search_movie, **kwargs)
+        with self.assertRaises(TypeError):
+            tmdb.search_movie(**{"year": 1953})
 
     def test_all_args_except_the_first_one_are_kwargs(self):
-        args = (self.movie_title, 1953)
-        self.assertRaises(TypeError, tmdb.search_movie, *args)
+        with self.assertRaises(TypeError):
+            tmdb.search_movie(self.title, 1953)
 
     def test_amount_of_results(self):
-        self.assertEqual(len(self.results_list), self.total_results)
+        self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_preloaded_attr(self):
-        gen = tmdb.search_movie(self.movie_title, preload=False)
-        movie = next(gen)
+    def test_not_preloaded_attr(self):
+        movie = next(tmdb.search_movie(self.title, preload=False))
         self.assertSetEqual(set(movie.data.keys()), {"id"})
 
-        gen = tmdb.search_movie(self.movie_title, preload=True)
-        movie = next(gen)
+    def test_preloaded_attr(self):
+        movie = next(tmdb.search_movie(self.title, preload=True))
         self.assertIn("original_title", movie.data.keys())
         self.assertIn("alternative_titles", movie.data.keys())
         self.assertIn("credits", movie.data.keys())
         self.assertIn("changes", movie.data.keys())
-        # and so on
 
 
 class SearchShowTestCase(unittest.TestCase):
@@ -73,58 +70,49 @@ class SearchShowTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.show_name = "lost"
-        cls.results = tmdb.search_show(cls.show_name)
-        cls.results_list = list(cls.results)
+        cls.name = "lost"
+        cls.results_genr = tmdb.search_show(cls.name)
+        cls.results_list = list(cls.results_genr)
+        cls.n_pages, cls.n_results = cls.get_totals()
+
+    @classmethod
+    def get_totals(cls):
         params = {
             "api_key": os.environ["TMDB_API_KEY"],
             "language": "en-US",
-            "query": cls.show_name,
+            "query": cls.name,
+            "page": 1,
         }
-        response = cls.get_api_response(**params, page=1)
-        cls.total_pages = response["total_pages"]
-        cls.total_results = response["total_results"]
-        cls.api_response_shows = []
-        for page in range(1, cls.total_pages + 1):
-            results = cls.get_api_response(**params, page=page)["results"]
-            for movie in results:
-                cls.api_response_shows.append(movie)
-
-    @classmethod
-    def get_api_response(cls, **params):
-        params = urlencode(params)
-        response = urlopen(f"{cls.BASEURL}{params}")
-        return json.loads(response.read().decode("utf-8"))
+        response = get_api_response(cls.BASEURL, **params)
+        return response["total_pages"], response["total_results"]
 
     def test_output_is_generator(self):
-        self.assertTrue(inspect.isgenerator(self.results))
+        self.assertTrue(inspect.isgenerator(self.results_genr))
 
     def test_output_item_is_Show_instance(self):
         self.assertIsInstance(self.results_list[0], tmdb.Show)
 
     def test_query_is_required(self):
-        kwargs = {"first_air_date_year": 2004}
-        self.assertRaises(TypeError, tmdb.search_show, **kwargs)
+        with self.assertRaises(TypeError):
+            tmdb.search_show(**{"first_air_date_year": 2004})
 
     def test_all_args_except_the_first_one_are_kwargs(self):
-        args = (self.show_name, 2004)
-        self.assertRaises(TypeError, tmdb.search_show, *args)
+        with self.assertRaises(TypeError):
+            tmdb.search_show(self.name, 2004)
 
     def test_amount_of_results(self):
-        self.assertEqual(len(self.results_list), self.total_results)
+        self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_preloaded_attr(self):
-        gen = tmdb.search_show(self.show_name, preload=False)
-        show = next(gen)
+    def test_not_preloaded_attr(self):
+        show = next(tmdb.search_show(self.name, preload=False))
         self.assertSetEqual(set(show.data.keys()), {"id"})
 
-        gen = tmdb.search_show(self.show_name, preload=True)
-        show = next(gen)
+    def test_preloaded_attr(self):
+        show = next(tmdb.search_show(self.name, preload=True))
         self.assertIn("original_name", show.data.keys())
         self.assertIn("alternative_titles", show.data.keys())
         self.assertIn("screened_theatrically", show.data.keys())
         self.assertIn("external_ids", show.data.keys())
-        # and so on
 
 
 class SearchPersonTestCase(unittest.TestCase):
@@ -132,59 +120,50 @@ class SearchPersonTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.person_name = "Abrams"
-        cls.results = tmdb.search_person(cls.person_name)
-        cls.results_list = list(cls.results)
+        cls.name = "Abrams"
+        cls.results_genr = tmdb.search_person(cls.name)
+        cls.results_list = list(cls.results_genr)
+        cls.n_pages, cls.n_results = cls.get_totals()
+
+    @classmethod
+    def get_totals(cls):
         params = {
             "api_key": os.environ["TMDB_API_KEY"],
             "language": "en-US",
             "include_adult": "false",
-            "query": cls.person_name,
+            "query": cls.name,
+            "page": 1,
         }
-        response = cls.get_api_response(**params, page=1)
-        cls.total_pages = response["total_pages"]
-        cls.total_results = response["total_results"]
-        cls.api_response_people = []
-        for page in range(1, cls.total_pages + 1):
-            results = cls.get_api_response(**params, page=page)["results"]
-            for movie in results:
-                cls.api_response_people.append(movie)
-
-    @classmethod
-    def get_api_response(cls, **params):
-        params = urlencode(params)
-        response = urlopen(f"{cls.BASEURL}{params}")
-        return json.loads(response.read().decode("utf-8"))
+        response = get_api_response(cls.BASEURL, **params)
+        return response["total_pages"], response["total_results"]
 
     def test_output_is_generator(self):
-        self.assertTrue(inspect.isgenerator(self.results))
+        self.assertTrue(inspect.isgenerator(self.results_genr))
 
     def test_output_item_is_Person_instance(self):
         self.assertIsInstance(self.results_list[0], tmdb.Person)
 
     def test_query_is_required(self):
-        kwargs = {"language": "en-US"}
-        self.assertRaises(TypeError, tmdb.search_person, **kwargs)
+        with self.assertRaises(TypeError):
+            tmdb.search_person(**{"language": "en-US"})
 
     def test_all_args_except_the_first_one_are_kwargs(self):
-        args = (self.person_name, True)
-        self.assertRaises(TypeError, tmdb.search_person, *args)
+        with self.assertRaises(TypeError):
+            tmdb.search_person(self.name, True)
 
     def test_amount_of_results(self):
-        self.assertEqual(len(self.results_list), self.total_results)
+        self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_preloaded_attr(self):
-        gen = tmdb.search_person(self.person_name, preload=False)
-        person = next(gen)
+    def test_not_preloaded_attr(self):
+        person = next(tmdb.search_person(self.name, preload=False))
         self.assertSetEqual(set(person.data.keys()), {"id"})
 
-        gen = tmdb.search_person(self.person_name, preload=True)
-        person = next(gen)
+    def test_preloaded_attr(self):
+        person = next(tmdb.search_person(self.name, preload=True))
         self.assertIn("name", person.data.keys())
         self.assertIn("movie_credits", person.data.keys())
         self.assertIn("tv_credits", person.data.keys())
         self.assertIn("also_known_as", person.data.keys())
-        # and so on
 
 
 class SearchCompanyTestCase(unittest.TestCase):
@@ -192,27 +171,19 @@ class SearchCompanyTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.company_name = "Sony"
-        cls.results = tmdb.search_company(cls.company_name)
-        cls.results_list = list(cls.results)
-        params = {"api_key": os.environ["TMDB_API_KEY"], "query": cls.company_name}
-        response = cls.get_api_response(**params, page=1)
-        cls.total_pages = response["total_pages"]
-        cls.total_results = response["total_results"]
-        cls.api_response_companies = []
-        for page in range(1, cls.total_pages + 1):
-            results = cls.get_api_response(**params, page=page)["results"]
-            for movie in results:
-                cls.api_response_companies.append(movie)
+        cls.name = "Sony"
+        cls.results_genr = tmdb.search_company(cls.name)
+        cls.results_list = list(cls.results_genr)
+        cls.n_pages, cls.n_results = cls.get_totals()
 
     @classmethod
-    def get_api_response(cls, **params):
-        params = urlencode(params)
-        response = urlopen(f"{cls.BASEURL}{params}")
-        return json.loads(response.read().decode("utf-8"))
+    def get_totals(cls):
+        params = {"api_key": os.environ["TMDB_API_KEY"], "query": cls.name, "page": 1}
+        response = get_api_response(cls.BASEURL, **params)
+        return response["total_pages"], response["total_results"]
 
     def test_output_is_generator(self):
-        self.assertTrue(inspect.isgenerator(self.results))
+        self.assertTrue(inspect.isgenerator(self.results_genr))
 
     def test_output_item_is_Company_instance(self):
         self.assertIsInstance(self.results_list[0], tmdb.Company)
@@ -221,19 +192,17 @@ class SearchCompanyTestCase(unittest.TestCase):
         self.assertRaises(TypeError, tmdb.search_company)
 
     def test_amount_of_results(self):
-        self.assertEqual(len(self.results_list), self.total_results)
+        self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_preloaded_attr(self):
-        gen = tmdb.search_company(self.company_name, preload=False)
-        company = next(gen)
+    def test_not_preloaded_attr(self):
+        company = next(tmdb.search_company(self.name, preload=False))
         self.assertSetEqual(set(company.data.keys()), {"id"})
 
-        gen = tmdb.search_company(self.company_name, preload=True)
-        company = next(gen)
+    def test_preloaded_attr(self):
+        company = next(tmdb.search_company(self.name, preload=True))
         self.assertIn("name", company.data.keys())
         self.assertIn("origin_country", company.data.keys())
         self.assertIn("parent_company", company.data.keys())
-        # and so on
 
 
 class DiscoverMovieTestCase(unittest.TestCase):
@@ -246,39 +215,35 @@ class DiscoverMovieTestCase(unittest.TestCase):
             "with_crew": 488,  # Steven Spielberg
             "with_cast": 3,  # Harrison Ford
         }
-        cls.results = tmdb.discover_movies(cls.options)
-        cls.results_list = list(cls.results)
-        cls.api_response = cls.get_api_response(cls.options)
-        cls.total_results = cls.api_response["total_results"]
+        cls.results_genr = tmdb.discover_movies(cls.options)
+        cls.results_list = list(cls.results_genr)
+        cls.n_pages, cls.n_results = cls.get_totals()
 
     @classmethod
-    def get_api_response(cls, options):
-        params = {"api_key": os.environ["TMDB_API_KEY"], **options}
-        params = urlencode(params)
-        response = urlopen(f"{cls.BASEURL}{params}")
-        return json.loads(response.read().decode("utf-8"))
+    def get_totals(cls):
+        params = {"api_key": os.environ["TMDB_API_KEY"], **cls.options}
+        response = get_api_response(cls.BASEURL, **params)
+        return response["total_pages"], response["total_results"]
 
     def test_output_is_generator(self):
-        self.assertTrue(inspect.isgenerator(self.results))
+        self.assertTrue(inspect.isgenerator(self.results_genr))
 
     def test_output_item_is_Movie_instance(self):
         self.assertIsInstance(self.results_list[0], tmdb.Movie)
 
     def test_amount_of_results(self):
-        self.assertEqual(len(self.results_list), self.total_results)
+        self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_preloaded_attr(self):
-        gen = tmdb.discover_movies(self.options, preload=False)
-        movie = next(gen)
+    def test_not_preloaded_attr(self):
+        movie = next(tmdb.discover_movies(self.options, preload=False))
         self.assertSetEqual(set(movie.data.keys()), {"id"})
 
-        gen = tmdb.discover_movies(self.options, preload=False)
-        movie = next(gen)
+    def test_preloaded_attr(self):
+        movie = next(tmdb.discover_movies(self.options, preload=True))
         self.assertIn("original_title", movie.data.keys())
         self.assertIn("alternative_titles", movie.data.keys())
         self.assertIn("credits", movie.data.keys())
         self.assertIn("changes", movie.data.keys())
-        # and so on
 
 
 class DiscoverShowTestCase(unittest.TestCase):
@@ -290,39 +255,35 @@ class DiscoverShowTestCase(unittest.TestCase):
             "sort_by": "popularity.desc",
             "with_companies": 278,  # Propaganda Films
         }
-        cls.results = tmdb.discover_shows(cls.options)
-        cls.results_list = list(cls.results)
-        cls.api_response = cls.get_api_response(cls.options)
-        cls.total_results = cls.api_response["total_results"]
+        cls.results_genr = tmdb.discover_shows(cls.options)
+        cls.results_list = list(cls.results_genr)
+        cls.n_pages, cls.n_results = cls.get_totals()
 
     @classmethod
-    def get_api_response(cls, options):
-        params = {"api_key": os.environ["TMDB_API_KEY"], **options}
-        params = urlencode(params)
-        response = urlopen(f"{cls.BASEURL}{params}")
-        return json.loads(response.read().decode("utf-8"))
+    def get_totals(cls):
+        params = {"api_key": os.environ["TMDB_API_KEY"], **cls.options}
+        response = get_api_response(cls.BASEURL, **params)
+        return response["total_pages"], response["total_results"]
 
     def test_output_is_generator(self):
-        self.assertTrue(inspect.isgenerator(self.results))
+        self.assertTrue(inspect.isgenerator(self.results_genr))
 
     def test_output_item_is_Show_instance(self):
         self.assertIsInstance(self.results_list[0], tmdb.Show)
 
     def test_amount_of_results(self):
-        self.assertEqual(len(self.results_list), self.total_results)
+        self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_preloaded_attr(self):
-        gen = tmdb.discover_shows(self.options, preload=False)
-        show = next(gen)
+    def test_not_preloaded_attr(self):
+        show = next(tmdb.discover_shows(self.options, preload=False))
         self.assertSetEqual(set(show.data.keys()), {"id"})
 
-        gen = tmdb.discover_shows(self.options, preload=True)
-        show = next(gen)
+    def test_preloaded_attr(self):
+        show = next(tmdb.discover_shows(self.options, preload=True))
         self.assertIn("original_name", show.data.keys())
         self.assertIn("alternative_titles", show.data.keys())
         self.assertIn("screened_theatrically", show.data.keys())
         self.assertIn("external_ids", show.data.keys())
-        # and so on
 
 
 class GetCertificationsTestCase(unittest.TestCase):
