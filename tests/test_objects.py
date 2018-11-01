@@ -27,17 +27,16 @@ class TMDbTestCase(unittest.TestCase):
 class MovieTestCase(unittest.TestCase):
     def setUp(self):
         self.movie_id = 18148
-        self.movie = Movie(self.movie_id, preload=False)
+        self.movie = Movie(self.movie_id)
 
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Movie()  # pylint: disable=E1120
 
     def test_preloaded(self):
-        preloaded_movie = Movie(self.movie_id, preload=True)
-        data = Movie(self.movie_id).get_all()
-        self.assertNotEqual(self.movie.data, data)
-        self.assertDictEqual(preloaded_movie.data, data)
+        self.assertDictEqual(self.movie.data, {"id": self.movie_id})
+        self.movie.get_all()
+        self.assertNotEqual(self.movie.data, {"id": self.movie_id})
 
     def test_get_details(self):
         details = self.movie.get_details()
@@ -114,17 +113,16 @@ class MovieTestCase(unittest.TestCase):
 class ShowTestCase(unittest.TestCase):
     def setUp(self):
         self.show_id = 1399
-        self.show = Show(self.show_id, preload=False)
+        self.show = Show(self.show_id)
 
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Show()  # pylint: disable=E1120
 
     def test_preloaded(self):
-        data = Show(self.show_id).get_all()
-        preloaded_show = Show(self.show_id, preload=True)
-        self.assertNotEqual(self.show.data, data)
-        self.assertDictEqual(preloaded_show.data, data)
+        self.assertDictEqual(self.show.data, {"id": self.show_id})
+        self.show.get_all()
+        self.assertNotEqual(self.show.data, {"id": self.show_id})
 
     def test_get_details(self):
         details = self.show.get_details()
@@ -200,13 +198,12 @@ class ShowTestCase(unittest.TestCase):
 class PersonTestCase(unittest.TestCase):
     def setUp(self):
         self.person_id = 287
-        self.person = Person(self.person_id, preload=False)
+        self.person = Person(self.person_id)
 
     def test_preloaded(self):
-        data = Person(self.person_id).get_all()
-        preloaded_person = Person(self.person_id, preload=True)
-        self.assertNotEqual(self.person.data, data)
-        self.assertDictEqual(preloaded_person.data, data)
+        self.assertDictEqual(self.person.data, {"id": self.person_id})
+        self.person.get_all()
+        self.assertNotEqual(self.person.data, {"id": self.person_id})
 
     def test_get_details(self):
         details = self.person.get_details()
@@ -253,7 +250,7 @@ class PersonTestCase(unittest.TestCase):
 class CompanyTestCase(unittest.TestCase):
     def setUp(self):
         self.company_id = 1
-        self.company = Company(self.company_id, preload=True)
+        self.company = Company(self.company_id)
 
     def test_get_details(self):
         details = self.company.get_details()
@@ -272,8 +269,8 @@ class KeywordTestCase(unittest.TestCase):
     def setUp(self):
         self.id_ = 3417
         self.name = "wormhole"
-        self.keyword_without_name = Keyword(self.id_, preload=False)
-        self.keyword_with_name = Keyword(self.id_, preload=False)._with_name(self.name)
+        self.keyword_without_name = Keyword(self.id_)
+        self.keyword_with_name = Keyword(self.id_, name=self.name)
 
     def test_init_keyword_with_name(self):
         expected_data = {"id": self.id_, "name": self.name}
@@ -300,7 +297,7 @@ class GenreTestCase(unittest.TestCase):
     def setUp(self):
         self.id_ = 12
         self.name = "Adventure"
-        self.genre = Genre(self.id_, preload=False)._with_name(self.name)
+        self.genre = Genre(self.id_, name=self.name)
 
     def test_init_genre(self):
         expected_data = {"id": self.id_, "name": self.name}

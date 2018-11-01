@@ -46,7 +46,7 @@ __all__ = [
 ]
 
 
-def search_movie(query: str, *, preload=False, **kwargs):
+def search_movie(query: str, **kwargs):
     """Search for movies.
 
     The `query` argument is a text query to search (required).
@@ -70,10 +70,10 @@ def search_movie(query: str, *, preload=False, **kwargs):
     url = urljoin(BASEURL, SEARCH_MOVIE_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Movie(item["id"], preload=preload)
+        yield Movie(item)
 
 
-def search_show(query: str, *, preload=False, **kwargs):
+def search_show(query: str, **kwargs):
     """Search for TV shows.
 
     The `query` argument is a text query to search (required).
@@ -90,10 +90,10 @@ def search_show(query: str, *, preload=False, **kwargs):
     url = urljoin(BASEURL, SEARCH_SHOW_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Show(item["id"], preload=preload)
+        yield Show(item)
 
 
-def search_person(query: str, *, preload=False, **kwargs):
+def search_person(query: str, **kwargs):
     """Search for people.
 
     The `query` argument is a text query to search (required).
@@ -114,10 +114,10 @@ def search_person(query: str, *, preload=False, **kwargs):
     url = urljoin(BASEURL, SEARCH_PERSON_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Person(item["id"], preload=preload)
+        yield Person(item)
 
 
-def search_company(query: str, *, preload=False, **kwargs):
+def search_company(query: str, **kwargs):
     """Search for companies.
 
     The `query` argument is a text query to search (required).
@@ -127,10 +127,10 @@ def search_company(query: str, *, preload=False, **kwargs):
     url = urljoin(BASEURL, SEARCH_COMPANY_SUFFIX)
     params = {"query": query, "api_key": TMDB_API_KEY, **kwargs}
     for item in _search_results_for(url, params):
-        yield Company(item["id"], preload=preload)
+        yield Company(item)
 
 
-def discover_movies(options: dict, *, preload=False):
+def discover_movies(options: dict):
     """Discover movies by different types of data like
     average rating, number of votes, genres and certifications.
 
@@ -142,10 +142,10 @@ def discover_movies(options: dict, *, preload=False):
     url = urljoin(BASEURL, DISCOVER_MOVIES_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
-        yield Movie(item["id"], preload=preload)
+        yield Movie(item)
 
 
-def discover_shows(options: dict, *, preload=False):
+def discover_shows(options: dict):
     """Discover TV shows by different types of data like
     average rating, number of votes, genres, the network
     they aired on and air dates.
@@ -158,7 +158,7 @@ def discover_shows(options: dict, *, preload=False):
     url = urljoin(BASEURL, DISCOVER_SHOWS_SUFFIX)
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
-        yield Show(item["id"], preload=preload)
+        yield Show(item)
 
 
 def get_movie_certifications():

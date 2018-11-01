@@ -58,14 +58,12 @@ __all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre"]
 
 
 class TMDb(ABC):
-    def __init__(self, tmdb_id, *, preload=True):
-        self.tmdb_id = tmdb_id
-        self.data = {"id": tmdb_id}
-        if preload:
-            self._first_init()
+    def __init__(self, tmdb_id, **kwargs):
+        self.data = {"id": tmdb_id, **kwargs}
+        self.tmdb_id = self.data["id"]
 
     @abstractmethod
-    def _first_init(self):
+    def _init(self):
         pass
 
     def _request(self, url: str, **params) -> dict:
@@ -76,7 +74,7 @@ class TMDb(ABC):
 
 
 class Movie(TMDb):
-    def _first_init(self):
+    def _init(self):
         return self.get_all()
 
     def get_all(self, **params):
@@ -197,7 +195,7 @@ class Movie(TMDb):
 
 
 class Show(TMDb):
-    def _first_init(self):
+    def _init(self):
         return self.get_all()
 
     def get_all(self, **params):
@@ -331,7 +329,7 @@ class Show(TMDb):
 
 
 class Person(TMDb):
-    def _first_init(self):
+    def _init(self):
         self.get_all()
 
     def get_all(self, **params):
@@ -419,7 +417,7 @@ class Person(TMDb):
 
 
 class Company(TMDb):
-    def _first_init(self):
+    def _init(self):
         self.get_details()
 
     def get_details(self, **params) -> dict:
@@ -449,12 +447,8 @@ class Company(TMDb):
 
 
 class Keyword(TMDb):
-    def _first_init(self):
+    def _init(self):
         self.get_details()
-
-    def _with_name(self, name):
-        self.data["name"] = name
-        return self
 
     def get_details(self) -> dict:
         """Get the primary information about a keyword."""
@@ -476,12 +470,8 @@ class Keyword(TMDb):
 
 
 class Genre(TMDb):
-    def _first_init(self):
-        pass
-
-    def _with_name(self, name):
-        self.data["name"] = name
-        return self
+    def _init(self):
+        pass  # TODO get_details
 
     def __str__(self):
         return self.data["name"]

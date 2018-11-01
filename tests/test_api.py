@@ -53,17 +53,6 @@ class SearchMovieTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_not_preloaded_attr(self):
-        movie = next(tmdb.search_movie(self.title, preload=False))
-        self.assertSetEqual(set(movie.data.keys()), {"id"})
-
-    def test_preloaded_attr(self):
-        movie = next(tmdb.search_movie(self.title, preload=True))
-        self.assertIn("original_title", movie.data.keys())
-        self.assertIn("alternative_titles", movie.data.keys())
-        self.assertIn("credits", movie.data.keys())
-        self.assertIn("changes", movie.data.keys())
-
 
 class SearchShowTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/tv?"
@@ -102,17 +91,6 @@ class SearchShowTestCase(unittest.TestCase):
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
-
-    def test_not_preloaded_attr(self):
-        show = next(tmdb.search_show(self.name, preload=False))
-        self.assertSetEqual(set(show.data.keys()), {"id"})
-
-    def test_preloaded_attr(self):
-        show = next(tmdb.search_show(self.name, preload=True))
-        self.assertIn("original_name", show.data.keys())
-        self.assertIn("alternative_titles", show.data.keys())
-        self.assertIn("screened_theatrically", show.data.keys())
-        self.assertIn("external_ids", show.data.keys())
 
 
 class SearchPersonTestCase(unittest.TestCase):
@@ -154,17 +132,6 @@ class SearchPersonTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_not_preloaded_attr(self):
-        person = next(tmdb.search_person(self.name, preload=False))
-        self.assertSetEqual(set(person.data.keys()), {"id"})
-
-    def test_preloaded_attr(self):
-        person = next(tmdb.search_person(self.name, preload=True))
-        self.assertIn("name", person.data.keys())
-        self.assertIn("movie_credits", person.data.keys())
-        self.assertIn("tv_credits", person.data.keys())
-        self.assertIn("also_known_as", person.data.keys())
-
 
 class SearchCompanyTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/search/company?"
@@ -193,16 +160,6 @@ class SearchCompanyTestCase(unittest.TestCase):
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
-
-    def test_not_preloaded_attr(self):
-        company = next(tmdb.search_company(self.name, preload=False))
-        self.assertSetEqual(set(company.data.keys()), {"id"})
-
-    def test_preloaded_attr(self):
-        company = next(tmdb.search_company(self.name, preload=True))
-        self.assertIn("name", company.data.keys())
-        self.assertIn("origin_country", company.data.keys())
-        self.assertIn("parent_company", company.data.keys())
 
 
 class DiscoverMovieTestCase(unittest.TestCase):
@@ -234,17 +191,6 @@ class DiscoverMovieTestCase(unittest.TestCase):
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
 
-    def test_not_preloaded_attr(self):
-        movie = next(tmdb.discover_movies(self.options, preload=False))
-        self.assertSetEqual(set(movie.data.keys()), {"id"})
-
-    def test_preloaded_attr(self):
-        movie = next(tmdb.discover_movies(self.options, preload=True))
-        self.assertIn("original_title", movie.data.keys())
-        self.assertIn("alternative_titles", movie.data.keys())
-        self.assertIn("credits", movie.data.keys())
-        self.assertIn("changes", movie.data.keys())
-
 
 class DiscoverShowTestCase(unittest.TestCase):
     BASEURL = "https://api.themoviedb.org/3/discover/tv?"
@@ -273,17 +219,6 @@ class DiscoverShowTestCase(unittest.TestCase):
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
-
-    def test_not_preloaded_attr(self):
-        show = next(tmdb.discover_shows(self.options, preload=False))
-        self.assertSetEqual(set(show.data.keys()), {"id"})
-
-    def test_preloaded_attr(self):
-        show = next(tmdb.discover_shows(self.options, preload=True))
-        self.assertIn("original_name", show.data.keys())
-        self.assertIn("alternative_titles", show.data.keys())
-        self.assertIn("screened_theatrically", show.data.keys())
-        self.assertIn("external_ids", show.data.keys())
 
 
 class GetCertificationsTestCase(unittest.TestCase):
