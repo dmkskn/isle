@@ -29,6 +29,117 @@ class MovieTestCase(unittest.TestCase):
         self.movie_id = 18148
         self.movie = Movie(self.movie_id)
 
+    def test_title_attr(self):
+        self.assertIsInstance(self.movie.title, dict)
+        self.assertIn("original", self.movie.title)
+        self.assertIn("default", self.movie.title)
+        self.assertIn("US", self.movie.title)
+
+    def test_overview_attr(self):
+        self.assertIsInstance(self.movie.overview, dict)
+        self.assertIn("default", self.movie.overview)
+        self.assertIn("US", self.movie.overview)
+
+    def test_tagline_attr(self):
+        self.assertIsInstance(self.movie.tagline, str)
+
+    def test_year_attr(self):
+        self.assertIsInstance(self.movie.year, int)
+        self.assertEqual(len(str(self.movie.year)), 4)
+
+    def test_external_ids_attrs(self):
+        imdb_id = self.movie.imdb_id
+        facebook_id = self.movie.facebook_id
+        instagram_id = self.movie.instagram_id
+        twitter_id = self.movie.twitter_id
+        self.assertEqual(imdb_id, self.movie.data["external_ids"]["imdb_id"])
+        self.assertEqual(facebook_id, self.movie.data["external_ids"]["facebook_id"])
+        self.assertEqual(instagram_id, self.movie.data["external_ids"]["instagram_id"])
+        self.assertEqual(twitter_id, self.movie.data["external_ids"]["twitter_id"])
+
+    def test_release_dates_attr(self):
+        dates = self.movie.release_dates
+        self.assertIsInstance(dates, dict)
+        release_dates = self.movie.data["release_dates"]["results"]
+        for key in (x["iso_3166_1"] for x in release_dates):
+            self.assertIn(key, dates)
+        self.assertIsInstance(dates["US"], list)
+
+    def test_is_adult_attr(self):
+        self.assertIsInstance(self.movie.is_adult, bool)
+
+    def test_backdrops_attr(self):
+        self.assertIsInstance(self.movie.backdrops, list)
+        self.assertIsInstance(self.movie.backdrops[0], dict)
+
+    def test_posters_attr(self):
+        self.assertIsInstance(self.movie.posters, list)
+        self.assertIsInstance(self.movie.posters[0], dict)
+
+    def test_languages_attr(self):
+        self.assertIsInstance(self.movie.languages, list)
+
+    def test_popularity_attr(self):
+        self.assertIsInstance(self.movie.popularity, float)
+
+    def test_homepage_attr(self):
+        self.assertIsInstance(self.movie.homepage, dict)
+        self.assertIn("default", self.movie.homepage)
+        self.assertIn("US", self.movie.homepage)
+
+    def test_revenue_attr(self):
+        self.assertIsInstance(self.movie.revenue, int)
+
+    def test_budget_attr(self):
+        self.assertIsInstance(self.movie.budget, int)
+
+    def test_runtime_attr(self):
+        self.assertIsInstance(self.movie.runtime, int)
+
+    def test_status_attr(self):
+        self.assertIsInstance(self.movie.status, str)
+
+    def test_cast_attr(self):
+        self.assertIsInstance(self.movie.cast, list)
+        self.assertIsInstance(self.movie.cast[0], dict)
+        self.assertIsInstance(self.movie.cast[0]["person"], Person)
+
+    def test_crew_attr(self):
+        self.assertIsInstance(self.movie.crew, list)
+        self.assertIsInstance(self.movie.crew[0], dict)
+        self.assertIsInstance(self.movie.crew[0]["person"], Person)
+
+    def test_videos_attr(self):
+        self.assertIsInstance(self.movie.videos, list)
+        self.assertIsInstance(self.movie.videos[0], dict)
+
+    def test_keywords_attr(self):
+        seen_keywords = []
+        for keyword in self.movie.keywords:
+            self.assertIsInstance(keyword, Keyword)
+            self.assertNotIn(keyword, seen_keywords)
+            seen_keywords.append(keyword)
+
+    def test_genres_attr(self):
+        seen_genres = []
+        for genre in self.movie.genres:
+            self.assertIsInstance(genre, Genre)
+            self.assertNotIn(genre, seen_genres)
+            seen_genres.append(genre)
+
+    def test_companies_attr(self):
+        seen_companies = []
+        for company in self.movie.companies:
+            self.assertIsInstance(company, Company)
+            self.assertNotIn(company, seen_companies)
+            seen_companies.append(company)
+
+    def test_vote_attr(self):
+        self.assertIsInstance(self.movie.vote, tuple)
+
+    def test_countries_attr(self):
+        self.assertIsInstance(self.movie.countries, list)
+
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Movie()  # pylint: disable=E1120

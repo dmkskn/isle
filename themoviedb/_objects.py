@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterator
+from datetime import date
+from operator import itemgetter
 
 from ._tools import get_response, search_results_for
 from .config import TMDB_API_KEY
@@ -66,6 +68,11 @@ class TMDb(ABC):
     def _init(self):
         pass
 
+    def _getdata(self, key):
+        if key not in self.data:
+            self._init()
+        return self.data[key]
+
     def _request(self, url: str, **params) -> dict:
         return get_response(url, **{"api_key": TMDB_API_KEY, **params})
 
@@ -76,6 +83,152 @@ class TMDb(ABC):
 class Movie(TMDb):
     def _init(self):
         return self.get_all()
+
+    @property
+    def title(self):
+        def _t(t):
+            return t["iso_3166_1"], t["data"]["title"]
+
+        titles = {}
+        titles["default"] = self._getdata("title")
+        titles["original"] = self._getdata("original_title")
+        for k, v in map(_t, self._getdata("translations")["translations"]):
+            titles[k] = v
+        return titles
+
+    @property
+    def overview(self):
+        def _o(o):
+            return o["iso_3166_1"], o["data"]["overview"]
+
+        overviews = {}
+        overviews["default"] = self._getdata("overview")
+        for k, v in map(_o, self._getdata("translations")["translations"]):
+            overviews[k] = v
+        return overviews
+
+    @property
+    def tagline(self):
+        return self._getdata("tagline")
+
+    @property
+    def homepage(self):
+        def _h(h):
+            return h["iso_3166_1"], h["data"]["homepage"]
+
+        pages = {}
+        pages["default"] = self._getdata("homepage")
+        for k, v in map(_h, self._getdata("translations")["translations"]):
+            pages[k] = v
+        return pages
+
+    @property
+    def year(self):
+        return date.fromisoformat(self._getdata("release_date")).year
+
+    @property
+    def release_dates(self):
+        dates = {}
+        for item in self._getdata("release_dates")["results"]:
+            dates[item["iso_3166_1"]] = item["release_dates"]
+        return dates
+
+    @property
+    def is_adult(self):
+        return self._getdata("adult")
+
+    @property
+    def backdrops(self):
+        return self._getdata("images")["backdrops"]
+
+    @property
+    def posters(self):
+        return self._getdata("images")["posters"]
+
+    @property
+    def languages(self):
+        return self._getdata("spoken_languages")
+
+    @property
+    def countries(self):
+        return self._getdata("production_countries")
+
+    @property
+    def popularity(self):
+        return self._getdata("popularity")
+
+    @property
+    def revenue(self):
+        return self._getdata("revenue")
+
+    @property
+    def budget(self):
+        return self._getdata("budget")
+
+    @property
+    def runtime(self):
+        return self._getdata("runtime")
+
+    @property
+    def status(self):
+        return self._getdata("status")
+
+    @property
+    def companies(self):
+        return list(map(Company, self._getdata("production_companies")))
+
+    @property
+    def cast(self):
+        cast = []
+        for item in self._getdata("credits")["cast"]:
+            item["person"] = Person(
+                item["id"], name=item["name"], gender=item["gender"]
+            )
+            cast.append(item)
+        cast.sort(key=itemgetter("order"))
+        return cast
+
+    @property
+    def crew(self):
+        crew = []
+        for item in self._getdata("credits")["crew"]:
+            item["person"] = Person(
+                item["id"], name=item["name"], gender=item["gender"]
+            )
+            crew.append(item)
+        return crew
+
+    @property
+    def vote(self):
+        return (self._getdata("vote_average"), self._getdata("vote_count"))
+
+    @property
+    def videos(self):
+        return self._getdata("videos")["results"]
+
+    @property
+    def genres(self):
+        return list(map(Genre, self._getdata("genres")))
+
+    @property
+    def keywords(self):
+        return list(map(Keyword, self._getdata("keywords")))
+
+    @property
+    def imdb_id(self):
+        return self._getdata("external_ids")["imdb_id"]
+
+    @property
+    def facebook_id(self):
+        return self._getdata("external_ids")["facebook_id"]
+
+    @property
+    def instagram_id(self):
+        return self._getdata("external_ids")["instagram_id"]
+
+    @property
+    def twitter_id(self):
+        return self._getdata("external_ids")["twitter_id"]
 
     def get_all(self, **params):
         """Get all information about a movie. This method
@@ -466,7 +619,7 @@ class Keyword(TMDb):
         yield from map(lambda x: Movie(x["id"]), results)
 
     def __str__(self):
-        return self.data.get("name", self.get_details()["name"])
+        return self._getdata("name")
 
 
 class Genre(TMDb):
@@ -474,4 +627,4 @@ class Genre(TMDb):
         pass  # TODO get_details
 
     def __str__(self):
-        return self.data["name"]
+        return self._getdata("name")
