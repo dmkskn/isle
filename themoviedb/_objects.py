@@ -363,6 +363,188 @@ class Show(TMDb):
     def _init(self):
         return self.get_all()
 
+    @property
+    def name(self):
+        def _n(n):
+            return n["iso_3166_1"], n["data"]["name"]
+
+        names = {}
+        names["default"] = self._getdata("name")
+        names["original"] = self._getdata("original_name")
+        for k, v in map(_n, self._getdata("translations")["translations"]):
+            names[k] = v
+        return names
+
+    @property
+    def overview(self):
+        def _o(o):
+            return o["iso_3166_1"], o["data"]["overview"]
+
+        overviews = {}
+        overviews["default"] = self._getdata("overview")
+        for k, v in map(_o, self._getdata("translations")["translations"]):
+            overviews[k] = v
+        return overviews
+
+    @property
+    def homepage(self):
+        def _h(h):
+            return h["iso_3166_1"], h["data"]["homepage"]
+
+        pages = {}
+        pages["default"] = self._getdata("homepage")
+        for k, v in map(_h, self._getdata("translations")["translations"]):
+            pages[k] = v
+        return pages
+
+    @property
+    def creators(self):
+        def _c(c):
+            return Person(c["id"], name=c["name"], gender=c["gender"])
+
+        return [c for c in map(_c, self._getdata("created_by"))]
+
+    @property
+    def backdrops(self):
+        return self._getdata("images")["backdrops"]
+
+    @property
+    def posters(self):
+        return self._getdata("images")["posters"]
+
+    @property
+    def runtimes(self):
+        return self._getdata("episode_run_time")
+
+    @property
+    def first_air_date(self):
+        return self._getdata("first_air_date")
+
+    @property
+    def last_air_date(self):
+        return self._getdata("last_air_date")
+
+    @property
+    def in_production(self):
+        return self._getdata("in_production")
+
+    @property
+    def languages(self):
+        return self._getdata("languages")
+
+    @property
+    def last_episode(self):
+        return self._getdata("last_episode_to_air")
+
+    @property
+    def next_episode(self):
+        return self._getdata("next_episode_to_air")
+
+    @property
+    def n_episodes(self):
+        return self._getdata("number_of_episodes")
+
+    @property
+    def n_seasons(self):
+        return self._getdata("number_of_seasons")
+
+    @property
+    def countries(self):
+        return self._getdata("origin_country")
+
+    @property
+    def popularity(self):
+        return self._getdata("popularity")
+
+    @property
+    def companies(self):
+        def _c(c):
+            return Company(c["id"], **c)
+
+        return list(map(_c, self._getdata("production_companies")))
+
+    @property
+    def seasons(self):
+        return self._getdata("seasons")
+
+    @property
+    def status(self):
+        return self._getdata("status")
+
+    @property
+    def type(self):
+        return self._getdata("type")
+
+    @property
+    def vote(self):
+        return (self._getdata("vote_average"), self._getdata("vote_count"))
+
+    @property
+    def videos(self):
+        return self._getdata("videos")["results"]
+
+    @property
+    def genres(self):
+        def _g(g):
+            return Genre(g["id"], **g)
+
+        return list(map(_g, self._getdata("genres")))
+
+    @property
+    def keywords(self):
+        def _k(k):
+            return Keyword(k["id"], **k)
+
+        return list(map(_k, self._getdata("keywords")["results"]))
+
+    @property
+    def imdb_id(self):
+        return self._getdata("external_ids")["imdb_id"]
+
+    @property
+    def tvdb_id(self):
+        return self._getdata("external_ids")["tvdb_id"]
+
+    @property
+    def facebook_id(self):
+        return self._getdata("external_ids")["facebook_id"]
+
+    @property
+    def instagram_id(self):
+        return self._getdata("external_ids")["instagram_id"]
+
+    @property
+    def twitter_id(self):
+        return self._getdata("external_ids")["twitter_id"]
+
+    @property
+    def ratings(self):
+        ratings = {}
+        for item in self._getdata("content_ratings")["results"]:
+            ratings[item["iso_3166_1"]] = item["rating"]
+        return ratings
+
+    @property
+    def cast(self):
+        cast = []
+        for item in self._getdata("credits")["cast"]:
+            item["person"] = Person(
+                item["id"], name=item["name"], gender=item["gender"]
+            )
+            cast.append(item)
+        cast.sort(key=itemgetter("order"))
+        return cast
+
+    @property
+    def crew(self):
+        crew = []
+        for item in self._getdata("credits")["crew"]:
+            item["person"] = Person(
+                item["id"], name=item["name"], gender=item["gender"]
+            )
+            crew.append(item)
+        return crew
+
     def get_all(self, **params):
         """Get all information about a TV show. This method
         makes only one API request."""
