@@ -29,6 +29,14 @@ class MovieTestCase(unittest.TestCase):
         self.movie_id = 18148
         self.movie = Movie(self.movie_id)
 
+    def test_raise_error_when_init_without_id(self):
+        with self.assertRaises(TypeError):
+            _ = Movie()  # pylint: disable=E1120
+        with self.assertRaises(TypeError):
+            _ = Movie("not int")
+        with self.assertRaises(TypeError):
+            _ = Movie({"id": self.movie_id})
+
     def test_title_attr(self):
         self.assertIsInstance(self.movie.title, dict)
         self.assertIn("original", self.movie.title)
@@ -229,6 +237,10 @@ class ShowTestCase(unittest.TestCase):
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Show()  # pylint: disable=E1120
+        with self.assertRaises(TypeError):
+            _ = Show("not int")
+        with self.assertRaises(TypeError):
+            _ = Show({"id": self.show_id})
 
     def test_preloaded(self):
         self.assertDictEqual(self.show.data, {"id": self.show_id})
@@ -310,6 +322,14 @@ class PersonTestCase(unittest.TestCase):
     def setUp(self):
         self.person_id = 287
         self.person = Person(self.person_id)
+
+    def test_raise_error_when_init_without_id(self):
+        with self.assertRaises(TypeError):
+            _ = Person()  # pylint: disable=E1120
+        with self.assertRaises(TypeError):
+            _ = Person("not int")
+        with self.assertRaises(TypeError):
+            _ = Person({"id": self.person_id})
 
     def test_preloaded(self):
         self.assertDictEqual(self.person.data, {"id": self.person_id})

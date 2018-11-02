@@ -60,7 +60,10 @@ __all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre"]
 
 
 class TMDb(ABC):
-    def __init__(self, tmdb_id, **kwargs):
+    def __init__(self, tmdb_id: int, **kwargs):
+        if not isinstance(tmdb_id, int):
+            msg = f"tmdb_id argument must be an integer, not {type(tmdb_id)}"
+            raise TypeError(msg)
         self.data = {"id": tmdb_id, **kwargs}
         self.tmdb_id = self.data["id"]
 
@@ -175,7 +178,10 @@ class Movie(TMDb):
 
     @property
     def companies(self):
-        return list(map(Company, self._getdata("production_companies")))
+        def _c(c):
+            return Company(c["id"], **c)
+
+        return list(map(_c, self._getdata("production_companies")))
 
     @property
     def cast(self):
@@ -208,11 +214,17 @@ class Movie(TMDb):
 
     @property
     def genres(self):
-        return list(map(Genre, self._getdata("genres")))
+        def _g(g):
+            return Genre(g["id"], **g)
+
+        return list(map(_g, self._getdata("genres")))
 
     @property
     def keywords(self):
-        return list(map(Keyword, self._getdata("keywords")))
+        def _k(k):
+            return Keyword(k["id"], **k)
+
+        return list(map(_k, self._getdata("keywords")["keywords"]))
 
     @property
     def imdb_id(self):
