@@ -1,3 +1,4 @@
+import re
 import unittest
 import inspect
 from themoviedb._objects import TMDb, Movie, Show, Person, Company, Keyword, Genre
@@ -462,6 +463,118 @@ class PersonTestCase(unittest.TestCase):
             _ = Person("not int")
         with self.assertRaises(TypeError):
             _ = Person({"id": self.person_id})
+
+    def test_name_attr(self):
+        self.assertIsInstance(self.person.name, str)
+
+    def test_also_known_as_attr(self):
+        self.assertIsInstance(self.person.also_known_as, list)
+        self.assertIsInstance(self.person.also_known_as[0], str)
+
+    def test_birthday_attr(self):
+        self.assertIsInstance(self.person.birthday, str)
+        self.assertTrue(re.match(r"\d{4}-\d{2}-\d{2}", self.person.birthday))
+
+    def test_known_for_department_attr(self):
+        self.assertIsInstance(self.person.known_for_department, str)
+
+    def test_deathday_attr(self):
+        self.assertIsInstance(self.person.deathday, (str, type(None)))
+
+    def test_gender_attr(self):
+        self.assertIsInstance(self.person.gender, int)
+
+    def test_biography_attr(self):
+        self.assertIsInstance(self.person.biography, dict)
+        self.assertIn("default", self.person.biography)
+        self.assertIn("US", self.person.biography)
+
+    def test_homepage_attr(self):
+        self.assertIsInstance(self.person.homepage, (str, type(None)))
+
+    def test_popularity_attr(self):
+        self.assertIsInstance(self.person.popularity, float)
+
+    def test_place_of_birth_attr(self):
+        self.assertIsInstance(self.person.place_of_birth, str)
+
+    def test_is_adult_attr(self):
+        self.assertIsInstance(self.person.is_adult, bool)
+
+    def test_movie_cast_attr(self):
+        self.assertIsInstance(self.person.movie_cast, list)
+        self.assertIsInstance(self.person.movie_cast[0], dict)
+        self.assertIn("character", self.person.movie_cast[0])
+        self.assertIn("movie", self.person.movie_cast[0])
+        self.assertIsInstance(self.person.movie_cast[0]["movie"], Movie)
+
+    def test_movie_crew_attr(self):
+        self.assertIsInstance(self.person.movie_crew, list)
+        self.assertIsInstance(self.person.movie_crew[0], dict)
+        self.assertIn("department", self.person.movie_crew[0])
+        self.assertIn("job", self.person.movie_crew[0])
+        self.assertIn("movie", self.person.movie_crew[0])
+        self.assertIsInstance(self.person.movie_crew[0]["movie"], Movie)
+
+    def test_show_cast_attr(self):
+        self.assertIsInstance(self.person.show_cast, list)
+        self.assertIsInstance(self.person.show_cast[0], dict)
+        self.assertIn("character", self.person.show_cast[0])
+        self.assertIn("show", self.person.show_cast[0])
+        self.assertIsInstance(self.person.show_cast[0]["show"], Show)
+
+    def test_show_crew_attr(self):
+        self.assertIsInstance(self.person.show_crew, list)
+        self.assertIsInstance(self.person.show_crew[0], dict)
+        self.assertIn("department", self.person.show_crew[0])
+        self.assertIn("job", self.person.show_crew[0])
+        self.assertIn("show", self.person.show_crew[0])
+        self.assertIsInstance(self.person.show_crew[0]["show"], Show)
+
+    def test_cast_attr(self):
+        self.assertIsInstance(self.person.cast, list)
+        self.assertIsInstance(self.person.cast[0], dict)
+        self.assertIn("character", self.person.cast[0])
+        self.assertIn("media_type", self.person.cast[0])
+        if self.person.cast[0]["media_type"] == "tv":
+            self.assertIn("show", self.person.cast[0])
+            self.assertIsInstance(self.person.cast[0]["show"], Show)
+        else:
+            self.assertIn("movie", self.person.cast[0])
+            self.assertIsInstance(self.person.cast[0]["movie"], Movie)
+
+    def test_crew_attr(self):
+        self.assertIsInstance(self.person.crew, list)
+        self.assertIsInstance(self.person.crew[0], dict)
+        self.assertIn("department", self.person.crew[0])
+        self.assertIn("job", self.person.crew[0])
+        self.assertIn("media_type", self.person.crew[0])
+        if self.person.crew[0]["media_type"] == "tv":
+            self.assertIn("show", self.person.crew[0])
+            self.assertIsInstance(self.person.crew[0]["show"], Show)
+        else:
+            self.assertIn("movie", self.person.crew[0])
+            self.assertIsInstance(self.person.crew[0]["movie"], Movie)
+
+    def test_external_ids_attrs(self):
+        imdb_id = self.person.imdb_id
+        freebase_mid = self.person.freebase_mid
+        freebase_id = self.person.freebase_id
+        tvrage_id = self.person.tvrage_id
+        facebook_id = self.person.facebook_id
+        instagram_id = self.person.instagram_id
+        twitter_id = self.person.twitter_id
+        self.assertEqual(imdb_id, self.person.data["external_ids"]["imdb_id"])
+        self.assertEqual(freebase_mid, self.person.data["external_ids"]["freebase_mid"])
+        self.assertEqual(freebase_id, self.person.data["external_ids"]["freebase_id"])
+        self.assertEqual(tvrage_id, self.person.data["external_ids"]["tvrage_id"])
+        self.assertEqual(facebook_id, self.person.data["external_ids"]["facebook_id"])
+        self.assertEqual(instagram_id, self.person.data["external_ids"]["instagram_id"])
+        self.assertEqual(twitter_id, self.person.data["external_ids"]["twitter_id"])
+
+    def test_profiles_attr(self):
+        self.assertIsInstance(self.person.profiles, list)
+        self.assertIsInstance(self.person.profiles[0], dict)
 
     def test_preloaded(self):
         self.assertDictEqual(self.person.data, {"id": self.person_id})

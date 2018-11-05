@@ -127,7 +127,8 @@ class Movie(TMDb):
 
     @property
     def year(self):
-        return date.fromisoformat(self._getdata("release_date")).year
+        release_date = self._getdata("release_date")
+        return date.fromisoformat(release_date).year if release_date else None
 
     @property
     def release_dates(self):
@@ -678,6 +679,172 @@ class Show(TMDb):
 class Person(TMDb):
     def _init(self):
         self.get_all()
+
+    @property
+    def name(self):
+        return self._getdata("name")
+
+    @property
+    def also_known_as(self):
+        return self._getdata("also_known_as")
+
+    @property
+    def known_for_department(self):
+        return self._getdata("known_for_department")
+
+    @property
+    def birthday(self):
+        return self._getdata("birthday")
+
+    @property
+    def deathday(self):
+        return self._getdata("deathday")
+
+    @property
+    def gender(self):
+        return self._getdata("gender")
+
+    @property
+    def biography(self):
+        def _b(b):
+            return b["iso_3166_1"], b["data"]["biography"]
+
+        biographies = {}
+        biographies["default"] = self._getdata("biography")
+        for k, v in map(_b, self._getdata("translations")["translations"]):
+            biographies[k] = v
+        return biographies
+
+    @property
+    def homepage(self):
+        self._getdata("homepage")
+
+    @property
+    def popularity(self):
+        return self._getdata("popularity")
+
+    @property
+    def place_of_birth(self):
+        return self._getdata("place_of_birth")
+
+    @property
+    def is_adult(self):
+        return self._getdata("adult")
+
+    @property
+    def movie_cast(self):
+        cast = []
+        for item in self._getdata("movie_credits")["cast"]:
+            cast.append({
+                "character": item["character"],
+                "credit_id": item["credit_id"],
+                "movie": Movie(item["id"], **item),
+            })
+        return cast
+
+    @property
+    def movie_crew(self):
+        crew = []
+        for item in self._getdata("movie_credits")["crew"]:
+            crew.append({
+                "department": item["department"],
+                "job": item["job"],
+                "credit_id": item["credit_id"],
+                "movie": Movie(item["id"], **item),
+            })
+        return crew
+
+    @property
+    def show_cast(self):
+        cast = []
+        for item in self._getdata("tv_credits")["cast"]:
+            cast.append({
+                "character": item["character"],
+                "credit_id": item["credit_id"],
+                "show": Show(item["id"], **item),
+            })
+        return cast
+
+    @property
+    def show_crew(self):
+        crew = []
+        for item in self._getdata("tv_credits")["crew"]:
+            crew.append({
+                "department": item["department"],
+                "job": item["job"],
+                "credit_id": item["credit_id"],
+                "show": Show(item["id"], **item),
+            })
+        return crew
+
+    @property
+    def cast(self):
+        cast = []
+        for item in self._getdata("combined_credits")["cast"]:
+            if item["media_type"] == "tv":
+                obj = Show(item['id'], **item)
+                key = "show"
+            else:
+                obj = Movie(item['id'], **item)
+                key = "movie"
+            cast.append({
+                "character": item["character"],
+                "credit_id": item["credit_id"],
+                "media_type": item["media_type"],
+                key: obj,
+            })
+        return cast
+
+    @property
+    def crew(self):
+        crew = []
+        for item in self._getdata("combined_credits")["crew"]:
+            if item["media_type"] == "tv":
+                obj = Show(item['id'], **item)
+                key = "show"
+            else:
+                obj = Movie(item['id'], **item)
+                key = "movie"
+            crew.append({
+                "department": item["department"],
+                "job": item["job"],
+                "credit_id": item["credit_id"],
+                "media_type": item["media_type"],
+                key: obj,
+            })
+        return crew
+
+    @property
+    def imdb_id(self):
+        return self._getdata("external_ids")["imdb_id"]
+
+    @property
+    def freebase_mid(self):
+        return self._getdata("external_ids")["freebase_mid"]
+
+    @property
+    def freebase_id(self):
+        return self._getdata("external_ids")["freebase_id"]
+
+    @property
+    def tvrage_id(self):
+        return self._getdata("external_ids")["tvrage_id"]
+
+    @property
+    def facebook_id(self):
+        return self._getdata("external_ids")["facebook_id"]
+
+    @property
+    def instagram_id(self):
+        return self._getdata("external_ids")["instagram_id"]
+
+    @property
+    def twitter_id(self):
+        return self._getdata("external_ids")["twitter_id"]
+
+    @property
+    def profiles(self):
+        return self._getdata("images")["profiles"]
 
     def get_all(self, **params):
         """Get all information about a person in a single
