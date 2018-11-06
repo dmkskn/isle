@@ -735,46 +735,54 @@ class Person(TMDb):
     def movie_cast(self):
         cast = []
         for item in self._getdata("movie_credits")["cast"]:
-            cast.append({
-                "character": item["character"],
-                "credit_id": item["credit_id"],
-                "movie": Movie(item["id"], **item),
-            })
+            cast.append(
+                {
+                    "character": item["character"],
+                    "credit_id": item["credit_id"],
+                    "movie": Movie(item["id"], **item),
+                }
+            )
         return cast
 
     @property
     def movie_crew(self):
         crew = []
         for item in self._getdata("movie_credits")["crew"]:
-            crew.append({
-                "department": item["department"],
-                "job": item["job"],
-                "credit_id": item["credit_id"],
-                "movie": Movie(item["id"], **item),
-            })
+            crew.append(
+                {
+                    "department": item["department"],
+                    "job": item["job"],
+                    "credit_id": item["credit_id"],
+                    "movie": Movie(item["id"], **item),
+                }
+            )
         return crew
 
     @property
     def show_cast(self):
         cast = []
         for item in self._getdata("tv_credits")["cast"]:
-            cast.append({
-                "character": item["character"],
-                "credit_id": item["credit_id"],
-                "show": Show(item["id"], **item),
-            })
+            cast.append(
+                {
+                    "character": item["character"],
+                    "credit_id": item["credit_id"],
+                    "show": Show(item["id"], **item),
+                }
+            )
         return cast
 
     @property
     def show_crew(self):
         crew = []
         for item in self._getdata("tv_credits")["crew"]:
-            crew.append({
-                "department": item["department"],
-                "job": item["job"],
-                "credit_id": item["credit_id"],
-                "show": Show(item["id"], **item),
-            })
+            crew.append(
+                {
+                    "department": item["department"],
+                    "job": item["job"],
+                    "credit_id": item["credit_id"],
+                    "show": Show(item["id"], **item),
+                }
+            )
         return crew
 
     @property
@@ -782,17 +790,19 @@ class Person(TMDb):
         cast = []
         for item in self._getdata("combined_credits")["cast"]:
             if item["media_type"] == "tv":
-                obj = Show(item['id'], **item)
+                obj = Show(item["id"], **item)
                 key = "show"
             else:
-                obj = Movie(item['id'], **item)
+                obj = Movie(item["id"], **item)
                 key = "movie"
-            cast.append({
-                "character": item["character"],
-                "credit_id": item["credit_id"],
-                "media_type": item["media_type"],
-                key: obj,
-            })
+            cast.append(
+                {
+                    "character": item["character"],
+                    "credit_id": item["credit_id"],
+                    "media_type": item["media_type"],
+                    key: obj,
+                }
+            )
         return cast
 
     @property
@@ -800,18 +810,20 @@ class Person(TMDb):
         crew = []
         for item in self._getdata("combined_credits")["crew"]:
             if item["media_type"] == "tv":
-                obj = Show(item['id'], **item)
+                obj = Show(item["id"], **item)
                 key = "show"
             else:
-                obj = Movie(item['id'], **item)
+                obj = Movie(item["id"], **item)
                 key = "movie"
-            crew.append({
-                "department": item["department"],
-                "job": item["job"],
-                "credit_id": item["credit_id"],
-                "media_type": item["media_type"],
-                key: obj,
-            })
+            crew.append(
+                {
+                    "department": item["department"],
+                    "job": item["job"],
+                    "credit_id": item["credit_id"],
+                    "media_type": item["media_type"],
+                    key: obj,
+                }
+            )
         return crew
 
     @property
@@ -933,6 +945,47 @@ class Person(TMDb):
 class Company(TMDb):
     def _init(self):
         self.get_details()
+
+    def _getdata(self, key):
+        if key not in self.data:
+            if key == "alternative_names":
+                self.get_alternative_names()
+            elif key == "images":
+                self.get_images()
+            else:
+                self._init()
+        return self.data[key]
+
+    @property
+    def name(self):
+        return self._getdata("name")
+
+    @property
+    def also_known_as(self):
+        names = []
+        for item in self._getdata("alternative_names")["results"]:
+            names.append(item["name"])
+        return names
+
+    @property
+    def description(self):
+        return self._getdata("description")
+
+    @property
+    def homepage(self):
+        return self._getdata("homepage")
+
+    @property
+    def country(self):
+        return self._getdata("origin_country")
+
+    @property
+    def parent_company(self):
+        return self._getdata("parent_company")
+
+    @property
+    def logos(self):
+        return self._getdata("images")["logos"]
 
     def get_details(self, **params) -> dict:
         """Get a companies details."""

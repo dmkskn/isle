@@ -628,6 +628,28 @@ class CompanyTestCase(unittest.TestCase):
         self.company_id = 1
         self.company = Company(self.company_id)
 
+    def test_name_attr(self):
+        self.assertIsInstance(self.company.name, str)
+
+    def test_also_known_as_attr(self):
+        self.assertIsInstance(self.company.also_known_as, list)
+
+    def test_description_attr(self):
+        self.assertIsInstance(self.company.description, str)
+
+    def test_homepage_attr(self):
+        self.assertIsInstance(self.company.homepage, str)
+
+    def test_country_attr(self):
+        self.assertIsInstance(self.company.country, str)
+
+    def test_parent_company_attr(self):
+        self.assertIsInstance(self.company.parent_company, (str, type(None)))
+
+    def test_logos_attr(self):
+        self.assertIsInstance(self.company.logos, list)
+        self.assertIsInstance(self.company.logos[0], dict)
+
     def test_get_details(self):
         details = self.company.get_details()
         self.assertDictEqual(details, self.company.data)
