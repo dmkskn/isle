@@ -1,7 +1,19 @@
 import re
 import unittest
 import inspect
-from themoviedb._objects import TMDb, Movie, Show, Person, Company, Keyword, Genre
+from themoviedb._objects import (
+    TMDb,
+    Movie,
+    Show,
+    Person,
+    Company,
+    Keyword,
+    Genre,
+    Image,
+    Language,
+    Vote,
+    Country,
+)
 
 
 class TMDbTestCase(unittest.TestCase):
@@ -27,7 +39,7 @@ class TMDbTestCase(unittest.TestCase):
 
 class MovieTestCase(unittest.TestCase):
     def setUp(self):
-        self.movie_id = 18148
+        self.movie_id = 18148  # there are tests that depend on the movie id
         self.movie = Movie(self.movie_id)
 
     def test_raise_error_when_init_without_id(self):
@@ -66,35 +78,43 @@ class MovieTestCase(unittest.TestCase):
         self.assertEqual(instagram_id, self.movie.data["external_ids"]["instagram_id"])
         self.assertEqual(twitter_id, self.movie.data["external_ids"]["twitter_id"])
 
-    def test_release_dates_attr(self):
-        dates = self.movie.release_dates
-        self.assertIsInstance(dates, dict)
-        release_dates = self.movie.data["release_dates"]["results"]
-        for key in (x["iso_3166_1"] for x in release_dates):
-            self.assertIn(key, dates)
-        self.assertIsInstance(dates["US"], list)
+    def test_releases_attr(self):
+        releases = self.movie.releases
+        self.assertIsInstance(releases, dict)
+        release_dates_data = self.movie.data["release_dates"]["results"]
+        for key in (x["iso_3166_1"] for x in release_dates_data):
+            self.assertIn(key, releases)
+        us_releases = releases["US"]
+        release = us_releases[0]
+        self.assertIsInstance(us_releases, list)
+        self.assertIsInstance(release, dict)
+        self.assertIn("certification", release)
+        self.assertIn("date", release)
+        self.assertIn("note", release)
+        self.assertIn("type", release)
+        self.assertNotIn("release_date", release)
+        self.assertNotIn("iso_639_1", release)
 
     def test_is_adult_attr(self):
         self.assertIsInstance(self.movie.is_adult, bool)
 
     def test_backdrops_attr(self):
         self.assertIsInstance(self.movie.backdrops, list)
-        self.assertIsInstance(self.movie.backdrops[0], dict)
+        self.assertIsInstance(self.movie.backdrops[0], Image)
 
     def test_posters_attr(self):
         self.assertIsInstance(self.movie.posters, list)
-        self.assertIsInstance(self.movie.posters[0], dict)
+        self.assertIsInstance(self.movie.posters[0], Image)
 
     def test_languages_attr(self):
         self.assertIsInstance(self.movie.languages, list)
+        self.assertIsInstance(self.movie.languages[0], Language)
 
     def test_popularity_attr(self):
         self.assertIsInstance(self.movie.popularity, float)
 
     def test_homepage_attr(self):
         self.assertIsInstance(self.movie.homepage, dict)
-        self.assertIn("default", self.movie.homepage)
-        self.assertIn("US", self.movie.homepage)
 
     def test_revenue_attr(self):
         self.assertIsInstance(self.movie.revenue, int)
@@ -144,10 +164,11 @@ class MovieTestCase(unittest.TestCase):
             seen_companies.append(company)
 
     def test_vote_attr(self):
-        self.assertIsInstance(self.movie.vote, tuple)
+        self.assertIsInstance(self.movie.vote, Vote)
 
     def test_countries_attr(self):
         self.assertIsInstance(self.movie.countries, list)
+        self.assertIsInstance(self.movie.countries[0], Country)
 
     def test_preloaded(self):
         self.assertDictEqual(self.movie.data, {"id": self.movie_id})
@@ -266,8 +287,7 @@ class ShowTestCase(unittest.TestCase):
 
     def test_languages_attr(self):
         self.assertIsInstance(self.show.languages, list)
-        self.assertIsInstance(self.show.languages[0], str)
-        self.assertEqual(len(self.show.languages[0]), 2)
+        self.assertIsInstance(self.show.languages[0], Language)
 
     def test_last_episode_attr(self):
         self.assertIsInstance(self.show.last_episode, dict)
@@ -283,8 +303,7 @@ class ShowTestCase(unittest.TestCase):
 
     def test_countries_attr(self):
         self.assertIsInstance(self.show.countries, list)
-        self.assertIsInstance(self.show.countries[0], str)
-        self.assertEqual(len(self.show.countries[0]), 2)
+        self.assertIsInstance(self.show.countries[0], Country)
 
     def test_popularity_attr(self):
         self.assertIsInstance(self.show.popularity, float)
@@ -304,7 +323,7 @@ class ShowTestCase(unittest.TestCase):
         self.assertIsInstance(self.show.type, str)
 
     def test_vote_attr(self):
-        self.assertIsInstance(self.show.vote, tuple)
+        self.assertIsInstance(self.show.vote, Vote)
         self.assertIsInstance(self.show.vote[0], float)
         self.assertIsInstance(self.show.vote[1], int)
 
@@ -339,11 +358,11 @@ class ShowTestCase(unittest.TestCase):
 
     def test_backdrops_attr(self):
         self.assertIsInstance(self.show.backdrops, list)
-        self.assertIsInstance(self.show.backdrops[0], dict)
+        self.assertIsInstance(self.show.backdrops[0], Image)
 
     def test_posters_attr(self):
         self.assertIsInstance(self.show.posters, list)
-        self.assertIsInstance(self.show.posters[0], dict)
+        self.assertIsInstance(self.show.posters[0], Image)
 
     def test_keywords_attr(self):
         seen_keywords = []
@@ -574,7 +593,7 @@ class PersonTestCase(unittest.TestCase):
 
     def test_profiles_attr(self):
         self.assertIsInstance(self.person.profiles, list)
-        self.assertIsInstance(self.person.profiles[0], dict)
+        self.assertIsInstance(self.person.profiles[0], Image)
 
     def test_preloaded(self):
         self.assertDictEqual(self.person.data, {"id": self.person_id})
@@ -641,14 +660,14 @@ class CompanyTestCase(unittest.TestCase):
         self.assertIsInstance(self.company.homepage, str)
 
     def test_country_attr(self):
-        self.assertIsInstance(self.company.country, str)
+        self.assertIsInstance(self.company.country, Country)
 
     def test_parent_company_attr(self):
         self.assertIsInstance(self.company.parent_company, (str, type(None)))
 
     def test_logos_attr(self):
         self.assertIsInstance(self.company.logos, list)
-        self.assertIsInstance(self.company.logos[0], dict)
+        self.assertIsInstance(self.company.logos[0], Image)
 
     def test_get_details(self):
         details = self.company.get_details()

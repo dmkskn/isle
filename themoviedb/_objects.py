@@ -1,12 +1,16 @@
+import copy
 from abc import ABC, abstractmethod
-from typing import Iterator
+from typing import Iterator, NamedTuple
 from datetime import date
 from operator import itemgetter
+from urllib.parse import urljoin
 
 from ._tools import get_response, search_results_for
 from .config import TMDB_API_KEY
 from ._urls import (
     BASEURL,
+    LANGUAGES_CONFIGURATION_SUFFIX,
+    COUNTRIES_CONFIGURATION_SUFFIX,
     MOVIE_DETAILS_SUFFIX,
     MOVIE_ALTERNATIVE_TITLES_SUFFIX,
     MOVIE_CHANGES_SUFFIX,
@@ -74,7 +78,7 @@ class TMDb(ABC):
     def _getdata(self, key):
         if key not in self.data:
             self._init()
-        return self.data[key]
+        return copy.deepcopy(self.data[key])
 
     def _request(self, url: str, **params) -> dict:
         return get_response(url, **{"api_key": TMDB_API_KEY, **params})
@@ -96,7 +100,8 @@ class Movie(TMDb):
         titles["default"] = self._getdata("title")
         titles["original"] = self._getdata("original_title")
         for k, v in map(_t, self._getdata("translations")["translations"]):
-            titles[k] = v
+            if v:
+                titles[k] = v
         return titles
 
     @property
@@ -107,7 +112,8 @@ class Movie(TMDb):
         overviews = {}
         overviews["default"] = self._getdata("overview")
         for k, v in map(_o, self._getdata("translations")["translations"]):
-            overviews[k] = v
+            if v:
+                overviews[k] = v
         return overviews
 
     @property
@@ -120,9 +126,11 @@ class Movie(TMDb):
             return h["iso_3166_1"], h["data"]["homepage"]
 
         pages = {}
-        pages["default"] = self._getdata("homepage")
+        if self._getdata("homepage"):
+            pages["default"] = self._getdata("homepage")
         for k, v in map(_h, self._getdata("translations")["translations"]):
-            pages[k] = v
+            if v:
+                pages[k] = v
         return pages
 
     @property
@@ -131,10 +139,29 @@ class Movie(TMDb):
         return date.fromisoformat(release_date).year if release_date else None
 
     @property
-    def release_dates(self):
+    def releases(self):
+        def _remove_iso_639_1(d):
+            if "iso_639_1" in d:
+                del d["iso_639_1"]
+            return d
+
+        def _rename_to_date(d):
+            if "release_date" in d:
+                d["date"] = d["release_date"]
+                del d["release_date"]
+            return d
+
+        def _default_note(d):
+            if "note" not in d:
+                d["note"] = ""
+            return d
+
         dates = {}
         for item in self._getdata("release_dates")["results"]:
-            dates[item["iso_3166_1"]] = item["release_dates"]
+            release_dates = list(map(_remove_iso_639_1, item["release_dates"]))
+            release_dates = list(map(_rename_to_date, release_dates))
+            release_dates = list(map(_default_note, release_dates))
+            dates[item["iso_3166_1"]] = release_dates
         return dates
 
     @property
@@ -143,19 +170,36 @@ class Movie(TMDb):
 
     @property
     def backdrops(self):
-        return self._getdata("images")["backdrops"]
+        return list(map(Image, self._getdata("images")["backdrops"]))
 
     @property
     def posters(self):
-        return self._getdata("images")["posters"]
+        return list(map(Image, self._getdata("images")["posters"]))
 
     @property
     def languages(self):
-        return self._getdata("spoken_languages")
+        languages = []
+        for code in map(itemgetter("iso_639_1"), self._getdata("spoken_languages")):
+            try:
+                item = self._all_languages[code]
+            except AttributeError:
+                self._all_languages = self._get_all_languages()
+                item = self._all_languages[code]
+            languages.append(
+                Language(
+                    iso_639_1=code,
+                    english_name=item["english_name"],
+                    original_name=item["name"],
+                )
+            )
+        return languages
 
     @property
     def countries(self):
-        return self._getdata("production_countries")
+        countries = []
+        for item in self._getdata("production_countries"):
+            countries.append(Country(item["iso_3166_1"], item["name"]))
+        return countries
 
     @property
     def popularity(self):
@@ -207,7 +251,9 @@ class Movie(TMDb):
 
     @property
     def vote(self):
-        return (self._getdata("vote_average"), self._getdata("vote_count"))
+        average = self._getdata("vote_average")
+        count = self._getdata("vote_count")
+        return Vote(average=average, count=count)
 
     @property
     def videos(self):
@@ -242,6 +288,16 @@ class Movie(TMDb):
     @property
     def twitter_id(self):
         return self._getdata("external_ids")["twitter_id"]
+
+    def _get_all_languages(self):
+        url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
+        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        languages = {}
+        for item in data:
+            iso_639_1 = item["iso_639_1"]
+            del item["iso_639_1"]
+            languages[iso_639_1] = item
+        return languages
 
     def get_all(self, **params):
         """Get all information about a movie. This method
@@ -393,7 +449,8 @@ class Show(TMDb):
             return h["iso_3166_1"], h["data"]["homepage"]
 
         pages = {}
-        pages["default"] = self._getdata("homepage")
+        if self._getdata("homepage"):
+            pages["default"] = self._getdata("homepage")
         for k, v in map(_h, self._getdata("translations")["translations"]):
             pages[k] = v
         return pages
@@ -407,11 +464,11 @@ class Show(TMDb):
 
     @property
     def backdrops(self):
-        return self._getdata("images")["backdrops"]
+        return list(map(Image, self._getdata("images")["backdrops"]))
 
     @property
     def posters(self):
-        return self._getdata("images")["posters"]
+        return list(map(Image, self._getdata("images")["posters"]))
 
     @property
     def runtimes(self):
@@ -431,7 +488,22 @@ class Show(TMDb):
 
     @property
     def languages(self):
-        return self._getdata("languages")
+        iso_codes = self._getdata("languages")
+        languages = []
+        for code in iso_codes:
+            try:
+                item = self._all_languages[code]
+            except AttributeError:
+                self._all_languages = self._get_all_languages()
+                item = self._all_languages[code]
+            languages.append(
+                Language(
+                    iso_639_1=code,
+                    english_name=item["english_name"],
+                    original_name=item["name"],
+                )
+            )
+        return languages
 
     @property
     def last_episode(self):
@@ -451,7 +523,15 @@ class Show(TMDb):
 
     @property
     def countries(self):
-        return self._getdata("origin_country")
+        countries = []
+        for code in self._getdata("origin_country"):
+            try:
+                english_name = self._all_countries[code]
+            except AttributeError:
+                self._all_countries = self._get_all_countries()
+                english_name = self._all_countries[code]
+            countries.append(Country(iso_3166_1=code, english_name=english_name))
+        return countries
 
     @property
     def popularity(self):
@@ -478,7 +558,9 @@ class Show(TMDb):
 
     @property
     def vote(self):
-        return (self._getdata("vote_average"), self._getdata("vote_count"))
+        average = self._getdata("vote_average")
+        count = self._getdata("vote_count")
+        return Vote(average=average, count=count)
 
     @property
     def videos(self):
@@ -545,6 +627,24 @@ class Show(TMDb):
             )
             crew.append(item)
         return crew
+
+    def _get_all_languages(self):
+        url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
+        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        languages = {}
+        for item in data:
+            iso_639_1 = item["iso_639_1"]
+            del item["iso_639_1"]
+            languages[iso_639_1] = item
+        return languages
+
+    def _get_all_countries(self):
+        url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
+        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        countries = {}
+        for item in data:
+            countries[item["iso_3166_1"]] = item["english_name"]
+        return countries
 
     def get_all(self, **params):
         """Get all information about a TV show. This method
@@ -856,7 +956,7 @@ class Person(TMDb):
 
     @property
     def profiles(self):
-        return self._getdata("images")["profiles"]
+        return list(map(Image, self._getdata("images")["profiles"]))
 
     def get_all(self, **params):
         """Get all information about a person in a single
@@ -954,7 +1054,7 @@ class Company(TMDb):
                 self.get_images()
             else:
                 self._init()
-        return self.data[key]
+        return copy.deepcopy(self.data[key])
 
     @property
     def name(self):
@@ -977,7 +1077,13 @@ class Company(TMDb):
 
     @property
     def country(self):
-        return self._getdata("origin_country")
+        code = self._getdata("origin_country")
+        try:
+            english_name = self._all_countries[code]
+        except AttributeError:
+            self._all_countries = self._get_all_countries()
+            english_name = self._all_countries[code]
+        return Country(iso_3166_1=code, english_name=english_name)
 
     @property
     def parent_company(self):
@@ -985,7 +1091,15 @@ class Company(TMDb):
 
     @property
     def logos(self):
-        return self._getdata("images")["logos"]
+        return list(map(Image, self._getdata("images")["logos"]))
+
+    def _get_all_countries(self):
+        url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
+        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        countries = {}
+        for item in data:
+            countries[item["iso_3166_1"]] = item["english_name"]
+        return countries
 
     def get_details(self, **params) -> dict:
         """Get a companies details."""
@@ -1017,6 +1131,10 @@ class Keyword(TMDb):
     def _init(self):
         self.get_details()
 
+    @property
+    def name(self):
+        return self._getdata("name")
+
     def get_details(self) -> dict:
         """Get the primary information about a keyword."""
         details = self._request(
@@ -1042,3 +1160,34 @@ class Genre(TMDb):
 
     def __str__(self):
         return self._getdata("name")
+
+
+class Image:
+    def __init__(self, image: dict):
+        for key, value in image.items():
+            setattr(self, key, value)
+
+
+class Country(NamedTuple):
+    iso_3166_1: str
+    english_name: str
+
+    def __str__(self):
+        return self.english_name
+
+
+class Language(NamedTuple):
+    iso_639_1: str
+    english_name: str
+    original_name: str
+
+    def __str__(self):
+        return self.english_name
+
+
+class Vote(NamedTuple):
+    average: float
+    count: str
+
+    def __str__(self):
+        return self.average
