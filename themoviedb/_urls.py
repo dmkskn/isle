@@ -1,4 +1,3 @@
-
 BASEURL = "https://api.themoviedb.org/"
 SEARCH_MOVIE_SUFFIX = "3/search/movie"
 SEARCH_SHOW_SUFFIX = "3/search/tv"
@@ -76,6 +75,14 @@ ALL_SHOW_SECOND_SUFFIXES = [
     "translations",
     "videos",
 ]
+
+SEASON_DETAILS_SUFFIX = "3/tv/{}/season/{}"  #  {tv_id} and {season_number}
+SEASON_CHANGES_SUFFIX = "3/tv/season/{}/changes"  #  {season_id}
+SEASON_CREDITS_SUFFIX = "3/tv/{}/season/{}/credits"
+SEASON_EXTERNAL_IDS_SUFFIX = "3/tv/{}/season/{}/external_ids"
+SEASON_IMAGES_SUFFIX = "3/tv/{}/season/{}/images"
+SEASON_VIDEOS_SUFFIX = "3/tv/{}/season/{}/videos"
+ALL_SEASON_SECOND_SUFFIXES = ["credits", "external_ids", "images", "videos"]
 
 PERSON_DETAILS_SUFFIX = "3/person/{}"  # {person_id}
 PERSON_CHANGES_SUFFIX = "3/person/{}/changes"
