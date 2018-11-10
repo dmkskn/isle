@@ -84,6 +84,22 @@ SEASON_IMAGES_SUFFIX = "3/tv/{}/season/{}/images"
 SEASON_VIDEOS_SUFFIX = "3/tv/{}/season/{}/videos"
 ALL_SEASON_SECOND_SUFFIXES = ["credits", "external_ids", "images", "videos"]
 
+#  {tv_id} and {season_number} and {episode_number}
+EPISODE_DETAILS_SUFFIX = "3/tv/{}/season/{}/episode/{}"
+EPISODE_CHANGES_SUFFIX = "3/tv/episode/{}/changes"
+EPISODE_CREDITS_SUFFIX = "3/tv/{}/season/{}/episode/{}/credits"
+EPISODE_EXTERNAL_IDS_SUFFIX = "3/tv/{}/season/{}/episode/{}/external_ids"
+EPISODE_TRANSLATIONS_SUFFIX = "3/tv/{}/season/{}/episode/{}/translations"
+EPISODE_IMAGES_SUFFIX = "3/tv/{}/season/{}/episode/{}/images"
+EPISODE_VIDEOS_SUFFIX = "3/tv/{}/season/{}/episode/{}/videos"
+ALL_EPISODE_SECOND_SUFFIXES = [
+    "credits",
+    "external_ids",
+    "translations",
+    "images",
+    "videos",
+]
+
 PERSON_DETAILS_SUFFIX = "3/person/{}"  # {person_id}
 PERSON_CHANGES_SUFFIX = "3/person/{}/changes"
 PERSON_MOVIE_CREDITS_SUFFIX = "3/person/{}/movie_credits"

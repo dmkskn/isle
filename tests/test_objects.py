@@ -10,6 +10,7 @@ from themoviedb._objects import (
     Keyword,
     Genre,
     Season,
+    Episode,
     Image,
     Language,
     Vote,
@@ -291,10 +292,10 @@ class ShowTestCase(unittest.TestCase):
         self.assertIsInstance(self.show.languages[0], Language)
 
     def test_last_episode_attr(self):
-        self.assertIsInstance(self.show.last_episode, dict)
+        self.assertIsInstance(self.show.last_episode, Episode)
 
     def test_next_episode_attr(self):
-        self.assertIsInstance(self.show.next_episode, (dict, type(None)))
+        self.assertIsInstance(self.show.next_episode, (Episode, type(None)))
 
     def test_n_episodes_attr(self):
         self.assertIsInstance(self.show.n_episodes, int)
@@ -737,9 +738,9 @@ class SeasonTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             _ = Season(1)  # pylint: disable=E1125
         with self.assertRaises(TypeError):
-            _ = Season(
+            _ = Season(  # pylint: disable=E1125
                 {"show_id": self.show_id, "season_number": 1}
-            )  # pylint: disable=E1125
+            )
         with self.assertRaises(TypeError):
             _ = Season(self.show_id)  # pylint: disable=E1125
 
@@ -766,7 +767,7 @@ class SeasonTestCase(unittest.TestCase):
 
     def test_episodes_attr(self):
         self.assertIsInstance(self.season.episodes, list)
-        self.assertIsInstance(self.season.episodes[0], dict)
+        self.assertIsInstance(self.season.episodes[0], Episode)
 
     def test_posters_attr(self):
         self.assertIsInstance(self.season.posters, list)
@@ -818,6 +819,115 @@ class SeasonTestCase(unittest.TestCase):
     def test_get_videos(self):
         videos = self.season.get_videos()
         self.assertDictEqual(videos, self.season.data["videos"])
+
+
+class EpisodeTestCase(unittest.TestCase):
+    def setUp(self):
+        self.show_id = 66732
+        self.s = 1  # season
+        self.n = 1  # episode
+        self.episode = Episode(self.n, show_id=self.show_id, season_number=self.s)
+
+    def test_raise_error_when_init_without_show_id_with_season_number(self):
+        with self.assertRaises(TypeError):
+            _ = Episode()  # pylint: disable=E1120,E1125
+        with self.assertRaises(TypeError):
+            _ = Episode(self.n)  # pylint: disable=E1125
+        with self.assertRaises(TypeError):
+            _ = Episode(self.n, self.show_id)  # pylint: disable=E1121,E1125
+        with self.assertRaises(TypeError):
+            _ = Episode(self.n, show_id=self.show_id)  # pylint: disable=E1125
+
+    def test_tmdb_id_attr(self):
+        self.assertIsInstance(self.episode.tmdb_id, int)
+        self.assertNotEqual(self.episode.tmdb_id, self.episode.show_id)
+
+    def test_tvdb_id_attr(self):
+        self.assertIsInstance(self.episode.tvdb_id, int)
+
+    def test_imdb_id_attr(self):
+        self.assertIsInstance(self.episode.imdb_id, str)
+
+    def test_number_attr(self):
+        self.assertIsInstance(self.episode.number, int)
+        self.assertEqual(self.episode.number, self.episode.n)
+
+    def test_season_number_attr(self):
+        self.assertIsInstance(self.episode.season_number, int)
+        self.assertEqual(self.episode.season_number, self.episode.sn)
+
+    def test_name_attr(self):
+        self.assertIsInstance(self.episode.name, dict)
+        self.assertIn("default", self.episode.name)
+        self.assertIn("US", self.episode.name)
+
+    def test_overview_attr(self):
+        self.assertIsInstance(self.episode.overview, dict)
+        self.assertIn("default", self.episode.overview)
+        self.assertIn("US", self.episode.overview)
+
+    def test_air_date_attr(self):
+        self.assertIsInstance(self.episode.air_date, str)
+        self.assertEqual(len(self.episode.air_date.split("-")), 3)
+
+    def test_stills_attr(self):
+        self.assertIsInstance(self.episode.stills, list)
+        self.assertIsInstance(self.episode.stills[0], Image)
+
+    def test_videos_attr(self):
+        self.assertIsInstance(self.episode.videos, list)
+
+    def test_cast_attr(self):
+        self.assertIsInstance(self.episode.cast, list)
+        self.assertIsInstance(self.episode.cast[0], dict)
+        self.assertIsInstance(self.episode.cast[0]["person"], Person)
+
+    def test_crew_attr(self):
+        self.assertIsInstance(self.episode.crew, list)
+        self.assertIsInstance(self.episode.crew[0], dict)
+        self.assertIsInstance(self.episode.crew[0]["person"], Person)
+
+    def test_guest_stars_attr(self):
+        self.assertIsInstance(self.episode.crew, list)
+        self.assertIsInstance(self.episode.crew[0], dict)
+        self.assertIsInstance(self.episode.crew[0]["person"], Person)
+
+    def test_vote_attr(self):
+        self.assertIsInstance(self.episode.vote, Vote)
+
+    def test_preloaded(self):
+        first_dict = {"episode_number": self.n, "season_number": self.s}
+        self.assertDictEqual(self.episode.data, first_dict)
+        self.episode.get_all()
+        self.assertNotEqual(self.episode.data, first_dict)
+
+    def test_get_all(self):
+        data = self.episode.get_all()
+        self.assertDictEqual(data, self.episode.data)
+
+    def test_get_details(self):
+        details = self.episode.get_details()
+        self.assertDictEqual(details, self.episode.data)
+
+    def test_get_changes(self):
+        changes = self.episode.get_changes()
+        self.assertDictEqual(changes, self.episode.data["changes"])
+
+    def test_get_external_ids(self):
+        external_ids = self.episode.get_external_ids()
+        self.assertDictEqual(external_ids, self.episode.data["external_ids"])
+
+    def test_get_credits(self):
+        credits = self.episode.get_credits()
+        self.assertDictEqual(credits, self.episode.data["credits"])
+
+    def test_get_images(self):
+        images = self.episode.get_images()
+        self.assertDictEqual(images, self.episode.data["images"])
+
+    def test_get_videos(self):
+        videos = self.episode.get_videos()
+        self.assertDictEqual(videos, self.episode.data["videos"])
 
 
 if __name__ == "__main__":

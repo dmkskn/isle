@@ -49,6 +49,14 @@ from ._urls import (
     SEASON_IMAGES_SUFFIX,
     SEASON_VIDEOS_SUFFIX,
     ALL_SEASON_SECOND_SUFFIXES,
+    EPISODE_DETAILS_SUFFIX,
+    EPISODE_CHANGES_SUFFIX,
+    EPISODE_CREDITS_SUFFIX,
+    EPISODE_EXTERNAL_IDS_SUFFIX,
+    EPISODE_IMAGES_SUFFIX,
+    EPISODE_VIDEOS_SUFFIX,
+    EPISODE_TRANSLATIONS_SUFFIX,
+    ALL_EPISODE_SECOND_SUFFIXES,
     PERSON_DETAILS_SUFFIX,
     PERSON_CHANGES_SUFFIX,
     PERSON_MOVIE_CREDITS_SUFFIX,
@@ -514,11 +522,24 @@ class Show(TMDb):
 
     @property
     def last_episode(self):
-        return self._getdata("last_episode_to_air")
+        item = self._getdata("last_episode_to_air")
+        return Episode(
+            item["episode_number"],
+            show_id=self.tmdb_id,
+            season_number=item["season_number"],
+        )
 
     @property
     def next_episode(self):
-        return self._getdata("next_episode_to_air")
+        item = self._getdata("next_episode_to_air")
+        if item:
+            return Episode(
+                item["episode_number"],
+                show_id=self.tmdb_id,
+                season_number=item["season_number"],
+            )
+        else:
+            return item
 
     @property
     def n_episodes(self):
@@ -1203,7 +1224,16 @@ class Season(TMDb):
 
     @property
     def episodes(self):
-        return self._getdata("episodes")
+        episodes = []
+        for item in self._getdata("episodes"):
+            episodes.append(
+                Episode(
+                    item["episode_number"],
+                    show_id=self.show_id,
+                    season_number=item["season_number"],
+                )
+            )
+        return episodes
 
     @property
     def tvdb_id(self):
@@ -1299,6 +1329,176 @@ class Season(TMDb):
         )
         self.data.update({"videos": videos})
         return videos
+
+
+class Episode(TMDb):
+    def __init__(self, n, *, show_id, season_number, **kwargs):
+        self.data = {"episode_number": n, "season_number": season_number}
+        self.show_id = show_id
+        self.number = self.data["episode_number"]
+        self.season_number = self.data["season_number"]
+
+    def _init(self):
+        self.get_all()
+
+    @property
+    def tmdb_id(self):
+        return self._getdata("id")
+
+    @property
+    def tvdb_id(self):
+        return self._getdata("external_ids")["tvdb_id"]
+
+    @property
+    def imdb_id(self):
+        return self._getdata("external_ids")["imdb_id"]
+
+    @property
+    def air_date(self):
+        return self._getdata("air_date")
+
+    @property
+    def n(self):
+        return self._getdata("episode_number")
+
+    @property
+    def sn(self):
+        return self._getdata("season_number")
+
+    @property
+    def name(self):
+        def _n(n):
+            return n["iso_3166_1"], n["data"]["name"]
+
+        names = {}
+        names["default"] = self._getdata("name")
+        for k, v in map(_n, self._getdata("translations")["translations"]):
+            if v:
+                names[k] = v
+        return names
+
+    @property
+    def overview(self):
+        def _o(o):
+            return o["iso_3166_1"], o["data"]["overview"]
+
+        overviews = {}
+        overviews["default"] = self._getdata("overview")
+        for k, v in map(_o, self._getdata("translations")["translations"]):
+            if v:
+                overviews[k] = v
+        return overviews
+
+    @property
+    def stills(self):
+        return list(map(Image, self._getdata("images")["stills"]))
+
+    @property
+    def videos(self):
+        return self._getdata("videos")["results"]
+
+    @property
+    def vote(self):
+        average = self._getdata("vote_average")
+        count = self._getdata("vote_average")
+        return Vote(average=average, count=count)
+
+    @property
+    def cast(self):
+        cast = []
+        for item in self._getdata("credits")["cast"]:
+            item["person"] = Person(item["id"], **item)
+            cast.append(item)
+        cast.sort(key=itemgetter("order"))
+        return cast
+
+    @property
+    def crew(self):
+        crew = []
+        for item in self._getdata("credits")["crew"]:
+            item["person"] = Person(item["id"], **item)
+            crew.append(item)
+        return crew
+
+    @property
+    def guest_stars(self):
+        guest_stars = []
+        for item in self._getdata("credits")["guest_stars"]:
+            item["person"] = Person(item["id"], **item)
+            guest_stars.append(item)
+        return guest_stars
+
+    def get_all(self, **params):
+        """Get all information about a TV episode in a single
+        response."""
+        methods = ",".join(ALL_EPISODE_SECOND_SUFFIXES)
+        all_data = self.get_details(**{"append_to_response": methods, **params})
+        self.data.update(all_data)
+        return all_data
+
+    def get_details(self, **params) -> dict:
+        """Get the primary TV episode details."""
+        details = self._request(
+            f"{BASEURL}{EPISODE_DETAILS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            **params,
+        )
+        self.data.update(details)
+        return details
+
+    def get_changes(self, **params) -> dict:
+        """Get the changes for a TV episode. By default only the
+        last 24 hours are returned."""
+        changes = self._request(
+            f"{BASEURL}{EPISODE_CHANGES_SUFFIX.format(self.tmdb_id)}", **params
+        )
+        self.data.update({"changes": changes})
+        return changes
+
+    def get_credits(self, **params) -> dict:
+        """Get the credits for TV episode."""
+        movie_credits = self._request(
+            f"{BASEURL}{SEASON_CREDITS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            **params,
+        )
+        self.data.update({"credits": movie_credits})
+        return movie_credits
+
+    def get_external_ids(self, **params) -> dict:
+        """Get the external ids for a TV episode."""
+        external_ids = self._request(
+            f"{BASEURL}{EPISODE_EXTERNAL_IDS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            **params,
+        )
+        self.data.update({"external_ids": external_ids})
+        return external_ids
+
+    def get_images(self, **params) -> dict:
+        """Get the images that belong to a TV episode."""
+        images = self._request(
+            f"{BASEURL}{EPISODE_IMAGES_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            **params,
+        )
+        self.data.update({"images": images})
+        return images
+
+    def get_videos(self, **params) -> dict:
+        """Get the videos that have been added to a TV episode."""
+        videos = self._request(
+            f"{BASEURL}{EPISODE_VIDEOS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            **params,
+        )
+        self.data.update({"videos": videos})
+        return videos
+
+    def get_translations(self, **params) -> dict:
+        """Get a list of the translations that exist for a
+        TV episode."""
+        translations = self._request(
+            f"{BASEURL}{EPISODE_TRANSLATIONS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            **params,
+        )
+        self.data.update({"translations": translations})
+        return translations
 
 
 class Image:
