@@ -277,7 +277,7 @@ class Movie(TMDb):
     @property
     def genres(self):
         def _g(g):
-            return Genre(g["id"], **g)
+            return Genre(tmdb_id=g["id"], name=g["name"])
 
         return list(map(_g, self._getdata("genres")))
 
@@ -600,7 +600,7 @@ class Show(TMDb):
     @property
     def genres(self):
         def _g(g):
-            return Genre(g["id"], **g)
+            return Genre(tmdb_id=g["id"], name=g["name"])
 
         return list(map(_g, self._getdata("genres")))
 
@@ -1185,14 +1185,6 @@ class Keyword(TMDb):
         return self._getdata("name")
 
 
-class Genre(TMDb):
-    def _init(self):
-        pass  # TODO get_details
-
-    def __str__(self):
-        return self._getdata("name")
-
-
 class Season(TMDb):
     def __init__(self, n, *, show_id, **kwargs):
         self.data = {"season_number": n, **kwargs}
@@ -1499,6 +1491,14 @@ class Episode(TMDb):
         )
         self.data.update({"translations": translations})
         return translations
+
+
+class Genre(NamedTuple):
+    tmdb_id: str
+    name: str
+
+    def __str__(self):
+        return self.name
 
 
 class Image:

@@ -716,11 +716,15 @@ class GenreTestCase(unittest.TestCase):
     def setUp(self):
         self.id_ = 12
         self.name = "Adventure"
-        self.genre = Genre(self.id_, name=self.name)
+        self.genre = Genre(tmdb_id=self.id_, name=self.name)
 
-    def test_init_genre(self):
-        expected_data = {"id": self.id_, "name": self.name}
-        self.assertDictEqual(self.genre.data, expected_data)
+    def test_genre_id(self):
+        self.assertEqual(self.genre.tmdb_id, self.id_)
+        self.assertEqual(self.genre.tmdb_id, self.genre[0])
+
+    def test_genre_name(self):
+        self.assertEqual(self.genre.name, self.name)
+        self.assertEqual(self.genre.name, self.genre[1])
 
     def test_genre_to_str(self):
         self.assertEqual(str(self.genre), self.name)
