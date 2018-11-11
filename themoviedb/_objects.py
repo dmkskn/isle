@@ -556,12 +556,15 @@ class Show(TMDb):
     def countries(self):
         countries = []
         for code in self._getdata("origin_country"):
-            try:
-                english_name = self._all_countries[code]
-            except AttributeError:
-                self._all_countries = self._get_all_countries()
-                english_name = self._all_countries[code]
-            countries.append(Country(iso_3166_1=code, english_name=english_name))
+            if code:
+                try:
+                    english_name = self._all_countries[code]
+                except AttributeError:
+                    self._all_countries = self._get_all_countries()
+                    english_name = self._all_countries[code]
+                countries.append(Country(iso_3166_1=code, english_name=english_name))
+            else:
+                continue
         return countries
 
     @property
@@ -1112,12 +1115,15 @@ class Company(TMDb):
     @property
     def country(self):
         code = self._getdata("origin_country")
-        try:
-            english_name = self._all_countries[code]
-        except AttributeError:
-            self._all_countries = self._get_all_countries()
-            english_name = self._all_countries[code]
-        return Country(iso_3166_1=code, english_name=english_name)
+        if code:
+            try:
+                english_name = self._all_countries[code]
+            except AttributeError:
+                self._all_countries = self._get_all_countries()
+                english_name = self._all_countries[code]
+            return Country(iso_3166_1=code, english_name=english_name)
+        else:
+            return code
 
     @property
     def parent_company(self):

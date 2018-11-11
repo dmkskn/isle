@@ -674,7 +674,7 @@ class CompanyTestCase(unittest.TestCase):
         self.assertIsInstance(self.company.homepage, str)
 
     def test_country_attr(self):
-        self.assertIsInstance(self.company.country, Country)
+        self.assertIsInstance(self.company.country, (Country, type(None)))
 
     def test_parent_company_attr(self):
         self.assertIsInstance(self.company.parent_company, (str, type(None)))
