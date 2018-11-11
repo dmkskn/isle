@@ -101,6 +101,9 @@ class TMDb(ABC):
     def _iter_request(self, url: str, **params):
         return search_results_for(url, {"api_key": TMDB_API_KEY, **params})
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.tmdb_id})"
+
 
 class Movie(TMDb):
     def _init(self):

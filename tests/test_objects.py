@@ -44,6 +44,9 @@ class MovieTestCase(unittest.TestCase):
         self.movie_id = 18148  # there are tests that depend on the movie id
         self.movie = Movie(self.movie_id)
 
+    def test_repr(self):
+        self.assertEqual(self.movie.__repr__(), f"Movie({self.movie_id})")
+
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Movie()  # pylint: disable=E1120
@@ -253,6 +256,9 @@ class ShowTestCase(unittest.TestCase):
     def setUp(self):
         self.show_id = 1399
         self.show = Show(self.show_id)
+
+    def test_repr(self):
+        self.assertEqual(self.show.__repr__(), f"Show({self.show_id})")
 
     def test_name_attr(self):
         self.assertIsInstance(self.show.name, dict)
@@ -477,6 +483,9 @@ class PersonTestCase(unittest.TestCase):
         self.person_id = 287
         self.person = Person(self.person_id)
 
+    def test_repr(self):
+        self.assertEqual(self.person.__repr__(), f"Person({self.person_id})")
+
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Person()  # pylint: disable=E1120
@@ -649,6 +658,9 @@ class CompanyTestCase(unittest.TestCase):
         self.company_id = 1
         self.company = Company(self.company_id)
 
+    def test_repr(self):
+        self.assertEqual(self.company.__repr__(), f"Company({self.company_id})")
+
     def test_name_attr(self):
         self.assertIsInstance(self.company.name, str)
 
@@ -690,6 +702,9 @@ class KeywordTestCase(unittest.TestCase):
         self.name = "wormhole"
         self.keyword_without_name = Keyword(self.id_)
         self.keyword_with_name = Keyword(self.id_, name=self.name)
+
+    def test_repr(self):
+        self.assertEqual(self.keyword_with_name.__repr__(), f"Keyword({self.id_})")
 
     def test_init_keyword_with_name(self):
         expected_data = {"id": self.id_, "name": self.name}
@@ -735,6 +750,9 @@ class SeasonTestCase(unittest.TestCase):
         self.show_id = 66732
         self.n = 1
         self.season = Season(self.n, show_id=self.show_id)
+
+    def test_repr(self):
+        self.assertEqual(self.season.__repr__(), f"Season({self.season.tmdb_id})")
 
     def test_raise_error_when_init_without_show_id_with_season_number(self):
         with self.assertRaises(TypeError):
@@ -831,6 +849,9 @@ class EpisodeTestCase(unittest.TestCase):
         self.s = 1  # season
         self.n = 1  # episode
         self.episode = Episode(self.n, show_id=self.show_id, season_number=self.s)
+
+    def test_repr(self):
+        self.assertEqual(self.episode.__repr__(), f"Episode({self.episode.tmdb_id})")
 
     def test_raise_error_when_init_without_show_id_with_season_number(self):
         with self.assertRaises(TypeError):
