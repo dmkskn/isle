@@ -9,6 +9,7 @@ from ._tools import get_response, search_results_for
 from .config import TMDB_API_KEY
 from ._urls import (
     BASEURL,
+    IMAGE_CONFIGURATION_SUFFIX,
     LANGUAGES_CONFIGURATION_SUFFIX,
     COUNTRIES_CONFIGURATION_SUFFIX,
     MOVIE_DETAILS_SUFFIX,
@@ -188,10 +189,16 @@ class Movie(TMDb):
 
     @property
     def backdrops(self):
-        return list(map(Image, self._getdata("images")["backdrops"]))
+        def _i(i):
+            return Image(i, type_="backdrop")
+
+        return list(map(_i, self._getdata("images")["backdrops"]))
 
     @property
     def posters(self):
+        def _i(i):
+            return Image(i, type_="poster")
+
         return list(map(Image, self._getdata("images")["posters"]))
 
     @property
@@ -482,11 +489,17 @@ class Show(TMDb):
 
     @property
     def backdrops(self):
-        return list(map(Image, self._getdata("images")["backdrops"]))
+        def _i(i):
+            return Image(i, type_="backdrop")
+
+        return list(map(_i, self._getdata("images")["backdrops"]))
 
     @property
     def posters(self):
-        return list(map(Image, self._getdata("images")["posters"]))
+        def _i(i):
+            return Image(i, type_="poster")
+
+        return list(map(_i, self._getdata("images")["posters"]))
 
     @property
     def runtimes(self):
@@ -993,7 +1006,10 @@ class Person(TMDb):
 
     @property
     def profiles(self):
-        return list(map(Image, self._getdata("images")["profiles"]))
+        def _i(i):
+            return Image(i, type_="profile")
+
+        return list(map(_i, self._getdata("images")["profiles"]))
 
     def get_all(self, **params):
         """Get all information about a person in a single
@@ -1131,7 +1147,10 @@ class Company(TMDb):
 
     @property
     def logos(self):
-        return list(map(Image, self._getdata("images")["logos"]))
+        def _i(i):
+            return Image(i, type_="logo")
+
+        return list(map(_i, self._getdata("images")["logos"]))
 
     def _get_all_countries(self):
         url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
@@ -1242,7 +1261,10 @@ class Season(TMDb):
 
     @property
     def posters(self):
-        return list(map(Image, self._getdata("images")["posters"]))
+        def _i(i):
+            return Image(i, type_="poster")
+
+        return list(map(_i, self._getdata("images")["posters"]))
 
     @property
     def videos(self):
@@ -1392,7 +1414,10 @@ class Episode(TMDb):
 
     @property
     def stills(self):
-        return list(map(Image, self._getdata("images")["stills"]))
+        def _i(i):
+            return Image(i, type_="still")
+
+        return list(map(_i, self._getdata("images")["stills"]))
 
     @property
     def videos(self):
@@ -1511,9 +1536,55 @@ class Genre(NamedTuple):
 
 
 class Image:
-    def __init__(self, image: dict):
-        for key, value in image.items():
-            setattr(self, key, value)
+    def __init__(self, image: dict, *, type_: str):
+        assert type_ in ["backdrop", "poster", "logo", "profile", "still"]
+        self._type = type_
+        self._configs_data = {}
+        for key in image.keys() - {"vote_average", "vote_count"}:
+            setattr(self, key, image[key])
+        if {"vote_average", "vote_count"} <= image.keys():
+            self.vote = Vote(average=image["vote_average"], count=image["vote_count"])
+
+    @property
+    def _configs(self):
+        if not self._configs_data:
+            self._configs_data.update(self._get_image_configs())
+        return self._configs_data
+
+    @property
+    def url(self) -> dict:
+        urls = {}
+        base = self._configs["secure_base_url"]
+        for size in self.sizes:
+            urls[size] = f"{base}/{size}{self.file_path}"
+        return urls
+
+    @property
+    def sizes(self) -> list:
+        return self._configs[self._image_sizes_key]
+
+    @property
+    def _image_sizes_key(self):
+        if self._type == "backdrop":
+            return "backdrop_sizes"
+        elif self._type == "poster":
+            return "poster_sizes"
+        elif self._type == "logo":
+            return "logo_sizes"
+        elif self._type == "profile":
+            return "profile_sizes"
+        elif self._type == "still":
+            return "still_sizes"
+        else:
+            raise ValueError(f"Unknown image type: {self._type}")
+
+    def _get_image_configs(self):
+        url = urljoin(BASEURL, IMAGE_CONFIGURATION_SUFFIX)
+        res = get_response(url, **{"api_key": TMDB_API_KEY})["images"]
+        return res
+
+    def __repr__(self):
+        return f"Image(heigh={self.height}, width={self.width}, _type={self._type})"
 
 
 class Country(NamedTuple):

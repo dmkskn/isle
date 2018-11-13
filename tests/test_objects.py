@@ -955,5 +955,35 @@ class EpisodeTestCase(unittest.TestCase):
         self.assertDictEqual(videos, self.episode.data["videos"])
 
 
+class ImageTestCase(unittest.TestCase):
+    def setUp(self):
+        self.data = {
+            "aspect_ratio": 1.777_777_777_777_78,
+            "file_path": "/fCayJrkfRaCRCTh8GqN30f8oyQF.jpg",
+            "height": 720,
+            "iso_639_1": None,
+            "vote_average": 0,
+            "vote_count": 0,
+            "width": 1280,
+        }
+        self.image = Image(self.data, type_="backdrop")
+
+    def test_init_without_type(self):
+        with self.assertRaises(TypeError):
+            _ = Image(self.data)
+
+    def test_get_urls(self):
+        self.assertEqual(self.image._configs_data, {})
+        urls = self.image.url
+        self.assertIsInstance(urls, dict)
+        self.assertNotEqual(self.image._configs_data, {})
+
+    def test_get_sizes(self):
+        self.assertEqual(self.image._configs_data, {})
+        sizes = self.image.sizes
+        self.assertIsInstance(sizes, list)
+        self.assertEqual(sizes, self.image._configs_data["backdrop_sizes"])
+
+
 if __name__ == "__main__":
     unittest.main()
