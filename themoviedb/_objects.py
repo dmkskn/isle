@@ -86,6 +86,7 @@ class TMDb(ABC):
             raise TypeError(msg)
         self.data = {"id": tmdb_id, **kwargs}
         self.tmdb_id = self.data["id"]
+        self.n_requests = 0
 
     @abstractmethod
     def _init(self):
@@ -97,9 +98,11 @@ class TMDb(ABC):
         return copy.deepcopy(self.data[key])
 
     def _request(self, url: str, **params) -> dict:
+        self.n_requests += 1
         return get_response(url, **{"api_key": TMDB_API_KEY, **params})
 
     def _iter_request(self, url: str, **params):
+        self.n_requests += 1
         return search_results_for(url, {"api_key": TMDB_API_KEY, **params})
 
     def __repr__(self):
