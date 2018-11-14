@@ -5,6 +5,7 @@ SEARCH_PERSON_SUFFIX = "3/search/person"
 SEARCH_COMPANY_SUFFIX = "3/search/company"
 DISCOVER_MOVIES_SUFFIX = "3/discover/movie"
 DISCOVER_SHOWS_SUFFIX = "3/discover/tv"
+FIND_SUFFIX = "3/find/{}"  # {external_id}
 MOVIE_CERTIFICATION_SUFFIX = "3/certification/movie/list"
 SHOW_CERTIFICATION_SUFFIX = "3/certification/tv/list"
 IMAGE_CONFIGURATION_SUFFIX = "3/configuration"

@@ -1,9 +1,9 @@
 import os
 from urllib.parse import urljoin
-
+from collections import defaultdict
 from ._tools import search_results_for as _search_results_for
 from ._tools import get_response
-from ._objects import Movie, Show, Person, Company
+from ._objects import Movie, Show, Person, Company, Episode, Season
 from .config import TMDB_API_KEY
 from ._urls import (
     BASEURL,
@@ -13,6 +13,7 @@ from ._urls import (
     SEARCH_COMPANY_SUFFIX,
     DISCOVER_MOVIES_SUFFIX,
     DISCOVER_SHOWS_SUFFIX,
+    FIND_SUFFIX,
     MOVIE_CERTIFICATION_SUFFIX,
     SHOW_CERTIFICATION_SUFFIX,
     MOVIE_GENRES_SUFFIX,
@@ -33,6 +34,7 @@ __all__ = [
     "search_company",
     "discover_movies",
     "discover_shows",
+    "find",
     "get_movie_certifications",
     "get_show_certifications",
     "get_movie_genres",
@@ -159,6 +161,49 @@ def discover_shows(options: dict):
     params = {"api_key": TMDB_API_KEY, **options}
     for item in _search_results_for(url, params):
         yield Show(item["id"], **item)
+
+
+def find(external_id: str, *, src: str, **options):
+    """Search for objects by an external id.
+
+    Allowed sources (`src`): `imdb_id`, `freebase_mid`,
+    `freebase_id`, `tvdb_id`, `tvrage_id`
+
+    See available options:
+    https://developers.themoviedb.org/3/find/find-by-id
+    """
+    url = urljoin(BASEURL, FIND_SUFFIX.format(external_id))
+    params = {"api_key": TMDB_API_KEY, "external_source": src, **options}
+    response = get_response(url, **params)
+    acc = {}
+    for key, results in response.items():
+        if key == "movie_results":
+            acc[key] = [Movie(x["id"], **x) for x in results]
+        elif key == "person_results":
+            acc[key] = [Person(x["id"], **x) for x in results]
+        elif key == "tv_results":
+            acc[key] = [Show(x["id"], **x) for x in results]
+        elif key == "tv_episode_results":
+            for x in results:
+                n = x["episode_number"]
+                sn = x["season_number"]
+                show_id = x["show_id"]
+                del x["episode_number"]
+                del x["season_number"]
+                del x["show_id"]
+                acc.setdefault(key, []).append(
+                    Episode(n, show_id=show_id, season_number=sn, **x)
+                )
+        elif key == "tv_season_results":
+            for x in results:
+                n = x["season_number"]
+                show_id = x["show_id"]
+                del x["season_number"]
+                del x["show_id"]
+                acc.setdefault(key, []).append(Season(n, show_id=show_id, **x))
+        else:
+            raise ValueError(f"Unkown type: {key}")
+    return acc
 
 
 def get_movie_certifications():

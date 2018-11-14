@@ -221,6 +221,47 @@ class DiscoverShowTestCase(unittest.TestCase):
         self.assertEqual(len(self.results_list), self.n_results)
 
 
+class FindTestCase(unittest.TestCase):
+    BASEURL = "https://api.themoviedb.org/3/find/{}?"
+
+    def setUp(self):
+        self.movie_imdb_id = "tt0046438"
+        self.show_imdb_id = "tt4574334"
+        self.person_imdb_id = "nm0000093"
+        self.episode_tvdb_id = 5_468_124
+        self.season_tvdb_id = 651_264
+
+    def test_find_movie(self):
+        results = tmdb.find(self.movie_imdb_id, src="imdb_id")
+        self.assertEqual(len(results["movie_results"]), 1)
+        self.assertIsInstance(results["movie_results"][0], tmdb._objects.Movie)
+        self.assertEqual(results["movie_results"][0].imdb_id, self.movie_imdb_id)
+
+    def test_find_person(self):
+        results = tmdb.find(self.person_imdb_id, src="imdb_id")
+        self.assertEqual(len(results["person_results"]), 1)
+        self.assertIsInstance(results["person_results"][0], tmdb._objects.Person)
+        self.assertEqual(results["person_results"][0].imdb_id, self.person_imdb_id)
+
+    def test_find_show(self):
+        results = tmdb.find(self.show_imdb_id, src="imdb_id")
+        self.assertEqual(len(results["tv_results"]), 1)
+        self.assertIsInstance(results["tv_results"][0], tmdb._objects.Show)
+        self.assertEqual(results["tv_results"][0].imdb_id, self.show_imdb_id)
+
+    def test_find_episode(self):
+        results = tmdb.find(self.episode_tvdb_id, src="tvdb_id")
+        self.assertEqual(len(results["tv_episode_results"]), 1)
+        self.assertIsInstance(results["tv_episode_results"][0], tmdb._objects.Episode)
+        self.assertEqual(results["tv_episode_results"][0].tvdb_id, self.episode_tvdb_id)
+
+    def test_find_season(self):
+        results = tmdb.find(self.season_tvdb_id, src="tvdb_id")
+        self.assertEqual(len(results["tv_season_results"]), 1)
+        self.assertIsInstance(results["tv_season_results"][0], tmdb._objects.Season)
+        self.assertEqual(results["tv_season_results"][0].tvdb_id, self.season_tvdb_id)
+
+
 class GetCertificationsTestCase(unittest.TestCase):
     def test_get_movie_certifications(self):
         res = tmdb.get_movie_certifications()
