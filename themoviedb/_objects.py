@@ -1368,7 +1368,7 @@ class Season(TMDb):
 
 class Episode(TMDb):
     def __init__(self, n, *, show_id, season_number, **kwargs):
-        self.data = {"episode_number": n, "season_number": season_number}
+        self.data = {"episode_number": n, "season_number": season_number, **kwargs}
         self.show_id = show_id
         self.number = self.data["episode_number"]
         self.season_number = self.data["season_number"]
