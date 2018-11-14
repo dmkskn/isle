@@ -15,6 +15,7 @@ from themoviedb._objects import (
     Language,
     Vote,
     Country,
+    Video,
 )
 
 
@@ -145,7 +146,8 @@ class MovieTestCase(unittest.TestCase):
 
     def test_videos_attr(self):
         self.assertIsInstance(self.movie.videos, list)
-        self.assertIsInstance(self.movie.videos[0], dict)
+        if self.movie.videos:
+            self.assertIsInstance(self.movie.videos[0], Video)
 
     def test_keywords_attr(self):
         seen_keywords = []
@@ -388,11 +390,8 @@ class ShowTestCase(unittest.TestCase):
 
     def test_videos_attr(self):
         self.assertIsInstance(self.show.videos, list)
-        self.assertIsInstance(self.show.videos[0], dict)
-        self.assertIn("type", self.show.videos[0])
-        self.assertIn("site", self.show.videos[0])
-        self.assertIn("size", self.show.videos[0])
-        self.assertIn("key", self.show.videos[0])
+        if self.show.videos:
+            self.assertIsInstance(self.show.videos[0], Video)
 
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
@@ -797,7 +796,8 @@ class SeasonTestCase(unittest.TestCase):
 
     def test_videos_attr(self):
         self.assertIsInstance(self.season.videos, list)
-        self.assertIsInstance(self.season.videos[0], dict)
+        if self.season.videos:
+            self.assertIsInstance(self.season.videos[0], Video)
 
     def test_cast_attr(self):
         self.assertIsInstance(self.season.cast, list)
@@ -901,6 +901,8 @@ class EpisodeTestCase(unittest.TestCase):
 
     def test_videos_attr(self):
         self.assertIsInstance(self.episode.videos, list)
+        if self.episode.videos:
+            self.assertIsInstance(self.episode.videos[0], Video)
 
     def test_cast_attr(self):
         self.assertIsInstance(self.episode.cast, list)

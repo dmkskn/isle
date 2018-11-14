@@ -199,7 +199,7 @@ class Movie(TMDb):
         def _i(i):
             return Image(i, type_="poster")
 
-        return list(map(Image, self._getdata("images")["posters"]))
+        return list(map(_i, self._getdata("images")["posters"]))
 
     @property
     def languages(self):
@@ -282,7 +282,11 @@ class Movie(TMDb):
 
     @property
     def videos(self):
-        return self._getdata("videos")["results"]
+        videos = []
+        for item in self._getdata("videos")["results"]:
+            url = f"https://www.youtube.com/watch?v={item['key']}"
+            videos.append(Video(name=item["name"], type=item["type"], url=url))
+        return videos
 
     @property
     def genres(self):
@@ -614,7 +618,11 @@ class Show(TMDb):
 
     @property
     def videos(self):
-        return self._getdata("videos")["results"]
+        videos = []
+        for item in self._getdata("videos")["results"]:
+            url = f"https://www.youtube.com/watch?v={item['key']}"
+            videos.append(Video(name=item["name"], type=item["type"], url=url))
+        return videos
 
     @property
     def genres(self):
@@ -1268,7 +1276,11 @@ class Season(TMDb):
 
     @property
     def videos(self):
-        return self._getdata("videos")["results"]
+        videos = []
+        for item in self._getdata("videos")["results"]:
+            url = f"https://www.youtube.com/watch?v={item['key']}"
+            videos.append(Video(name=item["name"], type=item["type"], url=url))
+        return videos
 
     @property
     def cast(self):
@@ -1421,7 +1433,11 @@ class Episode(TMDb):
 
     @property
     def videos(self):
-        return self._getdata("videos")["results"]
+        videos = []
+        for item in self._getdata("videos")["results"]:
+            url = f"https://www.youtube.com/watch?v={item['key']}"
+            videos.append(Video(name=item["name"], type=item["type"], url=url))
+        return videos
 
     @property
     def vote(self):
@@ -1610,3 +1626,12 @@ class Vote(NamedTuple):
 
     def __str__(self):
         return self.average
+
+
+class Video(NamedTuple):
+    name: str
+    type: str
+    url: str
+
+    def __str__(self):
+        return self.url
