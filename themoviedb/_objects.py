@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import copy
 from abc import ABC, abstractmethod
-from typing import Iterator, NamedTuple
+from typing import Iterator, NamedTuple, Optional, List
 from datetime import date
 from operator import itemgetter
 from urllib.parse import urljoin
@@ -110,11 +112,21 @@ class TMDb(ABC):
 
 
 class Movie(TMDb):
+    """Represents a movie."""
+
     def _init(self):
         return self.get_all()
 
     @property
-    def title(self):
+    def title(self) -> dict:
+        """Return titles of a movie in different languages.
+        Each key is an ISO-3166-1 code (such as `"US"`, `"RU"`,
+        etc.), and the value is the corresponding title.
+
+        There is two special keys: `"original"` and `"default"`.
+        The first one returns the original movie title and the
+        second one depends on the location."""
+
         def _t(t):
             return t["iso_3166_1"], t["data"]["title"]
 
@@ -127,7 +139,13 @@ class Movie(TMDb):
         return titles
 
     @property
-    def overview(self):
+    def overview(self) -> dict:
+        """Return the overviews of a movie in different
+        languages. Each key is an ISO-3166-1 code (such as `"US"`,
+        `"RU"`, etc.), and the value is the corresponding overview.
+
+        There is a key `"default"`. It depends on the location."""
+
         def _o(o):
             return o["iso_3166_1"], o["data"]["overview"]
 
@@ -139,11 +157,19 @@ class Movie(TMDb):
         return overviews
 
     @property
-    def tagline(self):
+    def tagline(self) -> Optional[str]:
+        """Return a movie slogan"""
         return self._getdata("tagline")
 
     @property
-    def homepage(self):
+    def homepage(self) -> dict:
+        """Return a movie homepages. Each key is an ISO-3166-1
+        code (such as `"US"`, `"RU"`, etc.) and the value is the
+        corresponding homepage.
+
+        There is a key `"default"`. It depends on the location.
+        """
+
         def _h(h):
             return h["iso_3166_1"], h["data"]["homepage"]
 
@@ -156,12 +182,18 @@ class Movie(TMDb):
         return pages
 
     @property
-    def year(self):
+    def year(self) -> Optional[int]:
+        """Return year of a movie."""
         release_date = self._getdata("release_date")
         return date.fromisoformat(release_date).year if release_date else None
 
     @property
-    def releases(self):
+    def releases(self) -> dict:
+        """Return release dates of a movie in different
+        countries. Each key is an ISO-3166-1 code (such as `"US"`,
+        `"RU"`, etc.) and the value is the corresponding date in
+        `YYYY-MM-DD` format."""
+
         def _remove_iso_639_1(d):
             if "iso_639_1" in d:
                 del d["iso_639_1"]
@@ -187,25 +219,34 @@ class Movie(TMDb):
         return dates
 
     @property
-    def is_adult(self):
+    def is_adult(self) -> bool:
+        """Return `True` if a movie is for adults."""
         return self._getdata("adult")
 
     @property
-    def backdrops(self):
+    def backdrops(self) -> List[Image]:
+        """Return backdrops that belong to a movie. Each item
+        is an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="backdrop")
 
         return list(map(_i, self._getdata("images")["backdrops"]))
 
     @property
-    def posters(self):
+    def posters(self) -> List[Image]:
+        """Return posters that belong to a movie. Each item is
+        an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="poster")
 
         return list(map(_i, self._getdata("images")["posters"]))
 
     @property
-    def languages(self):
+    def languages(self) -> List[Language]:
+        """Return the languages spoken in a movie. Each item is
+        an instance of the `Language` class."""
         languages = []
         for code in map(itemgetter("iso_639_1"), self._getdata("spoken_languages")):
             try:
@@ -223,34 +264,49 @@ class Movie(TMDb):
         return languages
 
     @property
-    def countries(self):
+    def countries(self) -> List[Country]:
+        """Return production countries. Each item is an instance of
+        the `Country` class."""
         countries = []
         for item in self._getdata("production_countries"):
             countries.append(Country(item["iso_3166_1"], item["name"]))
         return countries
 
     @property
-    def popularity(self):
+    def popularity(self) -> float:
+        """Return popularity of a movie on TMDb.
+
+        See more:
+        https://developers.themoviedb.org/3/getting-started/popularity."""
         return self._getdata("popularity")
 
     @property
-    def revenue(self):
+    def revenue(self) -> int:
+        """Return revenue of a movie."""
         return self._getdata("revenue")
 
     @property
-    def budget(self):
+    def budget(self) -> int:
+        """Return budget of a movie."""
         return self._getdata("budget")
 
     @property
-    def runtime(self):
+    def runtime(self) -> int:
+        """Return a movie runtime."""
         return self._getdata("runtime")
 
     @property
-    def status(self):
+    def status(self) -> str:
+        """Return one of this values: `"Rumored"`, `"Planned"`,
+        `"In Production"`, `"Post Production"`, `"Released"`,
+        `"Canceled"`."""
         return self._getdata("status")
 
     @property
-    def companies(self):
+    def companies(self) -> List[Company]:
+        """Return the production companies. Each item is an
+        instance of the `Company` class."""
+
         def _c(c):
             return Company(c["id"], **c)
 
@@ -258,6 +314,7 @@ class Movie(TMDb):
 
     @property
     def cast(self):
+        # TODO: definition
         cast = []
         for item in self._getdata("credits")["cast"]:
             item["person"] = Person(
@@ -269,6 +326,7 @@ class Movie(TMDb):
 
     @property
     def crew(self):
+        # TODO: definition
         crew = []
         for item in self._getdata("credits")["crew"]:
             item["person"] = Person(
@@ -278,13 +336,18 @@ class Movie(TMDb):
         return crew
 
     @property
-    def vote(self):
+    def vote(self) -> Vote:
+        """Return an instance of the `Vote` class. It is like a
+        `NamedTuple` object with two attributes: `average` and
+        `count`."""
         average = self._getdata("vote_average")
         count = self._getdata("vote_count")
         return Vote(average=average, count=count)
 
     @property
-    def videos(self):
+    def videos(self) -> List[Video]:
+        """Return videos. Each item is an instance of the `Video`
+        class."""
         videos = []
         for item in self._getdata("videos")["results"]:
             url = f"https://www.youtube.com/watch?v={item['key']}"
@@ -292,33 +355,41 @@ class Movie(TMDb):
         return videos
 
     @property
-    def genres(self):
+    def genres(self) -> List[Genre]:
+        """Return a movie genres."""
+
         def _g(g):
             return Genre(tmdb_id=g["id"], name=g["name"])
 
         return list(map(_g, self._getdata("genres")))
 
     @property
-    def keywords(self):
+    def keywords(self) -> List[Keyword]:
+        """Return a movie keywords."""
+
         def _k(k):
             return Keyword(k["id"], **k)
 
         return list(map(_k, self._getdata("keywords")["keywords"]))
 
     @property
-    def imdb_id(self):
+    def imdb_id(self) -> Optional[str]:
+        """Return the ID of a movie on IMDb."""
         return self._getdata("external_ids")["imdb_id"]
 
     @property
-    def facebook_id(self):
+    def facebook_id(self) -> Optional[str]:
+        """Return the ID of a movie on Facebook."""
         return self._getdata("external_ids")["facebook_id"]
 
     @property
-    def instagram_id(self):
+    def instagram_id(self) -> Optional[str]:
+        """Return the ID of a movie on Instagram."""
         return self._getdata("external_ids")["instagram_id"]
 
     @property
-    def twitter_id(self):
+    def twitter_id(self) -> Optional[str]:
+        """Return the ID of a movie on Twitter."""
         return self._getdata("external_ids")["twitter_id"]
 
     def _get_all_languages(self):
@@ -331,7 +402,7 @@ class Movie(TMDb):
             languages[iso_639_1] = item
         return languages
 
-    def get_all(self, **params):
+    def get_all(self, **params) -> dict:
         """Get all information about a movie. This method
         makes only one API request."""
         methods = ",".join(ALL_MOVIE_SECOND_SUFFIXES)
@@ -449,11 +520,21 @@ class Movie(TMDb):
 
 
 class Show(TMDb):
+    """Represents a TV show."""
+
     def _init(self):
         return self.get_all()
 
     @property
-    def name(self):
+    def name(self) -> dict:
+        """Return names of a TV show in different languages.
+        Each key is an ISO-3166-1 code (such as `"US"`, `"RU"`,
+        etc.), and the value is the corresponding name.
+
+        There is two special keys: `"original"` and `"default"`.
+        The first one returns the original movie title and the
+        second one depends on the location."""
+
         def _n(n):
             return n["iso_3166_1"], n["data"]["name"]
 
@@ -465,7 +546,13 @@ class Show(TMDb):
         return names
 
     @property
-    def overview(self):
+    def overview(self) -> dict:
+        """Return the overviews of a TV show in different
+        languages. Each key is an ISO-3166-1 code (such as `"US"`,
+        `"RU"`, etc.), and the value is the corresponding overview.
+
+        There is a key `"default"`. It depends on the location."""
+
         def _o(o):
             return o["iso_3166_1"], o["data"]["overview"]
 
@@ -476,7 +563,14 @@ class Show(TMDb):
         return overviews
 
     @property
-    def homepage(self):
+    def homepage(self) -> dict:
+        """Return a TV show homepages. Each key is an ISO-3166-1
+        code (such as `"US"`, `"RU"`, etc.) and the value is the
+        corresponding homepage.
+
+        There is a key `"default"`. It depends on the location.
+        """
+
         def _h(h):
             return h["iso_3166_1"], h["data"]["homepage"]
 
@@ -488,44 +582,58 @@ class Show(TMDb):
         return pages
 
     @property
-    def creators(self):
+    def creators(self) -> List[Person]:
+        """Return the creators of a TV show."""
+
         def _c(c):
             return Person(c["id"], name=c["name"], gender=c["gender"])
 
         return [c for c in map(_c, self._getdata("created_by"))]
 
     @property
-    def backdrops(self):
+    def backdrops(self) -> List[Image]:
+        """Return backdrops that belong to a TV show. Each item
+        is an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="backdrop")
 
         return list(map(_i, self._getdata("images")["backdrops"]))
 
     @property
-    def posters(self):
+    def posters(self) -> List[Image]:
+        """Return posters that belong to a TV show. Each item is
+        an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="poster")
 
         return list(map(_i, self._getdata("images")["posters"]))
 
     @property
-    def runtimes(self):
+    def runtimes(self) -> List[int]:
+        """Return the running times of TV show episodes."""
         return self._getdata("episode_run_time")
 
     @property
-    def first_air_date(self):
+    def first_air_date(self) -> str:
+        """Return the air date of the first episode."""
         return self._getdata("first_air_date")
 
     @property
-    def last_air_date(self):
+    def last_air_date(self) -> str:
+        """Return the air date of the last episode."""
         return self._getdata("last_air_date")
 
     @property
-    def in_production(self):
+    def in_production(self) -> bool:
+        """Return `True` if a TV show is in production."""
         return self._getdata("in_production")
 
     @property
-    def languages(self):
+    def languages(self) -> List[Language]:
+        """Return the languages spoken in a TV show. Each item is
+        an instance of the `Language` class."""
         iso_codes = self._getdata("languages")
         languages = []
         for code in iso_codes:
@@ -544,7 +652,8 @@ class Show(TMDb):
         return languages
 
     @property
-    def last_episode(self):
+    def last_episode(self) -> Episode:
+        """Return the last episode."""
         item = self._getdata("last_episode_to_air")
         return Episode(
             item["episode_number"],
@@ -553,7 +662,8 @@ class Show(TMDb):
         )
 
     @property
-    def next_episode(self):
+    def next_episode(self) -> Episode:
+        """Return the next episode."""
         item = self._getdata("next_episode_to_air")
         if item:
             return Episode(
@@ -565,15 +675,19 @@ class Show(TMDb):
             return item
 
     @property
-    def n_episodes(self):
+    def n_episodes(self) -> int:
+        """Return the number of episodes."""
         return self._getdata("number_of_episodes")
 
     @property
-    def n_seasons(self):
+    def n_seasons(self) -> int:
+        """Return the number of seasons."""
         return self._getdata("number_of_seasons")
 
     @property
-    def countries(self):
+    def countries(self) -> List[Coutry]:
+        """Return production countries. Each item is an instance of
+        the `Country` class."""
         countries = []
         for code in self._getdata("origin_country"):
             if code:
@@ -588,39 +702,53 @@ class Show(TMDb):
         return countries
 
     @property
-    def popularity(self):
+    def popularity(self) -> float:
+        """Return popularity of a TV show on TMDb.
+
+        See more:
+        https://developers.themoviedb.org/3/getting-started/popularity."""
         return self._getdata("popularity")
 
     @property
-    def companies(self):
+    def companies(self) -> List[Company]:
+        """Return the production companies. Each item is an
+        instance of the `Company` class."""
+
         def _c(c):
             return Company(c["id"], **c)
 
         return list(map(_c, self._getdata("production_companies")))
 
     @property
-    def seasons(self):
+    def seasons(self) -> List[Season]:
+        """Return seasons. Each item is an instance of the `Season`
+        class."""
         seasons = []
         for item in self._getdata("seasons"):
             seasons.append(Season(item["season_number"], show_id=self.tmdb_id, **item))
         return seasons
 
     @property
-    def status(self):
+    def status(self) -> str:
         return self._getdata("status")
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self._getdata("type")
 
     @property
-    def vote(self):
+    def vote(self) -> Vote:
+        """Return an instance of the `Vote` class. It is like a
+        `NamedTuple` object with two attributes: `average` and
+        `count`."""
         average = self._getdata("vote_average")
         count = self._getdata("vote_count")
         return Vote(average=average, count=count)
 
     @property
-    def videos(self):
+    def videos(self) -> List[Video]:
+        """Return videos. Each item is an instance of the `Video`
+        class."""
         videos = []
         for item in self._getdata("videos")["results"]:
             url = f"https://www.youtube.com/watch?v={item['key']}"
@@ -628,41 +756,54 @@ class Show(TMDb):
         return videos
 
     @property
-    def genres(self):
+    def genres(self) -> List[Genre]:
+        """Return a TV show genres."""
+
         def _g(g):
             return Genre(tmdb_id=g["id"], name=g["name"])
 
         return list(map(_g, self._getdata("genres")))
 
     @property
-    def keywords(self):
+    def keywords(self) -> List[Keyword]:
+        """Return a TV show keywords."""
+
         def _k(k):
             return Keyword(k["id"], **k)
 
         return list(map(_k, self._getdata("keywords")["results"]))
 
     @property
-    def imdb_id(self):
+    def imdb_id(self) -> Optional[str]:
+        """Return the ID of a TV show on IMDb."""
         return self._getdata("external_ids")["imdb_id"]
 
     @property
-    def tvdb_id(self):
+    def tvdb_id(self) -> Optional[str]:
+        """Return the ID of a TV show on TVDb."""
         return self._getdata("external_ids")["tvdb_id"]
 
     @property
-    def facebook_id(self):
+    def facebook_id(self) -> Optional[str]:
+        """Return the ID of a TV show on Facebook."""
         return self._getdata("external_ids")["facebook_id"]
 
     @property
-    def instagram_id(self):
+    def instagram_id(self) -> Optional[str]:
+        """Return the ID of a TV show on Instagram."""
         return self._getdata("external_ids")["instagram_id"]
 
     @property
-    def twitter_id(self):
+    def twitter_id(self) -> Optional[str]:
+        """Return the ID of a TV show on Twitter."""
         return self._getdata("external_ids")["twitter_id"]
 
     @property
-    def ratings(self):
+    def ratings(self) -> dict:
+        """Return content ratings (certifications) that have been
+        added to a TV show. Each key is an ISO-3166-1
+        code (such as `"US"`, `"RU"`, etc.) and the value is the
+        corresponding rating."""
         ratings = {}
         for item in self._getdata("content_ratings")["results"]:
             ratings[item["iso_3166_1"]] = item["rating"]
@@ -670,6 +811,7 @@ class Show(TMDb):
 
     @property
     def cast(self):
+        # TODO: definition
         cast = []
         for item in self._getdata("credits")["cast"]:
             item["person"] = Person(
@@ -681,6 +823,7 @@ class Show(TMDb):
 
     @property
     def crew(self):
+        # TODO: definition
         crew = []
         for item in self._getdata("credits")["crew"]:
             item["person"] = Person(
@@ -838,35 +981,49 @@ class Show(TMDb):
 
 
 class Person(TMDb):
+    """Represents a person."""
+
     def _init(self):
         self.get_all()
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Return the name of the person."""
         return self._getdata("name")
 
     @property
-    def also_known_as(self):
+    def also_known_as(self) -> List[str]:
+        """Return other names (in other languages)."""
         return self._getdata("also_known_as")
 
     @property
-    def known_for_department(self):
+    def known_for_department(self) -> str:
         return self._getdata("known_for_department")
 
     @property
-    def birthday(self):
+    def birthday(self) -> str:
+        """Return date of birth."""
         return self._getdata("birthday")
 
     @property
-    def deathday(self):
+    def deathday(self) -> str:
+        """Return date of birth."""
         return self._getdata("deathday")
 
     @property
-    def gender(self):
+    def gender(self) -> int:
+        """Return an integer between 0 and 2. Default 0."""
         return self._getdata("gender")
 
     @property
-    def biography(self):
+    def biography(self) -> dict:
+        """Return the biography of a person in different
+        languages. Each key is an ISO-3166-1 code (such as `"US"`,
+        `"RU"`, etc.), and the value is the corresponding
+        biography.
+
+        There is a key `"default"`. It depends on the location."""
+
         def _b(b):
             return b["iso_3166_1"], b["data"]["biography"]
 
@@ -877,15 +1034,21 @@ class Person(TMDb):
         return biographies
 
     @property
-    def homepage(self):
+    def homepage(self) -> str:
+        """Return a person homepage."""
         self._getdata("homepage")
 
     @property
-    def popularity(self):
+    def popularity(self) -> float:
+        """Return popularity of a person on TMDb.
+
+        See more:
+        https://developers.themoviedb.org/3/getting-started/popularity."""
         return self._getdata("popularity")
 
     @property
-    def place_of_birth(self):
+    def place_of_birth(self) -> str:
+        """Return place of birth."""
         return self._getdata("place_of_birth")
 
     @property
@@ -894,6 +1057,7 @@ class Person(TMDb):
 
     @property
     def movie_cast(self):
+        # TODO: definition
         cast = []
         for item in self._getdata("movie_credits")["cast"]:
             cast.append(
@@ -907,6 +1071,7 @@ class Person(TMDb):
 
     @property
     def movie_crew(self):
+        # TODO: definition
         crew = []
         for item in self._getdata("movie_credits")["crew"]:
             crew.append(
@@ -921,6 +1086,7 @@ class Person(TMDb):
 
     @property
     def show_cast(self):
+        # TODO: definition
         cast = []
         for item in self._getdata("tv_credits")["cast"]:
             cast.append(
@@ -934,6 +1100,7 @@ class Person(TMDb):
 
     @property
     def show_crew(self):
+        # TODO: definition
         crew = []
         for item in self._getdata("tv_credits")["crew"]:
             crew.append(
@@ -948,6 +1115,7 @@ class Person(TMDb):
 
     @property
     def cast(self):
+        # TODO: definition
         cast = []
         for item in self._getdata("combined_credits")["cast"]:
             if item["media_type"] == "tv":
@@ -968,6 +1136,7 @@ class Person(TMDb):
 
     @property
     def crew(self):
+        # TODO: definition
         crew = []
         for item in self._getdata("combined_credits")["crew"]:
             if item["media_type"] == "tv":
@@ -988,35 +1157,45 @@ class Person(TMDb):
         return crew
 
     @property
-    def imdb_id(self):
+    def imdb_id(self) -> Optional[str]:
+        """Return the ID of a person on IMDb."""
         return self._getdata("external_ids")["imdb_id"]
 
     @property
     def freebase_mid(self):
+        # TODO: definition
         return self._getdata("external_ids")["freebase_mid"]
 
     @property
     def freebase_id(self):
+        # TODO: definition
         return self._getdata("external_ids")["freebase_id"]
 
     @property
     def tvrage_id(self):
+        # TODO: definition
         return self._getdata("external_ids")["tvrage_id"]
 
     @property
-    def facebook_id(self):
+    def facebook_id(self) -> Optional[str]:
+        """Return the ID of a person on Facebook."""
         return self._getdata("external_ids")["facebook_id"]
 
     @property
-    def instagram_id(self):
+    def instagram_id(self) -> Optional[str]:
+        """Return the ID of a person on Instagram."""
         return self._getdata("external_ids")["instagram_id"]
 
     @property
-    def twitter_id(self):
+    def twitter_id(self) -> Optional[str]:
+        """Return the ID of a person on Twitter."""
         return self._getdata("external_ids")["twitter_id"]
 
     @property
-    def profiles(self):
+    def profiles(self) -> List[Image]:
+        """Return images that belong to a person. Each item is
+        an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="profile")
 
@@ -1107,6 +1286,8 @@ class Person(TMDb):
 
 
 class Company(TMDb):
+    """Represents a company."""
+
     def _init(self):
         self.get_details()
 
@@ -1121,26 +1302,31 @@ class Company(TMDb):
         return copy.deepcopy(self.data[key])
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Return the name of a company."""
         return self._getdata("name")
 
     @property
-    def also_known_as(self):
+    def also_known_as(self) -> List[str]:
+        """Return alternative names of a company."""
         names = []
         for item in self._getdata("alternative_names")["results"]:
             names.append(item["name"])
         return names
 
     @property
-    def description(self):
+    def description(self) -> str:
+        """Return a company's description."""
         return self._getdata("description")
 
     @property
-    def homepage(self):
+    def homepage(self) -> str:
+        """Return a company's homepage."""
         return self._getdata("homepage")
 
     @property
-    def country(self):
+    def country(self) -> Country:
+        """Return a company's origin country."""
         code = self._getdata("origin_country")
         if code:
             try:
@@ -1154,10 +1340,14 @@ class Company(TMDb):
 
     @property
     def parent_company(self):
+        # TODO: definition
         return self._getdata("parent_company")
 
     @property
     def logos(self):
+        """Return logo images that belong to a comapny. Each item
+        is an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="logo")
 
@@ -1198,11 +1388,14 @@ class Company(TMDb):
 
 
 class Keyword(TMDb):
+    """Represents a keyword."""
+
     def _init(self):
         self.get_details()
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Return a keyword's name"""
         return self._getdata("name")
 
     def get_details(self) -> dict:
@@ -1225,36 +1418,45 @@ class Keyword(TMDb):
 
 
 class Season(TMDb):
-    def __init__(self, n, *, show_id, **kwargs):
+    """Represents a TV show season."""
+
+    def __init__(self, n: int, *, show_id: int, **kwargs):
         self.data = {"season_number": n, **kwargs}
         self.show_id = show_id
         self.number = self.data["season_number"]
+        self.n_requests = 0
 
     def _init(self):
         self.get_all()
 
     @property
-    def tmdb_id(self):
+    def tmdb_id(self) -> int:
+        """Return the ID of a season on TMDb."""
         return self._getdata("id")
 
     @property
-    def n(self):
+    def n(self) -> int:
+        """Return a season number."""
         return self._getdata("season_number")
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Return a season's name."""
         return self._getdata("name")
 
     @property
-    def overview(self):
+    def overview(self) -> str:
+        """Return a season's overview."""
         return self._getdata("overview")
 
     @property
-    def air_date(self):
+    def air_date(self) -> str:
+        """Return the air date of a season."""
         return self._getdata("air_date")
 
     @property
-    def episodes(self):
+    def episodes(self) -> List[Episode]:
+        """Return a season's episodes."""
         episodes = []
         for item in self._getdata("episodes"):
             episodes.append(
@@ -1267,18 +1469,24 @@ class Season(TMDb):
         return episodes
 
     @property
-    def tvdb_id(self):
+    def tvdb_id(self) -> Optional[str]:
+        """Return the ID of a season on TVDb."""
         return self._getdata("external_ids")["tvdb_id"]
 
     @property
-    def posters(self):
+    def posters(self) -> List[Image]:
+        """Return poster images that belong to a season. Each item
+        is an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="poster")
 
         return list(map(_i, self._getdata("images")["posters"]))
 
     @property
-    def videos(self):
+    def videos(self) -> List[Video]:
+        """Return videos. Each item is an instance of the `Video`
+        class."""
         videos = []
         for item in self._getdata("videos")["results"]:
             url = f"https://www.youtube.com/watch?v={item['key']}"
@@ -1287,6 +1495,7 @@ class Season(TMDb):
 
     @property
     def cast(self):
+        # TODO: definition
         cast = []
         for item in self._getdata("credits")["cast"]:
             item["person"] = Person(
@@ -1298,6 +1507,7 @@ class Season(TMDb):
 
     @property
     def crew(self):
+        # TODO: definition
         crew = []
         for item in self._getdata("credits")["crew"]:
             item["person"] = Person(
@@ -1370,41 +1580,56 @@ class Season(TMDb):
 
 
 class Episode(TMDb):
+    """Represents a TV show episode."""
+
     def __init__(self, n, *, show_id, season_number, **kwargs):
         self.data = {"episode_number": n, "season_number": season_number, **kwargs}
         self.show_id = show_id
         self.number = self.data["episode_number"]
         self.season_number = self.data["season_number"]
+        self.n_requests = 0
 
     def _init(self):
         self.get_all()
 
     @property
-    def tmdb_id(self):
+    def tmdb_id(self) -> int:
+        """Return the ID of an episode on TMDb."""
         return self._getdata("id")
 
     @property
-    def tvdb_id(self):
+    def tvdb_id(self) -> Optional[str]:
+        """Return the ID of an episode on TVDb."""
         return self._getdata("external_ids")["tvdb_id"]
 
     @property
-    def imdb_id(self):
+    def imdb_id(self) -> Optional[str]:
+        """Return the ID of an episode on IMDb."""
         return self._getdata("external_ids")["imdb_id"]
 
     @property
-    def air_date(self):
+    def air_date(self) -> str:
+        """Return the air date of an episode."""
         return self._getdata("air_date")
 
     @property
-    def n(self):
+    def n(self) -> int:
+        """Return an episode number."""
         return self._getdata("episode_number")
 
     @property
-    def sn(self):
+    def sn(self) -> int:
+        """Return a season number."""
         return self._getdata("season_number")
 
     @property
-    def name(self):
+    def name(self) -> dict:
+        """Return titles of an episode in different languages.
+        Each key is an ISO-3166-1 code (such as `"US"`, `"RU"`,
+        etc.), and the value is the corresponding name.
+
+        There is a key `"default"`. It depends on the location."""
+
         def _n(n):
             return n["iso_3166_1"], n["data"]["name"]
 
@@ -1416,7 +1641,13 @@ class Episode(TMDb):
         return names
 
     @property
-    def overview(self):
+    def overview(self) -> dict:
+        """Return the overviews of an episode in different
+        languages. Each key is an ISO-3166-1 code (such as `"US"`,
+        `"RU"`, etc.), and the value is the corresponding overview.
+
+        There is a key `"default"`. It depends on the location."""
+
         def _o(o):
             return o["iso_3166_1"], o["data"]["overview"]
 
@@ -1428,14 +1659,19 @@ class Episode(TMDb):
         return overviews
 
     @property
-    def stills(self):
+    def stills(self) -> List[Image]:
+        """Return images that belong to an episode. Each item is
+        an instance of the `Image` class."""
+
         def _i(i):
             return Image(i, type_="still")
 
         return list(map(_i, self._getdata("images")["stills"]))
 
     @property
-    def videos(self):
+    def videos(self) -> List[Video]:
+        """Return videos. Each item is an instance of the `Video`
+        class."""
         videos = []
         for item in self._getdata("videos")["results"]:
             url = f"https://www.youtube.com/watch?v={item['key']}"
@@ -1443,13 +1679,17 @@ class Episode(TMDb):
         return videos
 
     @property
-    def vote(self):
+    def vote(self) -> Vote:
+        """Return an instance of the `Vote` class. It is like a
+        `NamedTuple` object with two attributes: `average` and
+        `count`."""
         average = self._getdata("vote_average")
         count = self._getdata("vote_average")
         return Vote(average=average, count=count)
 
     @property
     def cast(self):
+        # TODO: definition
         cast = []
         for item in self._getdata("credits")["cast"]:
             item["person"] = Person(item["id"], **item)
@@ -1459,6 +1699,7 @@ class Episode(TMDb):
 
     @property
     def crew(self):
+        # TODO: definition
         crew = []
         for item in self._getdata("credits")["crew"]:
             item["person"] = Person(item["id"], **item)
@@ -1467,6 +1708,7 @@ class Episode(TMDb):
 
     @property
     def guest_stars(self):
+        # TODO: definition
         guest_stars = []
         for item in self._getdata("credits")["guest_stars"]:
             item["person"] = Person(item["id"], **item)
@@ -1547,6 +1789,8 @@ class Episode(TMDb):
 
 
 class Genre(NamedTuple):
+    """Represents a genre."""
+
     tmdb_id: str
     name: str
 
@@ -1555,6 +1799,8 @@ class Genre(NamedTuple):
 
 
 class Image:
+    """Represents an image."""
+
     def __init__(self, image: dict, *, type_: str):
         assert type_ in ["backdrop", "poster", "logo", "profile", "still"]
         self._type = type_
@@ -1607,6 +1853,8 @@ class Image:
 
 
 class Country(NamedTuple):
+    """Represents a country."""
+
     iso_3166_1: str
     english_name: str
 
@@ -1615,6 +1863,8 @@ class Country(NamedTuple):
 
 
 class Language(NamedTuple):
+    """Represents a language."""
+
     iso_639_1: str
     english_name: str
     original_name: str
@@ -1624,6 +1874,8 @@ class Language(NamedTuple):
 
 
 class Vote(NamedTuple):
+    """Represents a vote."""
+
     average: float
     count: str
 
@@ -1632,6 +1884,8 @@ class Vote(NamedTuple):
 
 
 class Video(NamedTuple):
+    """Represents a video."""
+
     name: str
     type: str
     url: str
