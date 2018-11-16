@@ -16,6 +16,7 @@ from themoviedb._objects import (
     Vote,
     Country,
     Video,
+    Credit,
 )
 
 
@@ -154,13 +155,15 @@ class MovieTestCase(unittest.TestCase):
 
     def test_cast_attr(self):
         self.assertIsInstance(self.movie.cast, list)
-        self.assertIsInstance(self.movie.cast[0], dict)
-        self.assertIsInstance(self.movie.cast[0]["person"], Person)
+        self.assertIsInstance(self.movie.cast[0], tuple)
+        self.assertIsInstance(self.movie.cast[0][0], Person)
+        self.assertIsInstance(self.movie.cast[0][1], Credit)
 
     def test_crew_attr(self):
         self.assertIsInstance(self.movie.crew, list)
-        self.assertIsInstance(self.movie.crew[0], dict)
-        self.assertIsInstance(self.movie.crew[0]["person"], Person)
+        self.assertIsInstance(self.movie.crew[0], tuple)
+        self.assertIsInstance(self.movie.crew[0][0], Person)
+        self.assertIsInstance(self.movie.crew[0][1], Credit)
 
     def test_videos_attr(self):
         self.assertIsInstance(self.movie.videos, list)
@@ -364,13 +367,15 @@ class ShowTestCase(unittest.TestCase):
 
     def test_cast_attr(self):
         self.assertIsInstance(self.show.cast, list)
-        self.assertIsInstance(self.show.cast[0], dict)
-        self.assertIsInstance(self.show.cast[0]["person"], Person)
+        self.assertIsInstance(self.show.cast[0], tuple)
+        self.assertIsInstance(self.show.cast[0][0], Person)
+        self.assertIsInstance(self.show.cast[0][1], Credit)
 
     def test_crew_attr(self):
         self.assertIsInstance(self.show.crew, list)
-        self.assertIsInstance(self.show.crew[0], dict)
-        self.assertIsInstance(self.show.crew[0]["person"], Person)
+        self.assertIsInstance(self.show.crew[0], tuple)
+        self.assertIsInstance(self.show.crew[0][0], Person)
+        self.assertIsInstance(self.show.crew[0][1], Credit)
 
     def test_external_ids_attrs(self):
         imdb_id = self.show.imdb_id
@@ -550,58 +555,39 @@ class PersonTestCase(unittest.TestCase):
 
     def test_movie_cast_attr(self):
         self.assertIsInstance(self.person.movie_cast, list)
-        self.assertIsInstance(self.person.movie_cast[0], dict)
-        self.assertIn("character", self.person.movie_cast[0])
-        self.assertIn("movie", self.person.movie_cast[0])
-        self.assertIsInstance(self.person.movie_cast[0]["movie"], Movie)
+        self.assertIsInstance(self.person.movie_cast[0], tuple)
+        self.assertIsInstance(self.person.movie_cast[0][0], Movie)
+        self.assertIsInstance(self.person.movie_cast[0][1], Credit)
 
     def test_movie_crew_attr(self):
         self.assertIsInstance(self.person.movie_crew, list)
-        self.assertIsInstance(self.person.movie_crew[0], dict)
-        self.assertIn("department", self.person.movie_crew[0])
-        self.assertIn("job", self.person.movie_crew[0])
-        self.assertIn("movie", self.person.movie_crew[0])
-        self.assertIsInstance(self.person.movie_crew[0]["movie"], Movie)
+        self.assertIsInstance(self.person.movie_crew[0], tuple)
+        self.assertIsInstance(self.person.movie_crew[0][0], Movie)
+        self.assertIsInstance(self.person.movie_crew[0][1], Credit)
 
     def test_show_cast_attr(self):
         self.assertIsInstance(self.person.show_cast, list)
-        self.assertIsInstance(self.person.show_cast[0], dict)
-        self.assertIn("character", self.person.show_cast[0])
-        self.assertIn("show", self.person.show_cast[0])
-        self.assertIsInstance(self.person.show_cast[0]["show"], Show)
+        self.assertIsInstance(self.person.show_cast[0], tuple)
+        self.assertIsInstance(self.person.show_cast[0][0], Show)
+        self.assertIsInstance(self.person.show_cast[0][1], Credit)
 
     def test_show_crew_attr(self):
         self.assertIsInstance(self.person.show_crew, list)
-        self.assertIsInstance(self.person.show_crew[0], dict)
-        self.assertIn("department", self.person.show_crew[0])
-        self.assertIn("job", self.person.show_crew[0])
-        self.assertIn("show", self.person.show_crew[0])
-        self.assertIsInstance(self.person.show_crew[0]["show"], Show)
+        self.assertIsInstance(self.person.show_crew[0], tuple)
+        self.assertIsInstance(self.person.show_crew[0][0], Show)
+        self.assertIsInstance(self.person.show_crew[0][1], Credit)
 
     def test_cast_attr(self):
         self.assertIsInstance(self.person.cast, list)
-        self.assertIsInstance(self.person.cast[0], dict)
-        self.assertIn("character", self.person.cast[0])
-        self.assertIn("media_type", self.person.cast[0])
-        if self.person.cast[0]["media_type"] == "tv":
-            self.assertIn("show", self.person.cast[0])
-            self.assertIsInstance(self.person.cast[0]["show"], Show)
-        else:
-            self.assertIn("movie", self.person.cast[0])
-            self.assertIsInstance(self.person.cast[0]["movie"], Movie)
+        self.assertIsInstance(self.person.cast[0], tuple)
+        self.assertIsInstance(self.person.cast[0][0], (Show, Movie))
+        self.assertIsInstance(self.person.cast[0][1], Credit)
 
     def test_crew_attr(self):
         self.assertIsInstance(self.person.crew, list)
-        self.assertIsInstance(self.person.crew[0], dict)
-        self.assertIn("department", self.person.crew[0])
-        self.assertIn("job", self.person.crew[0])
-        self.assertIn("media_type", self.person.crew[0])
-        if self.person.crew[0]["media_type"] == "tv":
-            self.assertIn("show", self.person.crew[0])
-            self.assertIsInstance(self.person.crew[0]["show"], Show)
-        else:
-            self.assertIn("movie", self.person.crew[0])
-            self.assertIsInstance(self.person.crew[0]["movie"], Movie)
+        self.assertIsInstance(self.person.crew[0], tuple)
+        self.assertIsInstance(self.person.crew[0][0], (Show, Movie))
+        self.assertIsInstance(self.person.crew[0][1], Credit)
 
     def test_external_ids_attrs(self):
         imdb_id = self.person.imdb_id
@@ -819,13 +805,15 @@ class SeasonTestCase(unittest.TestCase):
 
     def test_cast_attr(self):
         self.assertIsInstance(self.season.cast, list)
-        self.assertIsInstance(self.season.cast[0], dict)
-        self.assertIsInstance(self.season.cast[0]["person"], Person)
+        self.assertIsInstance(self.season.cast[0], tuple)
+        self.assertIsInstance(self.season.cast[0][0], Person)
+        self.assertIsInstance(self.season.cast[0][1], Credit)
 
     def test_crew_attr(self):
         self.assertIsInstance(self.season.crew, list)
-        self.assertIsInstance(self.season.crew[0], dict)
-        self.assertIsInstance(self.season.crew[0]["person"], Person)
+        self.assertIsInstance(self.season.crew[0], tuple)
+        self.assertIsInstance(self.season.crew[0][0], Person)
+        self.assertIsInstance(self.season.crew[0][1], Credit)
 
     def test_preloaded(self):
         self.assertDictEqual(self.season.data, {"season_number": self.n})
@@ -924,18 +912,21 @@ class EpisodeTestCase(unittest.TestCase):
 
     def test_cast_attr(self):
         self.assertIsInstance(self.episode.cast, list)
-        self.assertIsInstance(self.episode.cast[0], dict)
-        self.assertIsInstance(self.episode.cast[0]["person"], Person)
+        self.assertIsInstance(self.episode.cast[0], tuple)
+        self.assertIsInstance(self.episode.cast[0][0], Person)
+        self.assertIsInstance(self.episode.cast[0][1], Credit)
 
     def test_crew_attr(self):
         self.assertIsInstance(self.episode.crew, list)
-        self.assertIsInstance(self.episode.crew[0], dict)
-        self.assertIsInstance(self.episode.crew[0]["person"], Person)
+        self.assertIsInstance(self.episode.cast[0], tuple)
+        self.assertIsInstance(self.episode.cast[0][0], Person)
+        self.assertIsInstance(self.episode.cast[0][1], Credit)
 
     def test_guest_stars_attr(self):
-        self.assertIsInstance(self.episode.crew, list)
-        self.assertIsInstance(self.episode.crew[0], dict)
-        self.assertIsInstance(self.episode.crew[0]["person"], Person)
+        self.assertIsInstance(self.episode.guest_stars, list)
+        self.assertIsInstance(self.episode.guest_stars[0], tuple)
+        self.assertIsInstance(self.episode.guest_stars[0][0], Person)
+        self.assertIsInstance(self.episode.guest_stars[0][1], Credit)
 
     def test_vote_attr(self):
         self.assertIsInstance(self.episode.vote, Vote)
@@ -1003,6 +994,72 @@ class ImageTestCase(unittest.TestCase):
         sizes = self.image.sizes
         self.assertIsInstance(sizes, list)
         self.assertEqual(sizes, self.image._configs_data["backdrop_sizes"])
+
+
+class CreditTestCase(unittest.TestCase):
+    def setUp(self):
+        self.movie_id = 18148
+        self.show_id = 1399
+        self.person_id = 287
+        self.movie_credit_id = "52fe47639251416c750978a9"
+        self.show_credit_id = "5256c8af19c2956ff60479f6"
+        self.movie_crew_credit = Credit(self.movie_credit_id)
+        self.show_cast_credit = Credit(self.show_credit_id)
+
+    def test_init_without_id(self):
+        with self.assertRaises(TypeError):
+            _ = Credit()
+
+    def test_credit_created_from_movie_object(self):
+        movie = Movie(self.movie_id)
+        movie.get_all()
+        person, credit = movie.crew[0]
+        person.get_all()
+        self.assertIsInstance(credit, Credit)
+        self.assertEqual(credit._media_data, movie.data)
+
+    def test_credit_created_from_person_object(self):
+        person = Person(self.person_id)
+        person.get_all()
+        _, credit = person.movie_cast[0]
+        self.assertIsInstance(credit, Credit)
+        self.assertEqual(credit._person_data, person.data)
+
+    def test_get_details(self):
+        data = self.movie_crew_credit.get_details()
+        self.assertIsInstance(data, dict)
+        self.assertIn("media", data)
+        self.assertIn("person", data)
+        self.assertIn("job", data)
+        self.assertIn("department", data)
+
+    def test_type_attr(self):
+        self.assertEqual(self.movie_crew_credit.type, "crew")
+        self.assertEqual(self.show_cast_credit.type, "cast")
+
+    def test_media_type_attr(self):
+        self.assertEqual(self.movie_crew_credit.media_type, "movie")
+        self.assertEqual(self.show_cast_credit.media_type, "tv")
+
+    def test_department_attr(self):
+        self.assertIsInstance(self.movie_crew_credit.department, str)
+
+    def test_job_attr(self):
+        self.assertIsInstance(self.movie_crew_credit.job, str)
+
+    def test_character_attr(self):
+        self.assertIsNone(self.movie_crew_credit.character)
+        self.assertIsInstance(self.show_cast_credit.character, str)
+
+    def test_person_attr(self):
+        self.assertIsInstance(self.movie_crew_credit.person, Person)
+
+    def test_person_known_for_attr(self):
+        self.assertIsInstance(self.movie_crew_credit.person_known_for, list)
+
+    def test_media_attr(self):
+        self.assertIsInstance(self.movie_crew_credit.media, Movie)
+        self.assertIsInstance(self.show_cast_credit.media, Show)
 
 
 if __name__ == "__main__":

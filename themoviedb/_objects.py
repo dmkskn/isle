@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 from abc import ABC, abstractmethod
-from typing import Iterator, NamedTuple, Optional, List
+from typing import Iterator, NamedTuple, Optional, List, Union, Tuple
 from datetime import date
 from operator import itemgetter
 from urllib.parse import urljoin
@@ -75,6 +75,7 @@ from ._urls import (
     COMPANY_IMAGES_SUFFIX,
     KEYWORD_DETAILS_SUFFIX,
     KEYWORD_MOVIES_SUFFIX,
+    CREDIT_DETAILS_SUFFIX,
 )
 
 
@@ -94,7 +95,7 @@ class TMDb(ABC):
     def _init(self):
         pass
 
-    def _getdata(self, key):
+    def _getdata(self, key, *, default="error"):
         if key not in self.data:
             self._init()
         return copy.deepcopy(self.data[key])
@@ -313,26 +314,40 @@ class Movie(TMDb):
         return list(map(_c, self._getdata("production_companies")))
 
     @property
-    def cast(self):
-        # TODO: definition
+    def cast(self) -> List[Tuple[Person, Credit]]:
+        """Return movie cast as list of tuples `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
-            item["person"] = Person(
-                item["id"], name=item["name"], gender=item["gender"]
+            kwargs = {
+                "credit_type": "cast",
+                "media_type": "movie",
+                "department": "Acting",
+                "job": "Actor",
+            }
+            credit = Credit(
+                item["credit_id"],
+                media_data=self.data,
+                character=item["character"],
+                **kwargs,
             )
-            cast.append(item)
-        cast.sort(key=itemgetter("order"))
+            person = Person(item["id"], **item)
+            cast.append((person, credit))
         return cast
 
     @property
-    def crew(self):
-        # TODO: definition
+    def crew(self) -> List[Tuple[Person, Credit]]:
+        """Return movie crew as list of tuples `(Person, Credit)`."""
         crew = []
         for item in self._getdata("credits")["crew"]:
-            item["person"] = Person(
-                item["id"], name=item["name"], gender=item["gender"]
-            )
-            crew.append(item)
+            kwargs = {
+                "credit_type": "crew",
+                "media_type": "movie",
+                "department": item["department"],
+                "job": item["job"],
+            }
+            credit = Credit(item["credit_id"], media_data=self.data, **kwargs)
+            person = Person(item["id"], **item)
+            crew.append((person, credit))
         return crew
 
     @property
@@ -586,7 +601,7 @@ class Show(TMDb):
         """Return the creators of a TV show."""
 
         def _c(c):
-            return Person(c["id"], name=c["name"], gender=c["gender"])
+            return Person(c["id"], **c)
 
         return [c for c in map(_c, self._getdata("created_by"))]
 
@@ -685,7 +700,7 @@ class Show(TMDb):
         return self._getdata("number_of_seasons")
 
     @property
-    def countries(self) -> List[Coutry]:
+    def countries(self) -> List[Country]:
         """Return production countries. Each item is an instance of
         the `Country` class."""
         countries = []
@@ -810,26 +825,42 @@ class Show(TMDb):
         return ratings
 
     @property
-    def cast(self):
-        # TODO: definition
+    def cast(self) -> List[Tuple[Person, Credit]]:
+        """Return TV show cast as list of tuples
+        `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
-            item["person"] = Person(
-                item["id"], name=item["name"], gender=item["gender"]
+            kwargs = {
+                "credit_type": "cast",
+                "media_type": "tv",
+                "department": "Acting",
+                "job": "Actor",
+            }
+            credit = Credit(
+                item["credit_id"],
+                media_data=self.data,
+                character=item["character"],
+                **kwargs,
             )
-            cast.append(item)
-        cast.sort(key=itemgetter("order"))
+            person = Person(item["id"], **item)
+            cast.append((person, credit))
         return cast
 
     @property
-    def crew(self):
-        # TODO: definition
+    def crew(self) -> List[Tuple[Person, Credit]]:
+        """Return TV show crew as list of tuples
+        `(Person, Credit)`."""
         crew = []
         for item in self._getdata("credits")["crew"]:
-            item["person"] = Person(
-                item["id"], name=item["name"], gender=item["gender"]
-            )
-            crew.append(item)
+            kwargs = {
+                "credit_type": "crew",
+                "media_type": "tv",
+                "department": item["department"],
+                "job": item["job"],
+            }
+            credit = Credit(item["credit_id"], media_data=self.data, **kwargs)
+            person = Person(item["id"], **item)
+            crew.append((person, credit))
         return crew
 
     def _get_all_languages(self):
@@ -1056,104 +1087,118 @@ class Person(TMDb):
         return self._getdata("adult")
 
     @property
-    def movie_cast(self):
-        # TODO: definition
+    def movie_cast(self) -> List[Tuple[Movie, Credit]]:
+        """Return movies as list of tuples `(Movie, Credit)`."""
         cast = []
         for item in self._getdata("movie_credits")["cast"]:
-            cast.append(
-                {
-                    "character": item["character"],
-                    "credit_id": item["credit_id"],
-                    "movie": Movie(item["id"], **item),
-                }
+            kwargs = {
+                "media_type": "movie",
+                "credit_type": "cast",
+                "department": "Acting",
+                "job": "Actor",
+            }
+            credit = Credit(
+                item["credit_id"],
+                person_data=self.data,
+                character=item["character"],
+                **kwargs,
             )
+            movie = Movie(item["id"], **item)
+            cast.append((movie, credit))
         return cast
 
     @property
-    def movie_crew(self):
-        # TODO: definition
+    def movie_crew(self) -> List[Tuple[Movie, Credit]]:
+        """Return movies as list of tuples `(Movie, Credit)`."""
         crew = []
         for item in self._getdata("movie_credits")["crew"]:
-            crew.append(
-                {
-                    "department": item["department"],
-                    "job": item["job"],
-                    "credit_id": item["credit_id"],
-                    "movie": Movie(item["id"], **item),
-                }
-            )
+            kwargs = {
+                "media_type": "movie",
+                "credit_type": "crew",
+                "department": item["department"],
+                "job": item["job"],
+            }
+            credit = Credit(item["credit_id"], person_data=self.data, **kwargs)
+            movie = Movie(item["id"], **item)
+            crew.append((movie, credit))
         return crew
 
     @property
-    def show_cast(self):
-        # TODO: definition
+    def show_cast(self) -> List[Tuple[Show, Credit]]:
+        """Return shows as list of tuples `(Show, Credit)`."""
         cast = []
         for item in self._getdata("tv_credits")["cast"]:
-            cast.append(
-                {
-                    "character": item["character"],
-                    "credit_id": item["credit_id"],
-                    "show": Show(item["id"], **item),
-                }
+            kwargs = {
+                "media_type": "tv",
+                "credit_type": "cast",
+                "department": "Acting",
+                "job": "Actor",
+            }
+            credit = Credit(
+                item["credit_id"],
+                person_data=self.data,
+                character=item["character"],
+                **kwargs,
             )
+            show = Show(item["id"], **item)
+            cast.append((show, credit))
         return cast
 
     @property
-    def show_crew(self):
-        # TODO: definition
+    def show_crew(self) -> List[Tuple[Show, Credit]]:
+        """Return shows as list of tuples `(Show, Credit)`."""
         crew = []
         for item in self._getdata("tv_credits")["crew"]:
-            crew.append(
-                {
-                    "department": item["department"],
-                    "job": item["job"],
-                    "credit_id": item["credit_id"],
-                    "show": Show(item["id"], **item),
-                }
-            )
+            kwargs = {
+                "media_type": "tv",
+                "credit_type": "crew",
+                "department": item["department"],
+                "job": item["job"],
+            }
+            credit = Credit(item["credit_id"], person_data=self.data, **kwargs)
+            show = Show(item["id"], **item)
+            crew.append((show, credit))
         return crew
 
     @property
-    def cast(self):
-        # TODO: definition
+    def cast(self) -> List[Tuple[Union[Movie, Show], Credit]]:
+        """Return movies and shows as list of tuples
+        `(Movie or Show, Credit)`."""
         cast = []
         for item in self._getdata("combined_credits")["cast"]:
-            if item["media_type"] == "tv":
-                obj = Show(item["id"], **item)
-                key = "show"
-            else:
-                obj = Movie(item["id"], **item)
-                key = "movie"
-            cast.append(
-                {
-                    "character": item["character"],
-                    "credit_id": item["credit_id"],
-                    "media_type": item["media_type"],
-                    key: obj,
-                }
+            kwargs = {
+                "media_type": item["media_type"],
+                "credit_type": "cast",
+                "department": "Acting",
+                "job": "Actor",
+            }
+            credit = Credit(
+                item["credit_id"],
+                person_data=self.data,
+                character=item["character"],
+                **kwargs,
             )
+            Obj = Show if item["media_type"] == "tv" else Movie
+            obj = Obj(item["id"], **item)
+            cast.append((obj, credit))
         return cast
 
     @property
-    def crew(self):
-        # TODO: definition
+    def crew(self) -> List[Tuple[Union[Movie, Show], Credit]]:
+        """Return movies and shows as list of tuples
+        `(Movie or Show, Credit)`."""
         crew = []
         for item in self._getdata("combined_credits")["crew"]:
-            if item["media_type"] == "tv":
-                obj = Show(item["id"], **item)
-                key = "show"
-            else:
-                obj = Movie(item["id"], **item)
-                key = "movie"
-            crew.append(
-                {
-                    "department": item["department"],
-                    "job": item["job"],
-                    "credit_id": item["credit_id"],
-                    "media_type": item["media_type"],
-                    key: obj,
-                }
-            )
+            kwargs = {
+                "media_type": item["media_type"],
+                "credit_type": "cast",
+                "department": item["department"],
+                "job": item["job"],
+            }
+            credit = Credit(item["credit_id"], person_data=self.data, **kwargs)
+            Obj = Show if item["media_type"] == "tv" else Movie
+            obj = Obj(item["id"], **item)
+            crew.append((obj, credit))
         return crew
 
     @property
@@ -1494,26 +1539,40 @@ class Season(TMDb):
         return videos
 
     @property
-    def cast(self):
-        # TODO: definition
+    def cast(self) -> List[Tuple[Person, Credit]]:
+        """Return TV season cast as list of tuples `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
-            item["person"] = Person(
-                item["id"], name=item["name"], gender=item["gender"]
+            kwargs = {
+                "credit_type": "cast",
+                "media_type": "movie",
+                "department": "Acting",
+                "job": "Actor",
+            }
+            credit = Credit(
+                item["credit_id"],
+                media_data=self.data,
+                character=item["character"],
+                **kwargs,
             )
-            cast.append(item)
-        cast.sort(key=itemgetter("order"))
+            person = Person(item["id"], **item)
+            cast.append((person, credit))
         return cast
 
     @property
-    def crew(self):
-        # TODO: definition
+    def crew(self) -> List[Tuple[Person, Credit]]:
+        """Return a TV season crew as list of tuples `(Person, Credit)`."""
         crew = []
         for item in self._getdata("credits")["crew"]:
-            item["person"] = Person(
-                item["id"], name=item["name"], gender=item["gender"]
-            )
-            crew.append(item)
+            kwargs = {
+                "credit_type": "crew",
+                "media_type": "movie",
+                "department": item["department"],
+                "job": item["job"],
+            }
+            credit = Credit(item["credit_id"], media_data=self.data, **kwargs)
+            person = Person(item["id"], **item)
+            crew.append((person, credit))
         return crew
 
     def get_all(self, **params):
@@ -1688,31 +1747,49 @@ class Episode(TMDb):
         return Vote(average=average, count=count)
 
     @property
-    def cast(self):
-        # TODO: definition
+    def cast(self) -> List[Tuple[Person, Credit]]:
+        """Return TV episode cast as list of tuples
+        `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
-            item["person"] = Person(item["id"], **item)
-            cast.append(item)
-        cast.sort(key=itemgetter("order"))
+            kwargs = {"credit_type": "cast", "department": "Acting", "job": "Actor"}
+            credit = Credit(
+                item["credit_id"],
+                media_data=self.data,
+                character=item["character"],
+                **kwargs,
+            )
+            person = Person(item["id"], **item)
+            cast.append((person, credit))
         return cast
 
     @property
-    def crew(self):
-        # TODO: definition
+    def crew(self) -> List[Tuple[Person, Credit]]:
+        """Return TV episode crew as list of tuples
+        `(Person, Credit)`."""
         crew = []
         for item in self._getdata("credits")["crew"]:
-            item["person"] = Person(item["id"], **item)
-            crew.append(item)
+            kwargs = {
+                "credit_type": "crew",
+                "department": item["department"],
+                "job": item["job"],
+            }
+            credit = Credit(item["credit_id"], media_data=self.data, **kwargs)
+            person = Person(item["id"], **item)
+            crew.append((person, credit))
         return crew
 
     @property
-    def guest_stars(self):
-        # TODO: definition
+    def guest_stars(self) -> List[Tuple[Person, Credit]]:
+        """Return TV episode guest stars as list of tuples
+        `(Person, Credit)`."""
         guest_stars = []
         for item in self._getdata("credits")["guest_stars"]:
-            item["person"] = Person(item["id"], **item)
-            guest_stars.append(item)
+            credit = Credit(
+                item["credit_id"], media_data=self.data, character=item.get("character")
+            )
+            person = Person(item["id"], **item)
+            guest_stars.append((person, credit))
         return guest_stars
 
     def get_all(self, **params):
@@ -1892,3 +1969,76 @@ class Video(NamedTuple):
 
     def __str__(self):
         return self.url
+
+
+class Credit(TMDb):
+    """Represents a credit."""
+
+    def __init__(
+        self, tmdb_id, *, person_data=None, media_data=None, character=None, **kwargs
+    ):
+        self.data = {"credit_id": tmdb_id, **kwargs}
+        self.tmdb_id = self.data["credit_id"]
+        self._person_data = person_data
+        self._media_data = media_data
+        self._character = character
+        self.n_requests = 0
+
+    def _init(self):
+        self.get_details()
+
+    @property
+    def type(self) -> str:
+        """Return a credit type"""
+        return self._getdata("credit_type")
+
+    @property
+    def media_type(self) -> str:
+        """Return a media type"""
+        return self._getdata("media_type")
+
+    @property
+    def department(self) -> str:
+        return self._getdata("department")
+
+    @property
+    def job(self) -> str:
+        return self._getdata("job")
+
+    @property
+    def character(self) -> Optional[str]:
+        if self.type == "crew":
+            return None
+        return self._character or self._getdata("media")["character"]
+
+    @property
+    def person(self) -> Person:
+        data = self._person_data or self._getdata("person")
+        return Person(data["id"], **data)
+
+    @property
+    def person_known_for(self) -> List[Union[Movie, Show]]:
+        media = []
+        for item in self._getdata("person")["known_for"]:
+            Obj = Show if item["media_type"] == "tv" else Movie
+            media.append(Obj(item["id"], **item))
+        return media
+
+    @property
+    def media(self) -> Union[Movie, Show]:
+        Obj = Show if self.media_type == "tv" else Movie
+        if self._media_data:
+            data = self._media_data
+        else:
+            data = self._getdata("media")
+            data.pop("seasons", None)
+            data.pop("episodes", None)
+        return Obj(data["id"], **data)
+
+    def get_details(self) -> dict:
+        """Get a movie or TV credit details."""
+        details = self._request(
+            f"{BASEURL}{CREDIT_DETAILS_SUFFIX.format(self.tmdb_id)}"
+        )
+        self.data.update(details)
+        return details

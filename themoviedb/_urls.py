@@ -130,3 +130,5 @@ KEYWORD_MOVIES_SUFFIX = "3/keyword/{}/movies"  # {keyword_id}
 
 MOVIE_GENRES_SUFFIX = "3/genre/movie/list"
 SHOW_GENRES_SUFFIX = "3/genre/tv/list"
+
+CREDIT_DETAILS_SUFFIX = "3/credit/{}"  #  {credit_id}
