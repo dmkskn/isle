@@ -541,10 +541,10 @@ class Show(TMDb):
         return self.get_all()
 
     @property
-    def name(self) -> dict:
-        """Return names of a TV show in different languages.
+    def title(self) -> dict:
+        """Return titles of a TV show in different languages.
         Each key is an ISO-3166-1 code (such as `"US"`, `"RU"`,
-        etc.), and the value is the corresponding name.
+        etc.), and the value is the corresponding title.
 
         There is two special keys: `"original"` and `"default"`.
         The first one returns the original movie title and the
@@ -1485,7 +1485,7 @@ class Season(TMDb):
         return self._getdata("season_number")
 
     @property
-    def name(self) -> str:
+    def title(self) -> str:
         """Return a season's name."""
         return self._getdata("name")
 
@@ -1682,10 +1682,10 @@ class Episode(TMDb):
         return self._getdata("season_number")
 
     @property
-    def name(self) -> dict:
+    def title(self) -> dict:
         """Return titles of an episode in different languages.
         Each key is an ISO-3166-1 code (such as `"US"`, `"RU"`,
-        etc.), and the value is the corresponding name.
+        etc.), and the value is the corresponding title.
 
         There is a key `"default"`. It depends on the location."""
 

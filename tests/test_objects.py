@@ -283,11 +283,11 @@ class ShowTestCase(unittest.TestCase):
     def test_repr(self):
         self.assertEqual(self.show.__repr__(), f"Show({self.show_id})")
 
-    def test_name_attr(self):
-        self.assertIsInstance(self.show.name, dict)
-        self.assertIn("original", self.show.name)
-        self.assertIn("default", self.show.name)
-        self.assertIn("US", self.show.name)
+    def test_title_attr(self):
+        self.assertIsInstance(self.show.title, dict)
+        self.assertIn("original", self.show.title)
+        self.assertIn("default", self.show.title)
+        self.assertIn("US", self.show.title)
 
     def test_overview_attr(self):
         self.assertIsInstance(self.show.overview, dict)
@@ -780,8 +780,8 @@ class SeasonTestCase(unittest.TestCase):
         self.assertIsInstance(self.season.number, int)
         self.assertEqual(self.season.number, self.season.n)
 
-    def test_name_attr(self):
-        self.assertIsInstance(self.season.name, str)
+    def test_title_attr(self):
+        self.assertIsInstance(self.season.title, str)
 
     def test_overview_attr(self):
         self.assertIsInstance(self.season.overview, str)
@@ -887,10 +887,10 @@ class EpisodeTestCase(unittest.TestCase):
         self.assertIsInstance(self.episode.season_number, int)
         self.assertEqual(self.episode.season_number, self.episode.sn)
 
-    def test_name_attr(self):
-        self.assertIsInstance(self.episode.name, dict)
-        self.assertIn("default", self.episode.name)
-        self.assertIn("US", self.episode.name)
+    def test_title_attr(self):
+        self.assertIsInstance(self.episode.title, dict)
+        self.assertIn("default", self.episode.title)
+        self.assertIn("US", self.episode.title)
 
     def test_overview_attr(self):
         self.assertIsInstance(self.episode.overview, dict)
