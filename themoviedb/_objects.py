@@ -8,7 +8,6 @@ from operator import itemgetter
 from urllib.parse import urljoin
 
 from ._tools import get_response, search_results_for
-from .config import TMDB_API_KEY
 from ._urls import (
     BASEURL,
     IMAGE_CONFIGURATION_SUFFIX,
@@ -82,6 +81,12 @@ from ._urls import (
 __all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre"]
 
 
+def _get_tmdb_api_key():
+    from . import TMDB_API_KEY
+
+    return TMDB_API_KEY
+
+
 class TMDb(ABC):
     def __init__(self, tmdb_id: int, **kwargs):
         if not isinstance(tmdb_id, int):
@@ -102,11 +107,11 @@ class TMDb(ABC):
 
     def _request(self, url: str, **params) -> dict:
         self.n_requests += 1
-        return get_response(url, **{"api_key": TMDB_API_KEY, **params})
+        return get_response(url, **{"api_key": _get_tmdb_api_key(), **params})
 
     def _iter_request(self, url: str, **params):
         self.n_requests += 1
-        return search_results_for(url, {"api_key": TMDB_API_KEY, **params})
+        return search_results_for(url, {"api_key": _get_tmdb_api_key(), **params})
 
     def __repr__(self):
         return f"{type(self).__name__}({self.tmdb_id})"
@@ -409,7 +414,7 @@ class Movie(TMDb):
 
     def _get_all_languages(self):
         url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
         languages = {}
         for item in data:
             iso_639_1 = item["iso_639_1"]
@@ -865,7 +870,7 @@ class Show(TMDb):
 
     def _get_all_languages(self):
         url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
         languages = {}
         for item in data:
             iso_639_1 = item["iso_639_1"]
@@ -875,7 +880,7 @@ class Show(TMDb):
 
     def _get_all_countries(self):
         url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
         countries = {}
         for item in data:
             countries[item["iso_3166_1"]] = item["english_name"]
@@ -1400,7 +1405,7 @@ class Company(TMDb):
 
     def _get_all_countries(self):
         url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": TMDB_API_KEY})
+        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
         countries = {}
         for item in data:
             countries[item["iso_3166_1"]] = item["english_name"]
@@ -1922,7 +1927,7 @@ class Image:
 
     def _get_image_configs(self):
         url = urljoin(BASEURL, IMAGE_CONFIGURATION_SUFFIX)
-        res = get_response(url, **{"api_key": TMDB_API_KEY})["images"]
+        res = get_response(url, **{"api_key": _get_tmdb_api_key()})["images"]
         return res
 
     def __repr__(self):
