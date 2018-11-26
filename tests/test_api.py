@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen
 
 import themoviedb as tmdb
+from themoviedb._objects import Genre, Country, Language
 
 
 def get_api_response(url, **params):
@@ -277,6 +278,12 @@ class GetCertificationsTestCase(unittest.TestCase):
         self.assertIn("US", res)
         self.assertIsInstance(res["US"], list)
 
+    def test_get_key(self):
+        movie_cert = tmdb.get_movie_certifications("US")
+        show_cert = tmdb.get_show_certifications("US")
+        self.assertIsInstance(movie_cert, list)
+        self.assertIsInstance(show_cert, list)
+
 
 class GetGenresTestCase(unittest.TestCase):
     def test_get_movie_genres(self):
@@ -286,6 +293,12 @@ class GetGenresTestCase(unittest.TestCase):
     def test_get_show_genres(self):
         res = tmdb.get_show_genres()
         self.assertIsInstance(res, list)
+
+    def test_get_genre_objects(self):
+        movie_genres = tmdb.get_movie_genres(objects=True)
+        show_genres = tmdb.get_show_genres(objects=True)
+        self.assertIsInstance(movie_genres[0], Genre)
+        self.assertIsInstance(show_genres[0], Genre)
 
 
 class GetConfigurationsTestCase(unittest.TestCase):
@@ -324,6 +337,28 @@ class GetConfigurationsTestCase(unittest.TestCase):
         self.assertIsInstance(res, list)
         self.assertIsInstance(res[0], dict)
         self.assertIn("zones", res[0])
+
+
+class GetCountriesTestCase(unittest.TestCase):
+    def test_get_countries(self):
+        res = tmdb.get_countries()
+        self.assertIsInstance(res, list)
+        self.assertIsInstance(res[0], dict)
+
+    def test_get_country_objects(self):
+        res = tmdb.get_countries(objects=True)
+        self.assertIsInstance(res[0], Country)
+
+
+class GetLanguagesTestCase(unittest.TestCase):
+    def test_get_languages(self):
+        res = tmdb.get_languages()
+        self.assertIsInstance(res, list)
+        self.assertIsInstance(res[0], dict)
+
+    def test_get_language_objects(self):
+        res = tmdb.get_languages(objects=True)
+        self.assertIsInstance(res[0], Language)
 
 
 if __name__ == "__main__":

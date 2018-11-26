@@ -3,7 +3,17 @@ from urllib.parse import urljoin
 from collections import defaultdict
 from ._tools import search_results_for as _search_results_for
 from ._tools import get_response
-from ._objects import Movie, Show, Person, Company, Episode, Season
+from ._objects import (
+    Movie,
+    Show,
+    Person,
+    Company,
+    Episode,
+    Season,
+    Genre,
+    Country,
+    Language,
+)
 from ._urls import (
     BASEURL,
     SEARCH_MOVIE_SUFFIX,
@@ -211,30 +221,40 @@ def find(external_id: str, *, src: str, **options):
     return acc
 
 
-def get_movie_certifications():
+def get_movie_certifications(country=None):
     """Get an up to date list of the officially supported
     movie certifications on TMDb."""
     url = urljoin(BASEURL, MOVIE_CERTIFICATION_SUFFIX)
-    return get_response(url, **{"api_key": _get_tmdb_api_key()})["certifications"]
+    res = get_response(url, **{"api_key": _get_tmdb_api_key()})["certifications"]
+    return res[country] if country else res
 
 
-def get_show_certifications():
+def get_show_certifications(country=None):
     """Get an up to date list of the officially supported TV
     show certifications on TMDb."""
     url = urljoin(BASEURL, SHOW_CERTIFICATION_SUFFIX)
-    return get_response(url, **{"api_key": _get_tmdb_api_key()})["certifications"]
+    res = get_response(url, **{"api_key": _get_tmdb_api_key()})["certifications"]
+    return res[country] if country else res
 
 
-def get_movie_genres():
+def get_movie_genres(objects=False):
     """Get the list of official genres for movies."""
     url = urljoin(BASEURL, MOVIE_GENRES_SUFFIX)
-    return get_response(url, **{"api_key": _get_tmdb_api_key()})["genres"]
+    genres = get_response(url, **{"api_key": _get_tmdb_api_key()})["genres"]
+    if objects:
+        return [Genre(tmdb_id=g["id"], name=g["name"]) for g in genres]
+    else:
+        return genres
 
 
-def get_show_genres():
+def get_show_genres(objects=False):
     """Get the list of official genres for TV shows."""
     url = urljoin(BASEURL, SHOW_GENRES_SUFFIX)
-    return get_response(url, **{"api_key": _get_tmdb_api_key()})["genres"]
+    genres = get_response(url, **{"api_key": _get_tmdb_api_key()})["genres"]
+    if objects:
+        return [Genre(tmdb_id=g["id"], name=g["name"]) for g in genres]
+    else:
+        return genres
 
 
 def get_image_configurations():
@@ -244,11 +264,15 @@ def get_image_configurations():
     return get_response(url, **{"api_key": _get_tmdb_api_key()})
 
 
-def get_countries():
+def get_countries(objects=False):
     """Get the list of countries (ISO 3166-1 tags) used
     throughout TMDb."""
     url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
-    return get_response(url, **{"api_key": _get_tmdb_api_key()})
+    countries = get_response(url, **{"api_key": _get_tmdb_api_key()})
+    if objects:
+        return [Country(**c) for c in countries]
+    else:
+        return countries
 
 
 def get_jobs():
@@ -258,11 +282,22 @@ def get_jobs():
     return get_response(url, **{"api_key": _get_tmdb_api_key()})
 
 
-def get_languages():
+def get_languages(objects=False):
     """Get the list of languages (ISO 639-1 tags) used
     throughout TMDb."""
     url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
-    return get_response(url, **{"api_key": _get_tmdb_api_key()})
+    languages = get_response(url, **{"api_key": _get_tmdb_api_key()})
+    if objects:
+        return [
+            Language(
+                iso_639_1=l["iso_639_1"],
+                english_name=l["english_name"],
+                original_name=l["name"],
+            )
+            for l in languages
+        ]
+    else:
+        return languages
 
 
 def get_primary_translations():
