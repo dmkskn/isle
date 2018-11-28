@@ -8,7 +8,7 @@ from typing import Iterator, List, NamedTuple, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 from . import _urls as URL
-from ._tools import get_response, search_results_for
+from ._requests import GET, GET_pages
 
 
 __all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre"]
@@ -37,11 +37,11 @@ class TMDb(ABC):
 
     def _request(self, url: str, **params) -> dict:
         self.n_requests += 1
-        return get_response(url, **{"api_key": _get_tmdb_api_key(), **params})
+        return GET(url, **{"api_key": _get_tmdb_api_key(), **params})
 
     def _iter_request(self, url: str, **params):
         self.n_requests += 1
-        return search_results_for(url, {"api_key": _get_tmdb_api_key(), **params})
+        return GET_pages(url, {"api_key": _get_tmdb_api_key(), **params})
 
     def __repr__(self):
         return f"{type(self).__name__}({self.tmdb_id})"
@@ -1880,9 +1880,7 @@ class Image:
             raise ValueError(f"Unknown image type: {self._type}")
 
     def _get_image_configs(self):
-        res = get_response(URL.IMAGE_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})[
-            "images"
-        ]
+        res = GET(URL.IMAGE_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})["images"]
         return res
 
     def __repr__(self):

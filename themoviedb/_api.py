@@ -14,8 +14,7 @@ from ._objects import (
     Season,
     Show,
 )
-from ._tools import get_response
-from ._tools import search_results_for as _search_results_for
+from ._requests import GET, GET_pages
 
 
 __all__ = [
@@ -67,7 +66,7 @@ def search_movie(query: str, **kwargs):
     Returns a generator. Each item is a `Movie` object.
     """
     params = {"query": query, "api_key": _get_tmdb_api_key(), **kwargs}
-    for item in _search_results_for(URL.SEARCH_MOVIE, params):
+    for item in GET_pages(URL.SEARCH_MOVIE, params):
         yield Movie(item["id"], **item)
 
 
@@ -86,7 +85,7 @@ def search_show(query: str, **kwargs):
     Returns a generator. Each item is a `Show` object.
     """
     params = {"query": query, "api_key": _get_tmdb_api_key(), **kwargs}
-    for item in _search_results_for(URL.SEARCH_SHOW, params):
+    for item in GET_pages(URL.SEARCH_SHOW, params):
         yield Show(item["id"], **item)
 
 
@@ -109,7 +108,7 @@ def search_person(query: str, **kwargs):
     Returns a generator. Each item is a `Person` object.
     """
     params = {"query": query, "api_key": _get_tmdb_api_key(), **kwargs}
-    for item in _search_results_for(URL.SEARCH_PERSON, params):
+    for item in GET_pages(URL.SEARCH_PERSON, params):
         yield Person(item["id"], **item)
 
 
@@ -121,7 +120,7 @@ def search_company(query: str, **kwargs):
     Returns a generator. Each item is a `Company` object.
     """
     params = {"query": query, "api_key": _get_tmdb_api_key(), **kwargs}
-    for item in _search_results_for(URL.SEARCH_COMPANY, params):
+    for item in GET_pages(URL.SEARCH_COMPANY, params):
         yield Company(item["id"], **item)
 
 
@@ -135,7 +134,7 @@ def discover_movies(options: dict):
     Returns a generator. Each item is a `Movie` object.
     """
     params = {"api_key": _get_tmdb_api_key(), **options}
-    for item in _search_results_for(URL.DISCOVER_MOVIES, params):
+    for item in GET_pages(URL.DISCOVER_MOVIES, params):
         yield Movie(item["id"], **item)
 
 
@@ -150,7 +149,7 @@ def discover_shows(options: dict):
     Returns a generator. Each item is a `Show` object.
     """
     params = {"api_key": _get_tmdb_api_key(), **options}
-    for item in _search_results_for(URL.DISCOVER_SHOWS, params):
+    for item in GET_pages(URL.DISCOVER_SHOWS, params):
         yield Show(item["id"], **item)
 
 
@@ -164,7 +163,7 @@ def find(external_id: str, *, src: str, **options):
     https://developers.themoviedb.org/3/find/find-by-id
     """
     params = {"api_key": _get_tmdb_api_key(), "external_source": src, **options}
-    response = get_response(URL.FIND.format(external_id=external_id), **params)
+    response = GET(URL.FIND.format(external_id=external_id), **params)
     acc = {}
     for key, results in response.items():
         if key == "movie_results":
@@ -199,7 +198,7 @@ def find(external_id: str, *, src: str, **options):
 def get_movie_certifications(country=None):
     """Get an up to date list of the officially supported
     movie certifications on TMDb."""
-    res = get_response(URL.MOVIE_CERTIFICATION, **{"api_key": _get_tmdb_api_key()})[
+    res = GET(URL.MOVIE_CERTIFICATION, **{"api_key": _get_tmdb_api_key()})[
         "certifications"
     ]
     return res[country] if country else res
@@ -208,7 +207,7 @@ def get_movie_certifications(country=None):
 def get_show_certifications(country=None):
     """Get an up to date list of the officially supported TV
     show certifications on TMDb."""
-    res = get_response(URL.SHOW_CERTIFICATION, **{"api_key": _get_tmdb_api_key()})[
+    res = GET(URL.SHOW_CERTIFICATION, **{"api_key": _get_tmdb_api_key()})[
         "certifications"
     ]
     return res[country] if country else res
@@ -216,9 +215,7 @@ def get_show_certifications(country=None):
 
 def get_movie_genres(objects=False):
     """Get the list of official genres for movies."""
-    genres = get_response(URL.MOVIE_GENRES, **{"api_key": _get_tmdb_api_key()})[
-        "genres"
-    ]
+    genres = GET(URL.MOVIE_GENRES, **{"api_key": _get_tmdb_api_key()})["genres"]
     if objects:
         return [Genre(tmdb_id=g["id"], name=g["name"]) for g in genres]
     else:
@@ -227,7 +224,7 @@ def get_movie_genres(objects=False):
 
 def get_show_genres(objects=False):
     """Get the list of official genres for TV shows."""
-    genres = get_response(URL.SHOW_GENRES, **{"api_key": _get_tmdb_api_key()})["genres"]
+    genres = GET(URL.SHOW_GENRES, **{"api_key": _get_tmdb_api_key()})["genres"]
     if objects:
         return [Genre(tmdb_id=g["id"], name=g["name"]) for g in genres]
     else:
@@ -237,15 +234,13 @@ def get_show_genres(objects=False):
 def get_image_configurations():
     """Get the data relevant to building image URLs as well
     as the change key map."""
-    return get_response(URL.IMAGE_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
+    return GET(URL.IMAGE_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
 
 
 def get_countries(objects=False):
     """Get the list of countries (ISO 3166-1 tags) used
     throughout TMDb."""
-    countries = get_response(
-        URL.COUNTRIES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
-    )
+    countries = GET(URL.COUNTRIES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
     if objects:
         return [Country(**c) for c in countries]
     else:
@@ -255,15 +250,13 @@ def get_countries(objects=False):
 def get_jobs():
     """Get a list of the jobs and departments we use on
     TMDb."""
-    return get_response(URL.JOBS_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
+    return GET(URL.JOBS_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
 
 
 def get_languages(objects=False):
     """Get the list of languages (ISO 639-1 tags) used
     throughout TMDb."""
-    languages = get_response(
-        URL.LANGUAGES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
-    )
+    languages = GET(URL.LANGUAGES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
     if objects:
         return [
             Language(
@@ -280,11 +273,11 @@ def get_languages(objects=False):
 def get_primary_translations():
     """Get a list of the officially supported translations
     on TMDb."""
-    return get_response(
+    return GET(
         URL.PRIMARY_TRANSLATIONS_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
     )
 
 
 def get_timezones():
     """Get the list of timezones used throughout TMDb."""
-    return get_response(URL.TIMEZONES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
+    return GET(URL.TIMEZONES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})
