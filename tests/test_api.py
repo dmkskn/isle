@@ -1,12 +1,12 @@
-import os
-import json
 import inspect
+import json
+import os
 import unittest
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
 import themoviedb as tmdb
-from themoviedb._objects import Genre, Country, Language
+from themoviedb._objects import Country, Genre, Language
 
 
 def get_api_response(url, **params):
@@ -49,7 +49,7 @@ class SearchMovieTestCase(unittest.TestCase):
 
     def test_all_args_except_the_first_one_are_kwargs(self):
         with self.assertRaises(TypeError):
-            tmdb.search_movie(self.title, 1953)
+            tmdb.search_movie(self.title, 1953)  # pylint: disable=E1121
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
@@ -88,7 +88,7 @@ class SearchShowTestCase(unittest.TestCase):
 
     def test_all_args_except_the_first_one_are_kwargs(self):
         with self.assertRaises(TypeError):
-            tmdb.search_show(self.name, 2004)
+            tmdb.search_show(self.name, 2004)  # pylint: disable=E1121
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)
@@ -128,7 +128,7 @@ class SearchPersonTestCase(unittest.TestCase):
 
     def test_all_args_except_the_first_one_are_kwargs(self):
         with self.assertRaises(TypeError):
-            tmdb.search_person(self.name, True)
+            tmdb.search_person(self.name, True)  # pylint: disable=E1121
 
     def test_amount_of_results(self):
         self.assertEqual(len(self.results_list), self.n_results)

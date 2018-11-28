@@ -1,22 +1,23 @@
+import inspect
 import re
 import unittest
-import inspect
+
 from themoviedb._objects import (
-    TMDb,
-    Movie,
-    Show,
-    Person,
     Company,
-    Keyword,
-    Genre,
-    Season,
-    Episode,
-    Image,
-    Language,
-    Vote,
     Country,
-    Video,
     Credit,
+    Episode,
+    Genre,
+    Image,
+    Keyword,
+    Language,
+    Movie,
+    Person,
+    Season,
+    Show,
+    TMDb,
+    Video,
+    Vote,
 )
 
 
@@ -70,10 +71,6 @@ class MovieTestCase(unittest.TestCase):
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Movie()  # pylint: disable=E1120
-        with self.assertRaises(TypeError):
-            _ = Movie("not int")
-        with self.assertRaises(TypeError):
-            _ = Movie({"id": self.movie_id})
 
     def test_title_attr(self):
         self.assertIsInstance(self.movie.title, dict)
@@ -419,10 +416,6 @@ class ShowTestCase(unittest.TestCase):
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Show()  # pylint: disable=E1120
-        with self.assertRaises(TypeError):
-            _ = Show("not int")
-        with self.assertRaises(TypeError):
-            _ = Show({"id": self.show_id})
 
     def test_preloaded(self):
         self.assertDictEqual(self.show.data, {"id": self.show_id})
@@ -511,10 +504,6 @@ class PersonTestCase(unittest.TestCase):
     def test_raise_error_when_init_without_id(self):
         with self.assertRaises(TypeError):
             _ = Person()  # pylint: disable=E1120
-        with self.assertRaises(TypeError):
-            _ = Person("not int")
-        with self.assertRaises(TypeError):
-            _ = Person({"id": self.person_id})
 
     def test_name_attr(self):
         self.assertIsInstance(self.person.name, str)

@@ -2,80 +2,13 @@ from __future__ import annotations
 
 import copy
 from abc import ABC, abstractmethod
-from typing import Iterator, NamedTuple, Optional, List, Union, Tuple
 from datetime import date
 from operator import itemgetter
+from typing import Iterator, List, NamedTuple, Optional, Tuple, Union
 from urllib.parse import urljoin
 
+from . import _urls as URL
 from ._tools import get_response, search_results_for
-from ._urls import (
-    BASEURL,
-    IMAGE_CONFIGURATION_SUFFIX,
-    LANGUAGES_CONFIGURATION_SUFFIX,
-    COUNTRIES_CONFIGURATION_SUFFIX,
-    MOVIE_DETAILS_SUFFIX,
-    MOVIE_ALTERNATIVE_TITLES_SUFFIX,
-    MOVIE_CHANGES_SUFFIX,
-    MOVIE_CREDITS_SUFFIX,
-    MOVIE_EXTERNAL_IDS_SUFFIX,
-    MOVIE_IMAGES_SUFFIX,
-    MOVIE_KEYWORDS_SUFFIX,
-    MOVIE_RELEASE_DATES_SUFFIX,
-    MOVIE_VIDEOS_SUFFIX,
-    MOVIE_TRANSLATIONS_SUFFIX,
-    MOVIE_RECOMMENDATIONS_SUFFIX,
-    MOVIE_SIMILAR_SUFFIX,
-    MOVIE_REVIEWS_SUFFIX,
-    MOVIE_LISTS_SUFFIX,
-    ALL_MOVIE_SECOND_SUFFIXES,
-    SHOW_DETAILS_SUFFIX,
-    SHOW_ALTERNATIVE_TITLES_SUFFIX,
-    SHOW_CHANGES_SUFFIX,
-    SHOW_CONTENT_RATINGS_SUFFIX,
-    SHOW_CREDITS_SUFFIX,
-    SHOW_EPISODE_GROUPS_SUFFIX,
-    SHOW_EXTERNAL_IDS_SUFFIX,
-    SHOW_IMAGES_SUFFIX,
-    SHOW_KEYWORDS_SUFFIX,
-    SHOW_RECOMMENDATIONS_SUFFIX,
-    SHOW_REVIEWS_SUFFIX,
-    SHOW_SCREENED_THEATRICALLY_SUFFIX,
-    SHOW_SIMILAR_SUFFIX,
-    SHOW_TRANSLATIONS_SUFFIX,
-    SHOW_VIDEOS_SUFFIX,
-    ALL_SHOW_SECOND_SUFFIXES,
-    SEASON_DETAILS_SUFFIX,
-    SEASON_CHANGES_SUFFIX,
-    SEASON_CREDITS_SUFFIX,
-    SEASON_EXTERNAL_IDS_SUFFIX,
-    SEASON_IMAGES_SUFFIX,
-    SEASON_VIDEOS_SUFFIX,
-    ALL_SEASON_SECOND_SUFFIXES,
-    EPISODE_DETAILS_SUFFIX,
-    EPISODE_CHANGES_SUFFIX,
-    EPISODE_CREDITS_SUFFIX,
-    EPISODE_EXTERNAL_IDS_SUFFIX,
-    EPISODE_IMAGES_SUFFIX,
-    EPISODE_VIDEOS_SUFFIX,
-    EPISODE_TRANSLATIONS_SUFFIX,
-    ALL_EPISODE_SECOND_SUFFIXES,
-    PERSON_DETAILS_SUFFIX,
-    PERSON_CHANGES_SUFFIX,
-    PERSON_MOVIE_CREDITS_SUFFIX,
-    PERSON_SHOW_CREDITS_SUFFIX,
-    PERSON_COMBINED_CREDITS_SUFFIX,
-    PERSON_EXTERNAL_IDS_SUFFIX,
-    PERSON_IMAGES_SUFFIX,
-    PERSON_TAGGED_IMAGES_SUFFIX,
-    PERSON_TRANSLATIONS_SUFFIX,
-    ALL_PERSON_SECOND_SUFFIXES,
-    COMPANY_DETAILS_SUFFIX,
-    COMPANY_ALTERNATIVE_NAMES_SUFFIX,
-    COMPANY_IMAGES_SUFFIX,
-    KEYWORD_DETAILS_SUFFIX,
-    KEYWORD_MOVIES_SUFFIX,
-    CREDIT_DETAILS_SUFFIX,
-)
 
 
 __all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre"]
@@ -89,9 +22,6 @@ def _get_tmdb_api_key():
 
 class TMDb(ABC):
     def __init__(self, tmdb_id: int, **kwargs):
-        if not isinstance(tmdb_id, int):
-            msg = f"tmdb_id argument must be an integer, not {type(tmdb_id)}"
-            raise TypeError(msg)
         self.data = {"id": tmdb_id, **kwargs}
         self.tmdb_id = self.data["id"]
         self.n_requests = 0
@@ -100,7 +30,7 @@ class TMDb(ABC):
     def _init(self):
         pass
 
-    def _getdata(self, key, *, default="error"):
+    def _getdata(self, key):
         if key not in self.data:
             self._init()
         return copy.deepcopy(self.data[key])
@@ -413,8 +343,9 @@ class Movie(TMDb):
         return self._getdata("external_ids")["twitter_id"]
 
     def _get_all_languages(self):
-        url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
+        data = self._request(
+            URL.LANGUAGES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
+        )
         languages = {}
         for item in data:
             iso_639_1 = item["iso_639_1"]
@@ -425,7 +356,7 @@ class Movie(TMDb):
     def get_all(self, **params) -> dict:
         """Get all information about a movie. This method
         makes only one API request."""
-        methods = ",".join(ALL_MOVIE_SECOND_SUFFIXES)
+        methods = ",".join(URL.ALL_MOVIE_SECOND_SUFFIXES)
         all_data = self.get_details(**{"append_to_response": methods, **params})
         self.data.update(all_data)
         return all_data
@@ -433,7 +364,7 @@ class Movie(TMDb):
     def get_details(self, **params) -> dict:
         """Get the primary information about a movie."""
         details = self._request(
-            f"{BASEURL}{MOVIE_DETAILS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_DETAILS.format(movie_id=self.tmdb_id), **params
         )
         self.data.update(details)
         return details
@@ -441,7 +372,7 @@ class Movie(TMDb):
     def get_alternative_titles(self, **params) -> dict:
         """Get all of the alternative titles for a movie."""
         alternative_titles = self._request(
-            f"{BASEURL}{MOVIE_ALTERNATIVE_TITLES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_ALTERNATIVE_TITLES.format(movie_id=self.tmdb_id), **params
         )
         self.data.update({"alternative_titles": alternative_titles})
         return alternative_titles
@@ -450,7 +381,7 @@ class Movie(TMDb):
         """Get the changes for a movie. By default only the
         last 24 hours are returned."""
         changes = self._request(
-            f"{BASEURL}{MOVIE_CHANGES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_CHANGES.format(movie_id=self.tmdb_id), **params
         )
         self.data.update({"changes": changes})
         return changes
@@ -458,7 +389,7 @@ class Movie(TMDb):
     def get_credits(self, **params) -> dict:
         """Get the cast and crew for a movie."""
         credits = self._request(
-            f"{BASEURL}{MOVIE_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_CREDITS.format(movie_id=self.tmdb_id), **params
         )
         self.data.update({"credits": credits})
         return credits
@@ -467,23 +398,21 @@ class Movie(TMDb):
         """Get the external ids for a movie. Such as
         Facebook, Instagram, Twitter and IMDb"""
         external_ids = self._request(
-            f"{BASEURL}{MOVIE_EXTERNAL_IDS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_EXTERNAL_IDS.format(movie_id=self.tmdb_id), **params
         )
         self.data.update({"external_ids": external_ids})
         return external_ids
 
     def get_images(self, **params) -> dict:
         """Get the images that belong to a movie."""
-        images = self._request(
-            f"{BASEURL}{MOVIE_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
-        )
+        images = self._request(URL.MOVIE_IMAGES.format(movie_id=self.tmdb_id), **params)
         self.data.update({"images": images})
         return images
 
     def get_keywords(self, **params) -> dict:
         """Get the keywords that have been added to a movie."""
         keywords = self._request(
-            f"{BASEURL}{MOVIE_KEYWORDS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_KEYWORDS.format(movie_id=self.tmdb_id), **params
         )
         self.data.update({"keywords": keywords})
         return keywords
@@ -492,16 +421,14 @@ class Movie(TMDb):
         """Get the release date along with the certification
         for a movie."""
         release_dates = self._request(
-            f"{BASEURL}{MOVIE_RELEASE_DATES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_RELEASE_DATES.format(movie_id=self.tmdb_id), **params
         )
         self.data.update({"release_dates": release_dates})
         return release_dates
 
     def get_videos(self, **params) -> dict:
         """Get the videos that have been added to a movie."""
-        videos = self._request(
-            f"{BASEURL}{MOVIE_VIDEOS_SUFFIX.format(self.tmdb_id)}", **params
-        )
+        videos = self._request(URL.MOVIE_VIDEOS.format(movie_id=self.tmdb_id), **params)
         self.data.update({"videos": videos})
         return videos
 
@@ -509,7 +436,7 @@ class Movie(TMDb):
         """Get a list of translations that have been created
         for a movie."""
         translations = self._request(
-            f"{BASEURL}{MOVIE_TRANSLATIONS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_TRANSLATIONS.format(movie_id=self.tmdb_id), **params
         )
         self.data.update({"translations": translations})
         return translations
@@ -517,25 +444,25 @@ class Movie(TMDb):
     def iter_recommendations(self, **params) -> Iterator[dict]:
         """Get a list of recommended movies for a movie."""
         yield from self._iter_request(
-            f"{BASEURL}{MOVIE_RECOMMENDATIONS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_RECOMMENDATIONS.format(movie_id=self.tmdb_id), **params
         )
 
     def iter_similar_movies(self, **params) -> Iterator[dict]:
         """Get a list of recommended movies for a movie."""
         yield from self._iter_request(
-            f"{BASEURL}{MOVIE_SIMILAR_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_SIMILAR.format(movie_id=self.tmdb_id), **params
         )
 
     def iter_reviews(self, **params) -> Iterator[dict]:
         """Get the user reviews for a movie."""
         yield from self._iter_request(
-            f"{BASEURL}{MOVIE_REVIEWS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_REVIEWS.format(movie_id=self.tmdb_id), **params
         )
 
     def iter_lists(self, **params) -> Iterator[dict]:
         """Get a list of lists that this movie belongs to."""
         yield from self._iter_request(
-            f"{BASEURL}{MOVIE_LISTS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.MOVIE_LISTS.format(movie_id=self.tmdb_id), **params
         )
 
 
@@ -869,8 +796,9 @@ class Show(TMDb):
         return crew
 
     def _get_all_languages(self):
-        url = urljoin(BASEURL, LANGUAGES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
+        data = self._request(
+            URL.LANGUAGES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
+        )
         languages = {}
         for item in data:
             iso_639_1 = item["iso_639_1"]
@@ -879,8 +807,9 @@ class Show(TMDb):
         return languages
 
     def _get_all_countries(self):
-        url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
+        data = self._request(
+            URL.COUNTRIES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
+        )
         countries = {}
         for item in data:
             countries[item["iso_3166_1"]] = item["english_name"]
@@ -889,23 +818,21 @@ class Show(TMDb):
     def get_all(self, **params):
         """Get all information about a TV show. This method
         makes only one API request."""
-        methods = ",".join(ALL_SHOW_SECOND_SUFFIXES)
+        methods = ",".join(URL.ALL_SHOW_SECOND_SUFFIXES)
         all_data = self.get_details(**{"append_to_response": methods, **params})
         self.data.update(all_data)
         return all_data
 
     def get_details(self, **params) -> dict:
         """Get the primary information about a TV show."""
-        details = self._request(
-            f"{BASEURL}{SHOW_DETAILS_SUFFIX.format(self.tmdb_id)}", **params
-        )
+        details = self._request(URL.SHOW_DETAILS.format(show_id=self.tmdb_id), **params)
         self.data.update(details)
         return details
 
     def get_alternative_titles(self, **params) -> dict:
         """Get all of the alternative titles for a TV show."""
         alternative_titles = self._request(
-            f"{BASEURL}{SHOW_ALTERNATIVE_TITLES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_ALTERNATIVE_TITLES.format(show_id=self.tmdb_id), **params
         )
         self.data.update({"alternative_titles": alternative_titles})
         return alternative_titles
@@ -913,9 +840,7 @@ class Show(TMDb):
     def get_changes(self, **params) -> dict:
         """Get the changes for a TV show. By default only the
         last 24 hours are returned."""
-        changes = self._request(
-            f"{BASEURL}{SHOW_CHANGES_SUFFIX.format(self.tmdb_id)}", **params
-        )
+        changes = self._request(URL.SHOW_CHANGES.format(show_id=self.tmdb_id), **params)
         self.data.update({"changes": changes})
         return changes
 
@@ -923,16 +848,14 @@ class Show(TMDb):
         """Get the list of content ratings (certifications)
         that have been added to a TV show."""
         content_ratings = self._request(
-            f"{BASEURL}{SHOW_CONTENT_RATINGS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_CONTENT_RATINGS.format(show_id=self.tmdb_id), **params
         )
         self.data.update({"content_ratings": content_ratings})
         return content_ratings
 
     def get_credits(self, **params) -> dict:
         """Get the cast and crew for a TV show."""
-        credits = self._request(
-            f"{BASEURL}{SHOW_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
-        )
+        credits = self._request(URL.SHOW_CREDITS.format(show_id=self.tmdb_id), **params)
         self.data.update({"credits": credits})
         return credits
 
@@ -940,7 +863,7 @@ class Show(TMDb):
         """Get all of the episode groups that have been
         created for a TV show."""
         episode_groups = self._request(
-            f"{BASEURL}{SHOW_EPISODE_GROUPS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_EPISODE_GROUPS.format(show_id=self.tmdb_id), **params
         )
         self.data.update({"episode_groups": episode_groups})
         return episode_groups
@@ -949,23 +872,21 @@ class Show(TMDb):
         """Get the external ids for a TV show. Such as
         Facebook, Instagram, Twitter, IMDb and TVDB"""
         external_ids = self._request(
-            f"{BASEURL}{SHOW_EXTERNAL_IDS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_EXTERNAL_IDS.format(show_id=self.tmdb_id), **params
         )
         self.data.update({"external_ids": external_ids})
         return external_ids
 
     def get_images(self, **params) -> dict:
         """Get the images that belong to a TV show."""
-        images = self._request(
-            f"{BASEURL}{SHOW_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
-        )
+        images = self._request(URL.SHOW_IMAGES.format(show_id=self.tmdb_id), **params)
         self.data.update({"images": images})
         return images
 
     def get_keywords(self, **params) -> dict:
         """Get the keywords that have been added to a TV show."""
         keywords = self._request(
-            f"{BASEURL}{SHOW_KEYWORDS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_KEYWORDS.format(show_id=self.tmdb_id), **params
         )
         self.data.update({"keywords": keywords})
         return keywords
@@ -973,21 +894,20 @@ class Show(TMDb):
     def iter_recommendations(self, **params) -> Iterator[dict]:
         """Get a list of recommended movies for a TV show."""
         yield from self._iter_request(
-            f"{BASEURL}{SHOW_RECOMMENDATIONS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_RECOMMENDATIONS.format(show_id=self.tmdb_id), **params
         )
 
     def iter_reviews(self, **params) -> Iterator[dict]:
         """Get the user reviews for a TV show."""
         yield from self._iter_request(
-            f"{BASEURL}{SHOW_REVIEWS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_REVIEWS.format(show_id=self.tmdb_id), **params
         )
 
     def get_screened_theatrically(self, **params):
         """Get a list of seasons or episodes that have been
         screened in a film festival or theatre."""
         screened_theatrically = self._request(
-            f"{BASEURL}{SHOW_SCREENED_THEATRICALLY_SUFFIX.format(self.tmdb_id)}",
-            **params,
+            URL.SHOW_SCREENED_THEATRICALLY.format(show_id=self.tmdb_id), **params
         )
         self.data.update({"screened_theatrically": screened_theatrically})
         return screened_theatrically
@@ -995,23 +915,21 @@ class Show(TMDb):
     def iter_similar_shows(self, **params) -> Iterator[dict]:
         """Get a list of recommended movies for a TV shows."""
         yield from self._iter_request(
-            f"{BASEURL}{SHOW_SIMILAR_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_SIMILAR.format(show_id=self.tmdb_id), **params
         )
 
     def get_translations(self, **params) -> dict:
         """Get a list of the translations that exist for a
         TV show."""
         translations = self._request(
-            f"{BASEURL}{SHOW_TRANSLATIONS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SHOW_TRANSLATIONS.format(show_id=self.tmdb_id), **params
         )
         self.data.update({"translations": translations})
         return translations
 
     def get_videos(self, **params) -> dict:
         """Get the videos that have been added to a TV show."""
-        videos = self._request(
-            f"{BASEURL}{SHOW_VIDEOS_SUFFIX.format(self.tmdb_id)}", **params
-        )
+        videos = self._request(URL.SHOW_VIDEOS.format(show_id=self.tmdb_id), **params)
         self.data.update({"videos": videos})
         return videos
 
@@ -1254,7 +1172,7 @@ class Person(TMDb):
     def get_all(self, **params):
         """Get all information about a person in a single
         response."""
-        methods = ",".join(ALL_PERSON_SECOND_SUFFIXES)
+        methods = ",".join(URL.ALL_PERSON_SECOND_SUFFIXES)
         all_data = self.get_details(**{"append_to_response": methods, **params})
         self.data.update(all_data)
         return all_data
@@ -1262,7 +1180,7 @@ class Person(TMDb):
     def get_details(self, **params) -> dict:
         """Get the primary person details."""
         details = self._request(
-            f"{BASEURL}{PERSON_DETAILS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_DETAILS.format(person_id=self.tmdb_id), **params
         )
         self.data.update(details)
         return details
@@ -1271,7 +1189,7 @@ class Person(TMDb):
         """Get the changes for a person. By default only the
         last 24 hours are returned."""
         changes = self._request(
-            f"{BASEURL}{PERSON_CHANGES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_CHANGES.format(person_id=self.tmdb_id), **params
         )
         self.data.update({"changes": changes})
         return changes
@@ -1279,7 +1197,7 @@ class Person(TMDb):
     def get_movie_credits(self, **params) -> dict:
         """Get the movie credits for a person."""
         movie_credits = self._request(
-            f"{BASEURL}{PERSON_MOVIE_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_MOVIE_CREDITS.format(person_id=self.tmdb_id), **params
         )
         self.data.update({"movie_credits": movie_credits})
         return movie_credits
@@ -1287,7 +1205,7 @@ class Person(TMDb):
     def get_show_credits(self, **params) -> dict:
         """Get the TV show credits for a person."""
         show_credits = self._request(
-            f"{BASEURL}{PERSON_SHOW_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_SHOW_CREDITS.format(person_id=self.tmdb_id), **params
         )
         self.data.update({"tv_credits": show_credits})
         return show_credits
@@ -1296,7 +1214,7 @@ class Person(TMDb):
         """Get the movie and TV credits together in a single
         response."""
         combined_credits = self._request(
-            f"{BASEURL}{PERSON_COMBINED_CREDITS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_COMBINED_CREDITS.format(person_id=self.tmdb_id), **params
         )
         self.data.update({"combined_credits": combined_credits})
         return combined_credits
@@ -1305,7 +1223,7 @@ class Person(TMDb):
         """Get the external ids for a person. Such as
         Facebook, Instagram, Twitter and IMDb and others"""
         external_ids = self._request(
-            f"{BASEURL}{PERSON_EXTERNAL_IDS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_EXTERNAL_IDS.format(person_id=self.tmdb_id), **params
         )
         self.data.update({"external_ids": external_ids})
         return external_ids
@@ -1313,7 +1231,7 @@ class Person(TMDb):
     def get_images(self, **params) -> dict:
         """Get the images for a person."""
         images = self._request(
-            f"{BASEURL}{PERSON_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_IMAGES.format(person_id=self.tmdb_id), **params
         )
         self.data.update({"images": images})
         return images
@@ -1322,14 +1240,14 @@ class Person(TMDb):
         """Get the images that this person has been tagged
         in."""
         yield from self._iter_request(
-            f"{BASEURL}{PERSON_TAGGED_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_TAGGED_IMAGES.format(person_id=self.tmdb_id), **params
         )
 
     def get_translations(self, **params) -> dict:
         """Get a list of translations that have been created
         for a person."""
         translations = self._request(
-            f"{BASEURL}{PERSON_TRANSLATIONS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.PERSON_TRANSLATIONS.format(person_id=self.tmdb_id), **params
         )
         self.data.update({"translations": translations})
         return translations
@@ -1404,8 +1322,9 @@ class Company(TMDb):
         return list(map(_i, self._getdata("images")["logos"]))
 
     def _get_all_countries(self):
-        url = urljoin(BASEURL, COUNTRIES_CONFIGURATION_SUFFIX)
-        data = self._request(url, **{"api_key": _get_tmdb_api_key()})
+        data = self._request(
+            URL.COUNTRIES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
+        )
         countries = {}
         for item in data:
             countries[item["iso_3166_1"]] = item["english_name"]
@@ -1414,7 +1333,7 @@ class Company(TMDb):
     def get_details(self, **params) -> dict:
         """Get a companies details."""
         details = self._request(
-            f"{BASEURL}{COMPANY_DETAILS_SUFFIX.format(self.tmdb_id)}", **params
+            URL.COMPANY_DETAILS.format(company_id=self.tmdb_id), **params
         )
         self.data.update(details)
         return details
@@ -1422,8 +1341,7 @@ class Company(TMDb):
     def get_alternative_names(self, **params) -> dict:
         """Get the alternative names of a company."""
         alternative_names = self._request(
-            f"{BASEURL}{COMPANY_ALTERNATIVE_NAMES_SUFFIX.format(self.tmdb_id)}",
-            **params,
+            URL.COMPANY_ALTERNATIVE_NAMES.format(company_id=self.tmdb_id), **params
         )
         self.data.update({"alternative_names": alternative_names})
         return alternative_names
@@ -1431,7 +1349,7 @@ class Company(TMDb):
     def get_images(self, **params) -> dict:
         """Get a companies logos."""
         images = self._request(
-            f"{BASEURL}{COMPANY_IMAGES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.COMPANY_IMAGES.format(company_id=self.tmdb_id), **params
         )
         self.data.update({"images": images})
         return images
@@ -1450,16 +1368,14 @@ class Keyword(TMDb):
 
     def get_details(self) -> dict:
         """Get the primary information about a keyword."""
-        details = self._request(
-            f"{BASEURL}{KEYWORD_DETAILS_SUFFIX.format(self.tmdb_id)}", **{}
-        )
+        details = self._request(URL.KEYWORD_DETAILS.format(keyword_id=self.tmdb_id))
         self.data.update(details)
         return details
 
     def iter_movies(self, **params) -> Iterator[Movie]:
         """Get the movies that belong to a keyword."""
         results = self._iter_request(
-            f"{BASEURL}{KEYWORD_MOVIES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.KEYWORD_MOVIES.format(keyword_id=self.tmdb_id), **params
         )
         yield from map(lambda x: Movie(x["id"]), results)
 
@@ -1583,7 +1499,7 @@ class Season(TMDb):
     def get_all(self, **params):
         """Get all information about a TV season in a single
         response."""
-        methods = ",".join(ALL_SEASON_SECOND_SUFFIXES)
+        methods = ",".join(URL.ALL_SEASON_SECOND_SUFFIXES)
         all_data = self.get_details(**{"append_to_response": methods, **params})
         self.data.update(all_data)
         return all_data
@@ -1591,7 +1507,7 @@ class Season(TMDb):
     def get_details(self, **params) -> dict:
         """Get the primary TV season details."""
         details = self._request(
-            f"{BASEURL}{SEASON_DETAILS_SUFFIX.format(self.show_id, self.number)}",
+            URL.SEASON_DETAILS.format(show_id=self.show_id, season_number=self.number),
             **params,
         )
         self.data.update(details)
@@ -1601,7 +1517,7 @@ class Season(TMDb):
         """Get the changes for a TV season. By default only the
         last 24 hours are returned."""
         changes = self._request(
-            f"{BASEURL}{SEASON_CHANGES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.SEASON_CHANGES.format(season_id=self.tmdb_id), **params
         )
         self.data.update({"changes": changes})
         return changes
@@ -1609,7 +1525,7 @@ class Season(TMDb):
     def get_credits(self, **params) -> dict:
         """Get the credits for TV season."""
         movie_credits = self._request(
-            f"{BASEURL}{SEASON_CREDITS_SUFFIX.format(self.show_id, self.number)}",
+            URL.SEASON_CREDITS.format(show_id=self.show_id, season_number=self.number),
             **params,
         )
         self.data.update({"credits": movie_credits})
@@ -1618,7 +1534,9 @@ class Season(TMDb):
     def get_external_ids(self, **params) -> dict:
         """Get the external ids for a TV season."""
         external_ids = self._request(
-            f"{BASEURL}{SEASON_EXTERNAL_IDS_SUFFIX.format(self.show_id, self.number)}",
+            URL.SEASON_EXTERNAL_IDS.format(
+                show_id=self.show_id, season_number=self.number
+            ),
             **params,
         )
         self.data.update({"external_ids": external_ids})
@@ -1627,7 +1545,7 @@ class Season(TMDb):
     def get_images(self, **params) -> dict:
         """Get the images that belong to a TV season."""
         images = self._request(
-            f"{BASEURL}{SEASON_IMAGES_SUFFIX.format(self.show_id, self.number)}",
+            URL.SEASON_IMAGES.format(show_id=self.show_id, season_number=self.number),
             **params,
         )
         self.data.update({"images": images})
@@ -1636,7 +1554,7 @@ class Season(TMDb):
     def get_videos(self, **params) -> dict:
         """Get the videos that have been added to a TV season."""
         videos = self._request(
-            f"{BASEURL}{SEASON_VIDEOS_SUFFIX.format(self.show_id, self.number)}",
+            URL.SEASON_VIDEOS.format(show_id=self.show_id, season_number=self.number),
             **params,
         )
         self.data.update({"videos": videos})
@@ -1800,7 +1718,7 @@ class Episode(TMDb):
     def get_all(self, **params):
         """Get all information about a TV episode in a single
         response."""
-        methods = ",".join(ALL_EPISODE_SECOND_SUFFIXES)
+        methods = ",".join(URL.ALL_EPISODE_SECOND_SUFFIXES)
         all_data = self.get_details(**{"append_to_response": methods, **params})
         self.data.update(all_data)
         return all_data
@@ -1808,7 +1726,13 @@ class Episode(TMDb):
     def get_details(self, **params) -> dict:
         """Get the primary TV episode details."""
         details = self._request(
-            f"{BASEURL}{EPISODE_DETAILS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            URL.EPISODE_DETAILS.format(
+                **{
+                    "show_id": self.show_id,
+                    "season_number": self.season_number,
+                    "episode_number": self.number,
+                }
+            ),
             **params,
         )
         self.data.update(details)
@@ -1818,7 +1742,7 @@ class Episode(TMDb):
         """Get the changes for a TV episode. By default only the
         last 24 hours are returned."""
         changes = self._request(
-            f"{BASEURL}{EPISODE_CHANGES_SUFFIX.format(self.tmdb_id)}", **params
+            URL.EPISODE_CHANGES.format(episode_id=self.tmdb_id), **params
         )
         self.data.update({"changes": changes})
         return changes
@@ -1826,7 +1750,13 @@ class Episode(TMDb):
     def get_credits(self, **params) -> dict:
         """Get the credits for TV episode."""
         movie_credits = self._request(
-            f"{BASEURL}{SEASON_CREDITS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            URL.SEASON_CREDITS.format(
+                **{
+                    "show_id": self.show_id,
+                    "season_number": self.season_number,
+                    "episode_number": self.number,
+                }
+            ),
             **params,
         )
         self.data.update({"credits": movie_credits})
@@ -1835,7 +1765,13 @@ class Episode(TMDb):
     def get_external_ids(self, **params) -> dict:
         """Get the external ids for a TV episode."""
         external_ids = self._request(
-            f"{BASEURL}{EPISODE_EXTERNAL_IDS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            URL.EPISODE_EXTERNAL_IDS.format(
+                **{
+                    "show_id": self.show_id,
+                    "season_number": self.season_number,
+                    "episode_number": self.number,
+                }
+            ),
             **params,
         )
         self.data.update({"external_ids": external_ids})
@@ -1844,7 +1780,13 @@ class Episode(TMDb):
     def get_images(self, **params) -> dict:
         """Get the images that belong to a TV episode."""
         images = self._request(
-            f"{BASEURL}{EPISODE_IMAGES_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            URL.EPISODE_IMAGES.format(
+                **{
+                    "show_id": self.show_id,
+                    "season_number": self.season_number,
+                    "episode_number": self.number,
+                }
+            ),
             **params,
         )
         self.data.update({"images": images})
@@ -1853,7 +1795,13 @@ class Episode(TMDb):
     def get_videos(self, **params) -> dict:
         """Get the videos that have been added to a TV episode."""
         videos = self._request(
-            f"{BASEURL}{EPISODE_VIDEOS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            URL.EPISODE_VIDEOS.format(
+                **{
+                    "show_id": self.show_id,
+                    "season_number": self.season_number,
+                    "episode_number": self.number,
+                }
+            ),
             **params,
         )
         self.data.update({"videos": videos})
@@ -1863,7 +1811,13 @@ class Episode(TMDb):
         """Get a list of the translations that exist for a
         TV episode."""
         translations = self._request(
-            f"{BASEURL}{EPISODE_TRANSLATIONS_SUFFIX.format(self.show_id, self.season_number, self.number)}",
+            URL.EPISODE_TRANSLATIONS.format(
+                **{
+                    "show_id": self.show_id,
+                    "season_number": self.season_number,
+                    "episode_number": self.number,
+                }
+            ),
             **params,
         )
         self.data.update({"translations": translations})
@@ -1926,12 +1880,13 @@ class Image:
             raise ValueError(f"Unknown image type: {self._type}")
 
     def _get_image_configs(self):
-        url = urljoin(BASEURL, IMAGE_CONFIGURATION_SUFFIX)
-        res = get_response(url, **{"api_key": _get_tmdb_api_key()})["images"]
+        res = get_response(URL.IMAGE_CONFIGURATION, **{"api_key": _get_tmdb_api_key()})[
+            "images"
+        ]
         return res
 
     def __repr__(self):
-        return f"Image(heigh={self.height}, width={self.width}, _type={self._type})"
+        return f"Image(height={self.height}, width={self.width}, _type={self._type})"
 
 
 class Country(NamedTuple):
@@ -2042,8 +1997,6 @@ class Credit(TMDb):
 
     def get_details(self) -> dict:
         """Get a movie or TV credit details."""
-        details = self._request(
-            f"{BASEURL}{CREDIT_DETAILS_SUFFIX.format(self.tmdb_id)}"
-        )
+        details = self._request(URL.CREDIT_DETAILS.format(credit_id=self.tmdb_id))
         self.data.update(details)
         return details
