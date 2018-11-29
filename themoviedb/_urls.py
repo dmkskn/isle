@@ -59,6 +59,8 @@ MOVIE_RECOMMENDATIONS = f"{MOVIE_DETAILS}/recommendations"
 MOVIE_SIMILAR = f"{MOVIE_DETAILS}/similar"
 MOVIE_REVIEWS = f"{MOVIE_DETAILS}/reviews"
 MOVIE_LISTS = f"{MOVIE_DETAILS}/lists"
+RATE_MOVIE = f"{MOVIE_DETAILS}/rating"
+DELETE_MOVIE_RATING = f"{MOVIE_DETAILS}/rating"
 ALL_MOVIE_SECOND_SUFFIXES = [
     "alternative_titles",
     "changes",
@@ -91,6 +93,8 @@ SHOW_SCREENED_THEATRICALLY = f"{SHOW_DETAILS}/screened_theatrically"
 SHOW_SIMILAR = f"{SHOW_DETAILS}/similar"
 SHOW_TRANSLATIONS = f"{SHOW_DETAILS}/translations"
 SHOW_VIDEOS = f"{SHOW_DETAILS}/videos"
+RATE_SHOW = f"{SHOW_DETAILS}/rating"
+DELETE_SHOW_RATING = f"{SHOW_DETAILS}/rating"
 ALL_SHOW_SECOND_SUFFIXES = [
     "alternative_titles",
     "changes",
@@ -190,3 +194,7 @@ SHOW_GENRES = f"{BASE}/{V}/genre/tv/list"
 
 
 CREDIT_DETAILS = f"{BASE}/{V}/credit/{{credit_id}}"
+
+
+LIST_DETAILS = f"{BASE}/{V}/list/{{list_id}}"
+LIST_CHECK_MOVIE_STATUS = f"{LIST_DETAILS}/item_status"

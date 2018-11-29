@@ -4,14 +4,14 @@ import copy
 from abc import ABC, abstractmethod
 from datetime import date
 from operator import itemgetter
-from typing import Iterator, List, NamedTuple, Optional, Tuple, Union
+from typing import Iterator, List as ListType, NamedTuple, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 from . import _urls as URL
-from ._requests import GET, GET_pages
+from ._requests import GET, GET_pages, POST, DELETE
 
 
-__all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre"]
+__all__ = ["Movie", "Show", "Person", "Company", "Keyword", "Genre", "Account"]
 
 
 def _get_tmdb_api_key():
@@ -42,6 +42,29 @@ class TMDb(ABC):
     def _iter_request(self, url: str, **params):
         self.n_requests += 1
         return GET_pages(url, {"api_key": _get_tmdb_api_key(), **params})
+
+    def _post_request(self, url, data, **params):
+        params = {"api_key": _get_tmdb_api_key(), **params}
+        request = POST(url, data, **params)
+        self.n_requests += 1
+        return request
+
+    def _delete_request(self, url, data, **params):
+        params = {"api_key": _get_tmdb_api_key(), **params}
+        request = DELETE(url, data, **params)
+        self.n_requests += 1
+        return request
+
+    def _get_all_languages(self):
+        data = self._request(
+            URL.LANGUAGES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
+        )
+        languages = {}
+        for item in data:
+            iso_639_1 = item["iso_639_1"]
+            del item["iso_639_1"]
+            languages[iso_639_1] = item
+        return languages
 
     def __repr__(self):
         return f"{type(self).__name__}({self.tmdb_id})"
@@ -160,7 +183,7 @@ class Movie(TMDb):
         return self._getdata("adult")
 
     @property
-    def backdrops(self) -> List[Image]:
+    def backdrops(self) -> ListType[Image]:
         """Return backdrops that belong to a movie. Each item
         is an instance of the `Image` class."""
 
@@ -170,7 +193,7 @@ class Movie(TMDb):
         return list(map(_i, self._getdata("images")["backdrops"]))
 
     @property
-    def posters(self) -> List[Image]:
+    def posters(self) -> ListType[Image]:
         """Return posters that belong to a movie. Each item is
         an instance of the `Image` class."""
 
@@ -180,7 +203,7 @@ class Movie(TMDb):
         return list(map(_i, self._getdata("images")["posters"]))
 
     @property
-    def languages(self) -> List[Language]:
+    def languages(self) -> ListType[Language]:
         """Return the languages spoken in a movie. Each item is
         an instance of the `Language` class."""
         languages = []
@@ -200,7 +223,7 @@ class Movie(TMDb):
         return languages
 
     @property
-    def countries(self) -> List[Country]:
+    def countries(self) -> ListType[Country]:
         """Return production countries. Each item is an instance of
         the `Country` class."""
         countries = []
@@ -239,7 +262,7 @@ class Movie(TMDb):
         return self._getdata("status")
 
     @property
-    def companies(self) -> List[Company]:
+    def companies(self) -> ListType[Company]:
         """Return the production companies. Each item is an
         instance of the `Company` class."""
 
@@ -249,7 +272,7 @@ class Movie(TMDb):
         return list(map(_c, self._getdata("production_companies")))
 
     @property
-    def cast(self) -> List[Tuple[Person, Credit]]:
+    def cast(self) -> ListType[Tuple[Person, Credit]]:
         """Return movie cast as list of tuples `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
@@ -270,7 +293,7 @@ class Movie(TMDb):
         return cast
 
     @property
-    def crew(self) -> List[Tuple[Person, Credit]]:
+    def crew(self) -> ListType[Tuple[Person, Credit]]:
         """Return movie crew as list of tuples `(Person, Credit)`."""
         crew = []
         for item in self._getdata("credits")["crew"]:
@@ -295,7 +318,7 @@ class Movie(TMDb):
         return Vote(average=average, count=count)
 
     @property
-    def videos(self) -> List[Video]:
+    def videos(self) -> ListType[Video]:
         """Return videos. Each item is an instance of the `Video`
         class."""
         videos = []
@@ -305,7 +328,7 @@ class Movie(TMDb):
         return videos
 
     @property
-    def genres(self) -> List[Genre]:
+    def genres(self) -> ListType[Genre]:
         """Return a movie genres."""
 
         def _g(g):
@@ -314,7 +337,7 @@ class Movie(TMDb):
         return list(map(_g, self._getdata("genres")))
 
     @property
-    def keywords(self) -> List[Keyword]:
+    def keywords(self) -> ListType[Keyword]:
         """Return a movie keywords."""
 
         def _k(k):
@@ -341,17 +364,6 @@ class Movie(TMDb):
     def twitter_id(self) -> Optional[str]:
         """Return the ID of a movie on Twitter."""
         return self._getdata("external_ids")["twitter_id"]
-
-    def _get_all_languages(self):
-        data = self._request(
-            URL.LANGUAGES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
-        )
-        languages = {}
-        for item in data:
-            iso_639_1 = item["iso_639_1"]
-            del item["iso_639_1"]
-            languages[iso_639_1] = item
-        return languages
 
     def get_all(self, **params) -> dict:
         """Get all information about a movie. This method
@@ -529,7 +541,7 @@ class Show(TMDb):
         return pages
 
     @property
-    def creators(self) -> List[Person]:
+    def creators(self) -> ListType[Person]:
         """Return the creators of a TV show."""
 
         def _c(c):
@@ -538,7 +550,7 @@ class Show(TMDb):
         return [c for c in map(_c, self._getdata("created_by"))]
 
     @property
-    def backdrops(self) -> List[Image]:
+    def backdrops(self) -> ListType[Image]:
         """Return backdrops that belong to a TV show. Each item
         is an instance of the `Image` class."""
 
@@ -548,7 +560,7 @@ class Show(TMDb):
         return list(map(_i, self._getdata("images")["backdrops"]))
 
     @property
-    def posters(self) -> List[Image]:
+    def posters(self) -> ListType[Image]:
         """Return posters that belong to a TV show. Each item is
         an instance of the `Image` class."""
 
@@ -558,7 +570,7 @@ class Show(TMDb):
         return list(map(_i, self._getdata("images")["posters"]))
 
     @property
-    def runtimes(self) -> List[int]:
+    def runtimes(self) -> ListType[int]:
         """Return the running times of TV show episodes."""
         return self._getdata("episode_run_time")
 
@@ -578,7 +590,7 @@ class Show(TMDb):
         return self._getdata("in_production")
 
     @property
-    def languages(self) -> List[Language]:
+    def languages(self) -> ListType[Language]:
         """Return the languages spoken in a TV show. Each item is
         an instance of the `Language` class."""
         iso_codes = self._getdata("languages")
@@ -632,7 +644,7 @@ class Show(TMDb):
         return self._getdata("number_of_seasons")
 
     @property
-    def countries(self) -> List[Country]:
+    def countries(self) -> ListType[Country]:
         """Return production countries. Each item is an instance of
         the `Country` class."""
         countries = []
@@ -657,7 +669,7 @@ class Show(TMDb):
         return self._getdata("popularity")
 
     @property
-    def companies(self) -> List[Company]:
+    def companies(self) -> ListType[Company]:
         """Return the production companies. Each item is an
         instance of the `Company` class."""
 
@@ -667,7 +679,7 @@ class Show(TMDb):
         return list(map(_c, self._getdata("production_companies")))
 
     @property
-    def seasons(self) -> List[Season]:
+    def seasons(self) -> ListType[Season]:
         """Return seasons. Each item is an instance of the `Season`
         class."""
         seasons = []
@@ -693,7 +705,7 @@ class Show(TMDb):
         return Vote(average=average, count=count)
 
     @property
-    def videos(self) -> List[Video]:
+    def videos(self) -> ListType[Video]:
         """Return videos. Each item is an instance of the `Video`
         class."""
         videos = []
@@ -703,7 +715,7 @@ class Show(TMDb):
         return videos
 
     @property
-    def genres(self) -> List[Genre]:
+    def genres(self) -> ListType[Genre]:
         """Return a TV show genres."""
 
         def _g(g):
@@ -712,7 +724,7 @@ class Show(TMDb):
         return list(map(_g, self._getdata("genres")))
 
     @property
-    def keywords(self) -> List[Keyword]:
+    def keywords(self) -> ListType[Keyword]:
         """Return a TV show keywords."""
 
         def _k(k):
@@ -757,7 +769,7 @@ class Show(TMDb):
         return ratings
 
     @property
-    def cast(self) -> List[Tuple[Person, Credit]]:
+    def cast(self) -> ListType[Tuple[Person, Credit]]:
         """Return TV show cast as list of tuples
         `(Person, Credit)`."""
         cast = []
@@ -779,7 +791,7 @@ class Show(TMDb):
         return cast
 
     @property
-    def crew(self) -> List[Tuple[Person, Credit]]:
+    def crew(self) -> ListType[Tuple[Person, Credit]]:
         """Return TV show crew as list of tuples
         `(Person, Credit)`."""
         crew = []
@@ -794,17 +806,6 @@ class Show(TMDb):
             person = Person(item["id"], **item)
             crew.append((person, credit))
         return crew
-
-    def _get_all_languages(self):
-        data = self._request(
-            URL.LANGUAGES_CONFIGURATION, **{"api_key": _get_tmdb_api_key()}
-        )
-        languages = {}
-        for item in data:
-            iso_639_1 = item["iso_639_1"]
-            del item["iso_639_1"]
-            languages[iso_639_1] = item
-        return languages
 
     def _get_all_countries(self):
         data = self._request(
@@ -946,7 +947,7 @@ class Person(TMDb):
         return self._getdata("name")
 
     @property
-    def also_known_as(self) -> List[str]:
+    def also_known_as(self) -> ListType[str]:
         """Return other names (in other languages)."""
         return self._getdata("also_known_as")
 
@@ -1010,7 +1011,7 @@ class Person(TMDb):
         return self._getdata("adult")
 
     @property
-    def movie_cast(self) -> List[Tuple[Movie, Credit]]:
+    def movie_cast(self) -> ListType[Tuple[Movie, Credit]]:
         """Return movies as list of tuples `(Movie, Credit)`."""
         cast = []
         for item in self._getdata("movie_credits")["cast"]:
@@ -1031,7 +1032,7 @@ class Person(TMDb):
         return cast
 
     @property
-    def movie_crew(self) -> List[Tuple[Movie, Credit]]:
+    def movie_crew(self) -> ListType[Tuple[Movie, Credit]]:
         """Return movies as list of tuples `(Movie, Credit)`."""
         crew = []
         for item in self._getdata("movie_credits")["crew"]:
@@ -1047,7 +1048,7 @@ class Person(TMDb):
         return crew
 
     @property
-    def show_cast(self) -> List[Tuple[Show, Credit]]:
+    def show_cast(self) -> ListType[Tuple[Show, Credit]]:
         """Return shows as list of tuples `(Show, Credit)`."""
         cast = []
         for item in self._getdata("tv_credits")["cast"]:
@@ -1068,7 +1069,7 @@ class Person(TMDb):
         return cast
 
     @property
-    def show_crew(self) -> List[Tuple[Show, Credit]]:
+    def show_crew(self) -> ListType[Tuple[Show, Credit]]:
         """Return shows as list of tuples `(Show, Credit)`."""
         crew = []
         for item in self._getdata("tv_credits")["crew"]:
@@ -1084,7 +1085,7 @@ class Person(TMDb):
         return crew
 
     @property
-    def cast(self) -> List[Tuple[Union[Movie, Show], Credit]]:
+    def cast(self) -> ListType[Tuple[Union[Movie, Show], Credit]]:
         """Return movies and shows as list of tuples
         `(Movie or Show, Credit)`."""
         cast = []
@@ -1107,7 +1108,7 @@ class Person(TMDb):
         return cast
 
     @property
-    def crew(self) -> List[Tuple[Union[Movie, Show], Credit]]:
+    def crew(self) -> ListType[Tuple[Union[Movie, Show], Credit]]:
         """Return movies and shows as list of tuples
         `(Movie or Show, Credit)`."""
         crew = []
@@ -1160,7 +1161,7 @@ class Person(TMDb):
         return self._getdata("external_ids")["twitter_id"]
 
     @property
-    def profiles(self) -> List[Image]:
+    def profiles(self) -> ListType[Image]:
         """Return images that belong to a person. Each item is
         an instance of the `Image` class."""
 
@@ -1275,7 +1276,7 @@ class Company(TMDb):
         return self._getdata("name")
 
     @property
-    def also_known_as(self) -> List[str]:
+    def also_known_as(self) -> ListType[str]:
         """Return alternative names of a company."""
         names = []
         for item in self._getdata("alternative_names")["results"]:
@@ -1421,7 +1422,7 @@ class Season(TMDb):
         return self._getdata("air_date")
 
     @property
-    def episodes(self) -> List[Episode]:
+    def episodes(self) -> ListType[Episode]:
         """Return a season's episodes."""
         episodes = []
         for item in self._getdata("episodes"):
@@ -1440,7 +1441,7 @@ class Season(TMDb):
         return self._getdata("external_ids")["tvdb_id"]
 
     @property
-    def posters(self) -> List[Image]:
+    def posters(self) -> ListType[Image]:
         """Return poster images that belong to a season. Each item
         is an instance of the `Image` class."""
 
@@ -1450,7 +1451,7 @@ class Season(TMDb):
         return list(map(_i, self._getdata("images")["posters"]))
 
     @property
-    def videos(self) -> List[Video]:
+    def videos(self) -> ListType[Video]:
         """Return videos. Each item is an instance of the `Video`
         class."""
         videos = []
@@ -1460,7 +1461,7 @@ class Season(TMDb):
         return videos
 
     @property
-    def cast(self) -> List[Tuple[Person, Credit]]:
+    def cast(self) -> ListType[Tuple[Person, Credit]]:
         """Return TV season cast as list of tuples `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
@@ -1481,7 +1482,7 @@ class Season(TMDb):
         return cast
 
     @property
-    def crew(self) -> List[Tuple[Person, Credit]]:
+    def crew(self) -> ListType[Tuple[Person, Credit]]:
         """Return a TV season crew as list of tuples `(Person, Credit)`."""
         crew = []
         for item in self._getdata("credits")["crew"]:
@@ -1641,7 +1642,7 @@ class Episode(TMDb):
         return overviews
 
     @property
-    def stills(self) -> List[Image]:
+    def stills(self) -> ListType[Image]:
         """Return images that belong to an episode. Each item is
         an instance of the `Image` class."""
 
@@ -1651,7 +1652,7 @@ class Episode(TMDb):
         return list(map(_i, self._getdata("images")["stills"]))
 
     @property
-    def videos(self) -> List[Video]:
+    def videos(self) -> ListType[Video]:
         """Return videos. Each item is an instance of the `Video`
         class."""
         videos = []
@@ -1670,7 +1671,7 @@ class Episode(TMDb):
         return Vote(average=average, count=count)
 
     @property
-    def cast(self) -> List[Tuple[Person, Credit]]:
+    def cast(self) -> ListType[Tuple[Person, Credit]]:
         """Return TV episode cast as list of tuples
         `(Person, Credit)`."""
         cast = []
@@ -1687,7 +1688,7 @@ class Episode(TMDb):
         return cast
 
     @property
-    def crew(self) -> List[Tuple[Person, Credit]]:
+    def crew(self) -> ListType[Tuple[Person, Credit]]:
         """Return TV episode crew as list of tuples
         `(Person, Credit)`."""
         crew = []
@@ -1703,7 +1704,7 @@ class Episode(TMDb):
         return crew
 
     @property
-    def guest_stars(self) -> List[Tuple[Person, Credit]]:
+    def guest_stars(self) -> ListType[Tuple[Person, Credit]]:
         """Return TV episode guest stars as list of tuples
         `(Person, Credit)`."""
         guest_stars = []
@@ -1975,7 +1976,7 @@ class Credit(TMDb):
         return Person(data["id"], **data)
 
     @property
-    def person_known_for(self) -> List[Union[Movie, Show]]:
+    def person_known_for(self) -> ListType[Union[Movie, Show]]:
         media = []
         for item in self._getdata("person")["known_for"]:
             Obj = Show if item["media_type"] == "tv" else Movie
@@ -1998,3 +1999,390 @@ class Credit(TMDb):
         details = self._request(URL.CREDIT_DETAILS.format(credit_id=self.tmdb_id))
         self.data.update(details)
         return details
+
+
+class Account(TMDb):
+    """Represents an user account."""
+
+    class _Token(NamedTuple):
+        id: str
+        expires_at: str
+
+    class _Session(NamedTuple):
+        id: str
+        is_guest: bool = False
+
+    class SessionError(Exception):
+        pass
+
+    class TokenError(Exception):
+        pass
+
+    def __init__(self):
+        self.data = {}
+        self._token = None
+        self._session = None
+        self.n_requests = 0
+
+    def _init(self):
+        self.get_details()
+
+    def login(self, username, password):
+        """Log in to the account."""
+        self._create_token()
+        self._validate_token(username, password)
+        return self._create_session()
+
+    def logout(self):
+        """Logout from a session."""
+        data = {"session_id": self._session_id}
+        request = self._delete_request(URL.AUTH_DELETE_SESSION, data)
+        self._token = self._session = None
+        return request
+
+    def login_as_guest(self):
+        """Create a new guest session. Guest sessions are a type of
+        session that will let a user rate movies and TV shows but
+        not require them to have a TMDb user account. """
+        request = self._request(URL.AUTH_GUEST_SESSION, api_key=_get_tmdb_api_key())
+        self._session = self._Session(id=request["guest_session_id"], is_guest=True)
+        return request
+
+    def _create_session(self):
+        data = {"request_token": self._token_id}
+        request = self._post_request(
+            URL.AUTH_NEW_SESSION, data, api_key=_get_tmdb_api_key()
+        )
+        self._session = self._Session(id=request["session_id"])
+        return request
+
+    def _create_token(self):
+        """Create a temporary request token that can be used to
+        validate a TMDb user login."""
+        request = self._request(URL.AUTH_NEW_TOKEN, api_key=_get_tmdb_api_key())
+        self._token = self._Token(
+            id=request["request_token"], expires_at=request["expires_at"]
+        )
+        return request
+
+    def _validate_token(self, username, password):
+        data = {
+            "username": username,
+            "password": password,
+            "request_token": self._token_id,
+        }
+        request = POST(URL.AUTH_VALIDATE_WITH_LOGIN, data, api_key=_get_tmdb_api_key())
+        return request
+
+    @property
+    def _session_id(self):
+        try:
+            return self._session.id
+        except AttributeError:
+            raise self.SessionError("No session ID. Need to log in.")
+
+    @property
+    def _token_id(self):
+        try:
+            return self._token.id
+        except AttributeError:
+            raise self.TokenError("No request token ID. Need to log in.")
+
+    @property
+    def tmdb_id(self) -> int:
+        return self._getdata("id")
+
+    @property
+    def default_language(self) -> str:
+        """It is a ISO 639 1 code."""
+        return self._getdata("iso_639_1")
+
+    @property
+    def fallback_language(self) -> str:
+        """It is a ISO 3166 1 code."""
+        return self._getdata("iso_3166_1")
+
+    @property
+    def name(self) -> str:
+        return self._getdata("name")
+
+    @property
+    def username(self) -> str:
+        return self._getdata("username")
+
+    @property
+    def include_adult(self) -> bool:
+        return self._getdata("include_adult")
+
+    def get_details(self):
+        """Get your account details."""
+        request = self._request(
+            URL.ACCOUNT_DETAILS,
+            api_key=_get_tmdb_api_key(),
+            session_id=self._session_id,
+        )
+        self.data.update(request)
+        return request
+
+    def iter_lists(self, **params):
+        """Get lists created by an account. Will include
+        private lists if you are the owner."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_CREATED_LISTS.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield List(item["id"], **item)
+
+    def iter_favorite_movies(self, **params):
+        """Get your favorite movies."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_FAVORITE_MOVIES.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield Movie(item["id"], **item)
+
+    def iter_favorite_shows(self, **params):
+        """Get your favorite TV shows."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_FAVORITE_SHOWS.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield Show(item["id"], **item)
+
+    def iter_rated_movies(self, **params):
+        """Get all the movies you have rated."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_RATED_MOVIES.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield Movie(item["id"], **item)
+
+    def iter_rated_shows(self, **params):
+        """Get all the TV shows you have rated."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_RATED_SHOWS.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield Show(item["id"], **item)
+
+    def iter_rated_episodes(self, **params):
+        """Get all the TV episodes you have rated."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_RATED_EPISODES.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield Episode(item["id"], **item)
+
+    def iter_movie_watchlist(self, **params):
+        """Get all the movies you have added to your watchlist."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_MOVIE_WATCHLIST.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield Movie(item["id"], **item)
+
+    def iter_show_watchlist(self, **params):
+        """Get all the TV shows you have added to your
+        watchlist."""
+        params = {"session_id": self._session_id, **params}
+        response = self._iter_request(
+            URL.ACCOUNT_SHOW_WATCHLIST.format(account_id=self.tmdb_id), **params
+        )
+        for item in response:
+            yield Show(item["id"], **item)
+
+    def mark_as_favorite(self, item):
+        """Mark a movie or TV show as a favorite item."""
+        if not isinstance(item, (Movie, Show)):
+            raise TypeError(
+                f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
+            )
+        data = {
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
+            "media_id": item.tmdb_id,
+            "favorite": True,
+        }
+        return self._post_request(
+            URL.ACCOUNT_MARK_AS_FAVORITE.format(account_id=self.tmdb_id),
+            data,
+            session_id=self._session_id,
+        )
+
+    def remove_from_favorites(self, item):
+        """Remove a movie or TV show from your favorites."""
+        if not isinstance(item, (Movie, Show)):
+            raise TypeError(
+                f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
+            )
+        data = {
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
+            "media_id": item.tmdb_id,
+            "favorite": False,
+        }
+        return self._post_request(
+            URL.ACCOUNT_MARK_AS_FAVORITE.format(account_id=self.tmdb_id),
+            data,
+            session_id=self._session_id,
+        )
+
+    def add_to_watchlist(self, item):
+        """Add a movie or TV show to your watchlist."""
+        if not isinstance(item, (Movie, Show)):
+            raise TypeError(
+                f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
+            )
+        data = {
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
+            "media_id": item.tmdb_id,
+            "watchlist": True,
+        }
+        return self._post_request(
+            URL.ACCOUNT_ADD_TO_WATCHLIST.format(account_id=self.tmdb_id),
+            data,
+            session_id=self._session_id,
+        )
+
+    def remove_from_watchlist(self, item):
+        """Add a movie or TV show to your watchlist."""
+        if not isinstance(item, (Movie, Show)):
+            raise TypeError(
+                f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
+            )
+        data = {
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
+            "media_id": item.tmdb_id,
+            "watchlist": False,
+        }
+        return self._post_request(
+            URL.ACCOUNT_ADD_TO_WATCHLIST.format(account_id=self.tmdb_id),
+            data,
+            session_id=self._session_id,
+        )
+
+    def rate(self, item, value):
+        """Rate a movie, TV show or TV episode. `value` must be
+        between `0.5` and `10`"""
+        if not isinstance(item, (Movie, Show)):
+            raise TypeError(
+                f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
+            )
+        if not 0.5 <= value <= 10:
+            raise TypeError(f"A value must be between 0.5 and 10. Not {value}")
+        data = {"value": value}
+        if isinstance(item, Movie):
+            return self._post_request(
+                URL.RATE_MOVIE.format(movie_id=item.tmdb_id),
+                data,
+                session_id=self._session_id,
+            )
+        else:
+            return self._post_request(
+                URL.RATE_SHOW.format(show_id=item.tmdb_id),
+                data,
+                session_id=self._session_id,
+            )
+
+    def delete_rating(self, item):
+        """Remove your rating for a movie, TV show or TV
+        episode."""
+        if not isinstance(item, (Movie, Show)):
+            raise TypeError(
+                f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
+            )
+        if isinstance(item, Movie):
+            return self._delete_request(
+                URL.DELETE_MOVIE_RATING.format(movie_id=item.tmdb_id),
+                {},
+                session_id=self._session_id,
+            )
+        else:
+            return self._post_request(
+                URL.DELETE_SHOW_RATING.format(show_id=item.tmdb_id),
+                {},
+                session_id=self._session_id,
+            )
+
+    # def create_list(self, name, desc, lang="en"): # TODO
+    #     return NotImplementedError
+
+    # def delete_list(self): # TODO
+    #     return NotImplementedError
+
+    # def add_movie_to_list(self, list_, movie): # TODO
+    #     return NotImplementedError
+
+    # def remove_movie_from_list(self, list_, movie): # TODO
+    #     return NotImplementedError
+
+    # def clear_list(self, list_): # TODO
+    #     return NotImplementedError
+
+
+class List(TMDb):
+    """Represents a list."""
+
+    def _init(self):
+        self.get_details()
+
+    @property
+    def name(self):
+        """The name of a list."""
+        return self._getdata("name")
+
+    @property
+    def description(self):
+        """The description of a list."""
+        return self._getdata("description")
+
+    @property
+    def creator(self):
+        return self._getdata("created_by")
+
+    @property
+    def n_favorites(self):
+        return self._getdata("favorite_count")
+
+    @property
+    def items(self):
+        acc = []
+        for item in self._getdata("items"):
+            if item["media_type"] == "movie":
+                Obj = Movie
+            elif item["media_type"] == "tv":
+                Obj = Show
+            acc.append(Obj(item["id"], **item))
+        return acc
+
+    @property
+    def language(self):
+        code = self._getdata("iso_639_1")
+        try:
+            item = self._all_languages[code]
+        except AttributeError:
+            self._all_languages = self._get_all_languages()
+            item = self._all_languages[code]
+        return Language(
+            iso_639_1=code,
+            english_name=item["english_name"],
+            original_name=item["name"],
+        )
+
+    def get_details(self, **params):
+        details = self._request(URL.LIST_DETAILS.format(list_id=self.tmdb_id), **params)
+        self.n_requests += 1
+        self.data.update(details)
+        return details
+
+    def has_movie(self, movie) -> bool:
+        r = self._request(
+            URL.LIST_CHECK_MOVIE_STATUS.format(list_id=self.tmdb_id),
+            movie_id=movie.tmdb_id,
+        )
+        return r["item_present"]
