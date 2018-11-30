@@ -198,3 +198,8 @@ CREDIT_DETAILS = f"{BASE}/{V}/credit/{{credit_id}}"
 
 LIST_DETAILS = f"{BASE}/{V}/list/{{list_id}}"
 LIST_CHECK_MOVIE_STATUS = f"{LIST_DETAILS}/item_status"
+CREATE_LIST = f"{BASE}/{V}/list"
+DELETE_LIST = f"{BASE}/{V}/list/{{list_id}}"
+ADD_MOVIE_TO_LIST = f"{BASE}/{V}/list/{{list_id}}/add_item"
+REMOVE_MOVIE_FROM_LIST = f"{BASE}/{V}/list/{{list_id}}/remove_item"
+CLEAR_LIST = f"{BASE}/{V}/list/{{list_id}}/clear"

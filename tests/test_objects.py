@@ -1180,19 +1180,45 @@ class AccountTestCase(unittest.TestCase):
         self.assertEqual(r["status_code"], 13)
 
     # def test_create_list(self):
-    #     pass
+    #     l = self.logged_account.create_list("name", "desc")
+    #     self.assertIsInstance(l, List)
+    #     self.assertEqual(l.name, "name")
+    #     self.assertEqual(l.description, "desc")
+    #     self.logged_account.delete_list(l)
 
     # def test_delete_list(self):
-    #     pass
+    #     l = self.logged_account.create_list("name_del", "desc_del")
+    #     r = self.logged_account.delete_list(l)
+    #     self.assertEqual(r["status_code"], 13)
 
     # def test_add_movie_to_list(self):
-    #     pass
+    #     l = self.logged_account.create_list("name", "desc")
+    #     r = self.logged_account.add_movie_to_list(l, Movie(18148))
+    #     self.assertEqual(r["status_code"], 12)
+    #     self.assertTrue(l._changed)
+    #     self.assertTrue(l.has_movie(Movie(18148)))
+    #     self.assertTrue(any([m.tmdb_id == 18148 for m in l.items]))
+    #     self.logged_account.delete_list(l)
 
     # def test_remove_movie_from_list(self):
-    #     pass
+    #     l = self.logged_account.create_list("name", "desc")
+    #     self.logged_account.add_movie_to_list(l, Movie(18148))
+    #     r = self.logged_account.remove_movie_from_list(l, Movie(18148))
+    #     self.assertEqual(r["status_code"], 13)
+    #     self.assertTrue(l._changed)
+    #     self.assertTrue(not l.has_movie(Movie(18148)))
+    #     self.logged_account.delete_list(l)
 
     # def test_clear_list(self):
-    #     pass
+    #     l = self.logged_account.create_list("name", "desc")
+    #     self.logged_account.add_movie_to_list(l, Movie(18148))
+    #     self.logged_account.add_movie_to_list(l, Movie(238))
+    #     r = self.logged_account.clear_list(l)
+    #     self.assertEqual(r["status_code"], 12)
+    #     self.assertTrue(l._changed)
+    #     self.assertEqual(l.items, [])
+    #     self.assertTrue(not l.has_movie(Movie(18148)))
+    #     self.assertTrue(not l.has_movie(Movie(238)))
 
 
 class ListTestCase(unittest.TestCase):

@@ -2309,27 +2309,70 @@ class Account(TMDb):
                 session_id=self._session_id,
             )
 
-    # def create_list(self, name, desc, lang="en"): # TODO
-    #     return NotImplementedError
+    # def create_list(self, name, desc, lang="en"):
+    #     """Create a list."""
+    #     data = {"name": name, "description": desc, "language": lang}
+    #     r = self._post_request(URL.CREATE_LIST, data, session_id=self._session_id)
+    #     return List(r["list_id"], name=name, description=desc, iso_639_1=lang)
 
-    # def delete_list(self): # TODO
-    #     return NotImplementedError
+    # def delete_list(self, list_): # TODO: raises HTTPError (it is a TMDb propblem)
+    #     """Delete a list."""
+    #     return self._delete_request(
+    #         URL.DELETE_LIST.format(list_id=list_.tmdb_id), {}, session_id=self._session_id
+    #     )
 
-    # def add_movie_to_list(self, list_, movie): # TODO
-    #     return NotImplementedError
+    # def add_movie_to_list(self, list_, movie):
+    #     """Add a movie to a list."""
+    #     data = {"media_id": movie.tmdb_id}
+    #     r = self._post_request(
+    #         URL.ADD_MOVIE_TO_LIST.format(list_id=list_.tmdb_id),
+    #         data,
+    #         session_id=self._session_id,
+    #         confirm=True,
+    #     )
+    #     if r["status_code"] == 12:
+    #         list_._changed = True
+    #     return r
 
-    # def remove_movie_from_list(self, list_, movie): # TODO
-    #     return NotImplementedError
+    # def remove_movie_from_list(self, list_, movie):
+    #     """Remove a movie from a list."""
+    #     data = {"media_id": movie.tmdb_id}
+    #     r = self._post_request(
+    #         URL.REMOVE_MOVIE_FROM_LIST.format(list_id=list_.tmdb_id),
+    #         data,
+    #         session_id=self._session_id,
+    #     )
+    #     if r["status_code"] == 13:
+    #         list_._changed = True
+    #     return r
 
-    # def clear_list(self, list_): # TODO
-    #     return NotImplementedError
+    # def clear_list(self, list_):
+    #     """Clear all of the items from a list."""
+    #     r = self._post_request(
+    #         URL.CLEAR_LIST.format(list_id=list_.tmdb_id),
+    #         None,
+    #         session_id=self._session_id,
+    #     )
+    #     if r["status_code"] == 12:
+    #         list_._changed = True
+    #     return r
 
 
 class List(TMDb):
     """Represents a list."""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._changed = False
+
     def _init(self):
         self.get_details()
+
+    def _getdata(self, key):
+        if key not in self.data or self._changed:
+            self._init()
+            self._changed = False
+        return copy.deepcopy(self.data[key])
 
     @property
     def name(self):
