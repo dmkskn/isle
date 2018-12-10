@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen
 
 import themoviedb as tmdb
-from themoviedb._objects import Country, Genre, Language
+from themoviedb.objects.others import Country, Genre, Language
 
 
 def get_api_response(url, **params):
@@ -235,31 +235,33 @@ class FindTestCase(unittest.TestCase):
     def test_find_movie(self):
         results = tmdb.find(self.movie_imdb_id, src="imdb_id")
         self.assertEqual(len(results["movie_results"]), 1)
-        self.assertIsInstance(results["movie_results"][0], tmdb._objects.Movie)
+        self.assertIsInstance(results["movie_results"][0], tmdb.objects.movie.Movie)
         self.assertEqual(results["movie_results"][0].imdb_id, self.movie_imdb_id)
 
     def test_find_person(self):
         results = tmdb.find(self.person_imdb_id, src="imdb_id")
         self.assertEqual(len(results["person_results"]), 1)
-        self.assertIsInstance(results["person_results"][0], tmdb._objects.Person)
+        self.assertIsInstance(results["person_results"][0], tmdb.objects.person.Person)
         self.assertEqual(results["person_results"][0].imdb_id, self.person_imdb_id)
 
     def test_find_show(self):
         results = tmdb.find(self.show_imdb_id, src="imdb_id")
         self.assertEqual(len(results["tv_results"]), 1)
-        self.assertIsInstance(results["tv_results"][0], tmdb._objects.Show)
+        self.assertIsInstance(results["tv_results"][0], tmdb.objects.show.Show)
         self.assertEqual(results["tv_results"][0].imdb_id, self.show_imdb_id)
 
     def test_find_episode(self):
         results = tmdb.find(self.episode_tvdb_id, src="tvdb_id")
         self.assertEqual(len(results["tv_episode_results"]), 1)
-        self.assertIsInstance(results["tv_episode_results"][0], tmdb._objects.Episode)
+        self.assertIsInstance(
+            results["tv_episode_results"][0], tmdb.objects.show.Episode
+        )
         self.assertEqual(results["tv_episode_results"][0].tvdb_id, self.episode_tvdb_id)
 
     def test_find_season(self):
         results = tmdb.find(self.season_tvdb_id, src="tvdb_id")
         self.assertEqual(len(results["tv_season_results"]), 1)
-        self.assertIsInstance(results["tv_season_results"][0], tmdb._objects.Season)
+        self.assertIsInstance(results["tv_season_results"][0], tmdb.objects.show.Season)
         self.assertEqual(results["tv_season_results"][0].tvdb_id, self.season_tvdb_id)
 
 

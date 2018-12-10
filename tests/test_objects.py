@@ -3,24 +3,21 @@ import os
 import re
 import unittest
 
-from themoviedb._objects import (
-    Account,
-    Company,
+from themoviedb.objects.account import Account, TMDbList
+from themoviedb.objects.company import Company
+from themoviedb.objects.movie import Movie
+from themoviedb.objects.person import Person
+from themoviedb.objects.show import Episode, Season, Show
+from themoviedb.objects._tmdb import TMDb
+from themoviedb.objects.others import (
     Country,
     Credit,
-    Episode,
     Genre,
     Image,
     Keyword,
     Language,
-    List,
-    Movie,
-    Person,
-    Season,
-    Show,
-    TMDb,
-    Video,
     Vote,
+    Video,
 )
 
 
@@ -1109,7 +1106,7 @@ class AccountTestCase(unittest.TestCase):
         lists = self.logged_account.iter_lists()
         self.assertTrue(inspect.isgenerator(lists))
         for l in lists:
-            self.assertIsInstance(l, List)
+            self.assertIsInstance(l, TMDbList)
 
     def test_iter_favorite_movies(self):
         favorite_movies = self.logged_account.iter_favorite_movies()
@@ -1181,7 +1178,7 @@ class AccountTestCase(unittest.TestCase):
 
     # def test_create_list(self):
     #     l = self.logged_account.create_list("name", "desc")
-    #     self.assertIsInstance(l, List)
+    #     self.assertIsInstance(l, TMDbList)
     #     self.assertEqual(l.name, "name")
     #     self.assertEqual(l.description, "desc")
     #     self.logged_account.delete_list(l)
@@ -1225,7 +1222,7 @@ class ListTestCase(unittest.TestCase):
     LIST_ID = os.getenv("TMDB_LIST_ID")
 
     def setUp(self):
-        self.list_ = List(self.LIST_ID)
+        self.list_ = TMDbList(self.LIST_ID)
 
     def test_name_attr(self):
         self.assertEqual(self.list_.name, self.list_.data["name"])
