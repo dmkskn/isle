@@ -28,7 +28,7 @@ class ShowTestCase(unittest.TestCase):
         self.assertIsInstance(self.show.title, dict)
         self.assertIn("original", self.show.title)
         self.assertIn("default", self.show.title)
-        self.assertIn("US", self.show.title)
+        self.assertIn("RU", self.show.title)
 
     def test_overview_attr(self):
         self.assertIsInstance(self.show.overview, dict)
@@ -52,7 +52,6 @@ class ShowTestCase(unittest.TestCase):
     def test_homepage_attr(self):
         self.assertIsInstance(self.show.homepage, dict)
         self.assertIn("default", self.show.homepage)
-        self.assertIn("US", self.show.homepage)
 
     def test_in_production_attr(self):
         self.assertIsInstance(self.show.in_production, bool)

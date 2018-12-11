@@ -52,14 +52,11 @@ class Person(_tmdb_obj.TMDb):
         biography.
 
         There is a key `"default"`. It depends on the location."""
-
-        def _b(b):
-            return b["iso_3166_1"], b["data"]["biography"]
-
-        biographies = {}
-        biographies["default"] = self._getdata("biography")
-        for k, v in map(_b, self._getdata("translations")["translations"]):
-            biographies[k] = v
+        biographies = {"default": self._getdata("biography")}
+        for item in self._getdata("translations")["translations"]:
+            code, bio = item["iso_3166_1"], item["data"]["biography"]
+            if bio:
+                biographies[code] = bio
         return biographies
 
     @property

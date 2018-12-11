@@ -26,16 +26,15 @@ class Show(_tmdb_obj.TMDb):
         There is two special keys: `"original"` and `"default"`.
         The first one returns the original movie title and the
         second one depends on the location."""
-
-        def _n(n):
-            return n["iso_3166_1"], n["data"]["name"]
-
-        names = {}
-        names["default"] = self._getdata("name")
-        names["original"] = self._getdata("original_name")
-        for k, v in map(_n, self._getdata("translations")["translations"]):
-            names[k] = v
-        return names
+        titles = {
+            "default": self._getdata("name"),
+            "original": self._getdata("original_name"),
+        }
+        for item in self._getdata("translations")["translations"]:
+            code, title = item["iso_3166_1"], item["data"]["name"]
+            if title:
+                titles[code] = title
+        return titles
 
     @property
     def overview(self) -> dict:
@@ -44,14 +43,11 @@ class Show(_tmdb_obj.TMDb):
         `"RU"`, etc.), and the value is the corresponding overview.
 
         There is a key `"default"`. It depends on the location."""
-
-        def _o(o):
-            return o["iso_3166_1"], o["data"]["overview"]
-
-        overviews = {}
-        overviews["default"] = self._getdata("overview")
-        for k, v in map(_o, self._getdata("translations")["translations"]):
-            overviews[k] = v
+        overviews = {"default": self._getdata("overview")}
+        for item in self._getdata("translations")["translations"]:
+            code, overview = item["iso_3166_1"], item["data"]["overview"]
+            if overview:
+                overviews[code] = overview
         return overviews
 
     @property
@@ -62,45 +58,39 @@ class Show(_tmdb_obj.TMDb):
 
         There is a key `"default"`. It depends on the location.
         """
-
-        def _h(h):
-            return h["iso_3166_1"], h["data"]["homepage"]
-
-        pages = {}
-        if self._getdata("homepage"):
-            pages["default"] = self._getdata("homepage")
-        for k, v in map(_h, self._getdata("translations")["translations"]):
-            pages[k] = v
+        default = self._getdata("homepage")
+        pages = {"default": default} if default else {}
+        for item in self._getdata("translations")["translations"]:
+            code, page = item["iso_3166_1"], item["data"]["homepage"]
+            if page:
+                pages[code] = page
         return pages
 
     @property
     def creators(self) -> List[person_obj.Person]:
         """Return the creators of a TV show."""
-
-        def _c(c):
-            return person_obj.Person(c["id"], **c)
-
-        return [c for c in map(_c, self._getdata("created_by"))]
+        creators = []
+        for item in self._getdata("created_by"):
+            creators.append(person_obj.Person(item["id"], **item))
+        return creators
 
     @property
     def backdrops(self) -> List[other_objs.Image]:
         """Return backdrops that belong to a TV show. Each item
         is an instance of the `Image` class."""
-
-        def _i(i):
-            return other_objs.Image(i, type_="backdrop")
-
-        return list(map(_i, self._getdata("images")["backdrops"]))
+        backdrops = []
+        for item in self._getdata("images")["backdrops"]:
+            backdrops.append(other_objs.Image(item, type_="backdrop"))
+        return backdrops
 
     @property
     def posters(self) -> List[other_objs.Image]:
         """Return posters that belong to a TV show. Each item is
         an instance of the `Image` class."""
-
-        def _i(i):
-            return other_objs.Image(i, type_="poster")
-
-        return list(map(_i, self._getdata("images")["posters"]))
+        posters = []
+        for item in self._getdata("images")["posters"]:
+            posters.append(other_objs.Image(item, type_="poster"))
+        return posters
 
     @property
     def runtimes(self) -> List[int]:
@@ -207,11 +197,10 @@ class Show(_tmdb_obj.TMDb):
     def companies(self) -> List[company.Company]:
         """Return the production companies. Each item is an
         instance of the `Company` class."""
-
-        def _c(c):
-            return company.Company(c["id"], **c)
-
-        return list(map(_c, self._getdata("production_companies")))
+        companies = []
+        for item in self._getdata("production_companies"):
+            companies.append(company.Company(item["id"], **item))
+        return companies
 
     @property
     def seasons(self) -> List[Season]:
@@ -254,20 +243,18 @@ class Show(_tmdb_obj.TMDb):
     @property
     def genres(self) -> List[other_objs.Genre]:
         """Return a TV show genres."""
-
-        def _g(g):
-            return other_objs.Genre(tmdb_id=g["id"], name=g["name"])
-
-        return list(map(_g, self._getdata("genres")))
+        genres = []
+        for item in self._getdata("genres"):
+            genres.append(other_objs.Genre(tmdb_id=item["id"], name=item["name"]))
+        return genres
 
     @property
     def keywords(self) -> List[other_objs.Keyword]:
         """Return a TV show keywords."""
-
-        def _k(k):
-            return other_objs.Keyword(k["id"], **k)
-
-        return list(map(_k, self._getdata("keywords")["results"]))
+        keywords = []
+        for item in self._getdata("keywords")["results"]:
+            keywords.append(other_objs.Keyword(item["id"], **item))
+        return keywords
 
     @property
     def imdb_id(self) -> Optional[str]:

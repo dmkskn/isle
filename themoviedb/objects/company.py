@@ -72,11 +72,10 @@ class Company(_tmdb_obj.TMDb):
     def logos(self):
         """Return logo images that belong to a comapny. Each item
         is an instance of the `Image` class."""
-
-        def _i(i):
-            return other_objs.Image(i, type_="logo")
-
-        return list(map(_i, self._getdata("images")["logos"]))
+        logos = []
+        for item in self._getdata("images")["logos"]:
+            logos.append(other_objs.Image(item, type_="logo"))
+        return logos
 
     def _get_all_countries(self):
         data = self._request(URL.COUNTRIES_CONFIGURATION, **{"api_key": tmdb_api_key()})
