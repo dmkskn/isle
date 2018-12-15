@@ -6,8 +6,8 @@ from urllib.request import urlopen
 
 import pytest
 
-import themoviedb
-from themoviedb.objects.show import Show
+import isle
+from isle.objects.show import Show
 
 
 URL = "https://api.themoviedb.org/3/search/tv?"
@@ -32,7 +32,7 @@ def n_results():
 
 @pytest.fixture(scope="module")
 def results():
-    results = themoviedb.search_show(TITLE)
+    results = isle.search_show(TITLE)
     items = list(results)
     return items, results
 
@@ -48,12 +48,12 @@ def test_output_item_is_Show_instance(results):
 
 def test_title_is_required():
     with pytest.raises(TypeError):
-        themoviedb.search_show(**{"first_air_date_year": YEAR})
+        isle.search_show(**{"first_air_date_year": YEAR})
 
 
 def test_raises_error_when_year_is_not_kwarg():
     with pytest.raises(TypeError):
-        themoviedb.search_show(TITLE, YEAR)  # pylint: disable=E1121
+        isle.search_show(TITLE, YEAR)  # pylint: disable=E1121
 
 
 def test_amount_of_results(results, n_results):

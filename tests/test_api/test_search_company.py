@@ -6,8 +6,8 @@ from urllib.request import urlopen
 
 import pytest
 
-import themoviedb
-from themoviedb.objects.company import Company
+import isle
+from isle.objects.company import Company
 
 
 URL = "https://api.themoviedb.org/3/search/company?"
@@ -26,7 +26,7 @@ def n_results():
 
 @pytest.fixture(scope="module")
 def results():
-    results = themoviedb.search_company(NAME)
+    results = isle.search_company(NAME)
     items = list(results)
     return items, results
 
@@ -42,7 +42,7 @@ def test_output_item_is_Company_instance(results):
 
 def test_name_is_required():
     with pytest.raises(TypeError):
-        themoviedb.search_movie()  # pylint: disable=E1120
+        isle.search_movie()  # pylint: disable=E1120
 
 
 def test_amount_of_results(results, n_results):

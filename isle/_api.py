@@ -188,14 +188,18 @@ def find(external_id: str, *, src: str, **options):
 def get_movie_certifications(country=None):
     """Get an up to date list of the officially supported
     movie certifications on TMDb."""
-    res = GET(URL.MOVIE_CERTIFICATION, **{"api_key": tmdb_api_key()})["certifications"]
+    res = GET(URL.MOVIE_CERTIFICATION, **{"api_key": tmdb_api_key()})[
+        "certifications"
+    ]
     return res[country] if country else res
 
 
 def get_show_certifications(country=None):
     """Get an up to date list of the officially supported TV
     show certifications on TMDb."""
-    res = GET(URL.SHOW_CERTIFICATION, **{"api_key": tmdb_api_key()})["certifications"]
+    res = GET(URL.SHOW_CERTIFICATION, **{"api_key": tmdb_api_key()})[
+        "certifications"
+    ]
     return res[country] if country else res
 
 
@@ -259,7 +263,9 @@ def get_languages(objects=False):
 def get_primary_translations():
     """Get a list of the officially supported translations
     on TMDb."""
-    return GET(URL.PRIMARY_TRANSLATIONS_CONFIGURATION, **{"api_key": tmdb_api_key()})
+    return GET(
+        URL.PRIMARY_TRANSLATIONS_CONFIGURATION, **{"api_key": tmdb_api_key()}
+    )
 
 
 def get_timezones():

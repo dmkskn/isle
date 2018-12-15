@@ -3,12 +3,12 @@ from __future__ import annotations
 import copy
 from typing import NamedTuple
 
-import themoviedb._urls as URL
-import themoviedb.objects._tmdb as _tmdb_obj
-import themoviedb.objects.movie as movie_obj
-import themoviedb.objects.others as other_objs
-import themoviedb.objects.person as person_obj
-import themoviedb.objects.show as show_objs
+import isle._urls as URL
+import isle.objects._tmdb as _tmdb_obj
+import isle.objects.movie as movie_obj
+import isle.objects.others as other_objs
+import isle.objects.person as person_obj
+import isle.objects.show as show_objs
 from .._config import tmdb_api_key
 
 
@@ -56,12 +56,16 @@ class Account(_tmdb_obj.TMDb):
         session that will let a user rate movies and TV shows but
         not require them to have a TMDb user account. """
         request = self._request(URL.AUTH_GUEST_SESSION, api_key=tmdb_api_key())
-        self._session = self._Session(id=request["guest_session_id"], is_guest=True)
+        self._session = self._Session(
+            id=request["guest_session_id"], is_guest=True
+        )
         return request
 
     def _create_session(self):
         data = {"request_token": self._token_id}
-        request = self._post_request(URL.AUTH_NEW_SESSION, data, api_key=tmdb_api_key())
+        request = self._post_request(
+            URL.AUTH_NEW_SESSION, data, api_key=tmdb_api_key()
+        )
         self._session = self._Session(id=request["session_id"])
         return request
 
@@ -128,7 +132,9 @@ class Account(_tmdb_obj.TMDb):
     def get_details(self):
         """Get your account details."""
         request = self._request(
-            URL.ACCOUNT_DETAILS, api_key=tmdb_api_key(), session_id=self._session_id
+            URL.ACCOUNT_DETAILS,
+            api_key=tmdb_api_key(),
+            session_id=self._session_id,
         )
         self.data.update(request)
         return request
@@ -147,7 +153,8 @@ class Account(_tmdb_obj.TMDb):
         """Get your favorite movies."""
         params = {"session_id": self._session_id, **params}
         response = self._iter_request(
-            URL.ACCOUNT_FAVORITE_MOVIES.format(account_id=self.tmdb_id), **params
+            URL.ACCOUNT_FAVORITE_MOVIES.format(account_id=self.tmdb_id),
+            **params,
         )
         for item in response:
             yield movie_obj.Movie(item["id"], **item)
@@ -156,7 +163,8 @@ class Account(_tmdb_obj.TMDb):
         """Get your favorite TV shows."""
         params = {"session_id": self._session_id, **params}
         response = self._iter_request(
-            URL.ACCOUNT_FAVORITE_SHOWS.format(account_id=self.tmdb_id), **params
+            URL.ACCOUNT_FAVORITE_SHOWS.format(account_id=self.tmdb_id),
+            **params,
         )
         for item in response:
             yield show_objs.Show(item["id"], **item)
@@ -183,7 +191,8 @@ class Account(_tmdb_obj.TMDb):
         """Get all the TV episodes you have rated."""
         params = {"session_id": self._session_id, **params}
         response = self._iter_request(
-            URL.ACCOUNT_RATED_EPISODES.format(account_id=self.tmdb_id), **params
+            URL.ACCOUNT_RATED_EPISODES.format(account_id=self.tmdb_id),
+            **params,
         )
         for item in response:
             yield show_objs.Episode(item["id"], **item)
@@ -192,7 +201,8 @@ class Account(_tmdb_obj.TMDb):
         """Get all the movies you have added to your watchlist."""
         params = {"session_id": self._session_id, **params}
         response = self._iter_request(
-            URL.ACCOUNT_MOVIE_WATCHLIST.format(account_id=self.tmdb_id), **params
+            URL.ACCOUNT_MOVIE_WATCHLIST.format(account_id=self.tmdb_id),
+            **params,
         )
         for item in response:
             yield movie_obj.Movie(item["id"], **item)
@@ -202,7 +212,8 @@ class Account(_tmdb_obj.TMDb):
         watchlist."""
         params = {"session_id": self._session_id, **params}
         response = self._iter_request(
-            URL.ACCOUNT_SHOW_WATCHLIST.format(account_id=self.tmdb_id), **params
+            URL.ACCOUNT_SHOW_WATCHLIST.format(account_id=self.tmdb_id),
+            **params,
         )
         for item in response:
             yield show_objs.Show(item["id"], **item)
@@ -214,7 +225,9 @@ class Account(_tmdb_obj.TMDb):
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie" if isinstance(item, movie_obj.Movie) else "tv",
+            "media_type": "movie"
+            if isinstance(item, movie_obj.Movie)
+            else "tv",
             "media_id": item.tmdb_id,
             "favorite": True,
         }
@@ -231,7 +244,9 @@ class Account(_tmdb_obj.TMDb):
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie" if isinstance(item, movie_obj.Movie) else "tv",
+            "media_type": "movie"
+            if isinstance(item, movie_obj.Movie)
+            else "tv",
             "media_id": item.tmdb_id,
             "favorite": False,
         }
@@ -248,7 +263,9 @@ class Account(_tmdb_obj.TMDb):
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie" if isinstance(item, movie_obj.Movie) else "tv",
+            "media_type": "movie"
+            if isinstance(item, movie_obj.Movie)
+            else "tv",
             "media_id": item.tmdb_id,
             "watchlist": True,
         }
@@ -265,7 +282,9 @@ class Account(_tmdb_obj.TMDb):
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie" if isinstance(item, movie_obj.Movie) else "tv",
+            "media_type": "movie"
+            if isinstance(item, movie_obj.Movie)
+            else "tv",
             "media_id": item.tmdb_id,
             "watchlist": False,
         }
@@ -427,7 +446,9 @@ class TMDbList(_tmdb_obj.TMDb):
         )
 
     def get_details(self, **params):
-        details = self._request(URL.LIST_DETAILS.format(list_id=self.tmdb_id), **params)
+        details = self._request(
+            URL.LIST_DETAILS.format(list_id=self.tmdb_id), **params
+        )
         self.n_requests += 1
         self.data.update(details)
         return details

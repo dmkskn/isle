@@ -3,9 +3,9 @@ from __future__ import annotations
 import copy
 from typing import List
 
-import themoviedb._urls as URL
-import themoviedb.objects._tmdb as _tmdb_obj
-import themoviedb.objects.others as other_objs
+import isle._urls as URL
+import isle.objects._tmdb as _tmdb_obj
+import isle.objects.others as other_objs
 
 from .._config import tmdb_api_key
 
@@ -59,7 +59,9 @@ class Company(_tmdb_obj.TMDb):
             except AttributeError:
                 self._all_countries = self._get_all_countries()
                 english_name = self._all_countries[code]
-            return other_objs.Country(iso_3166_1=code, english_name=english_name)
+            return other_objs.Country(
+                iso_3166_1=code, english_name=english_name
+            )
         else:
             return code
 
@@ -78,7 +80,9 @@ class Company(_tmdb_obj.TMDb):
         return logos
 
     def _get_all_countries(self):
-        data = self._request(URL.COUNTRIES_CONFIGURATION, **{"api_key": tmdb_api_key()})
+        data = self._request(
+            URL.COUNTRIES_CONFIGURATION, **{"api_key": tmdb_api_key()}
+        )
         countries = {}
         for item in data:
             countries[item["iso_3166_1"]] = item["english_name"]
@@ -95,7 +99,8 @@ class Company(_tmdb_obj.TMDb):
     def get_alternative_names(self, **params) -> dict:
         """Get the alternative names of a company."""
         alternative_names = self._request(
-            URL.COMPANY_ALTERNATIVE_NAMES.format(company_id=self.tmdb_id), **params
+            URL.COMPANY_ALTERNATIVE_NAMES.format(company_id=self.tmdb_id),
+            **params
         )
         self.data.update({"alternative_names": alternative_names})
         return alternative_names

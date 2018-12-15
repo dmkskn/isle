@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 from abc import ABC, abstractmethod
 
-import themoviedb._urls as URL
+import isle._urls as URL
 
 from .._config import tmdb_api_key
 from .._requests import DELETE, GET, POST, GET_pages
@@ -45,7 +45,9 @@ class TMDb(ABC):
         return request
 
     def _get_all_languages(self):
-        data = self._request(URL.LANGUAGES_CONFIGURATION, **{"api_key": tmdb_api_key()})
+        data = self._request(
+            URL.LANGUAGES_CONFIGURATION, **{"api_key": tmdb_api_key()}
+        )
         languages = {}
         for item in data:
             iso_639_1 = item["iso_639_1"]

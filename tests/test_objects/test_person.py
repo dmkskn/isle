@@ -3,10 +3,10 @@ import re
 
 import pytest
 
-from themoviedb.objects.movie import Movie
-from themoviedb.objects.person import Person
-from themoviedb.objects.show import Show
-from themoviedb.objects.others import (
+from isle.objects.movie import Movie
+from isle.objects.person import Person
+from isle.objects.show import Show
+from isle.objects.others import (
     Country,
     Credit,
     Genre,

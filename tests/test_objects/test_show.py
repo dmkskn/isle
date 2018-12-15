@@ -2,10 +2,10 @@ import inspect
 
 import pytest
 
-from themoviedb.objects.company import Company
-from themoviedb.objects.person import Person
-from themoviedb.objects.show import Episode, Season, Show
-from themoviedb.objects.others import (
+from isle.objects.company import Company
+from isle.objects.person import Person
+from isle.objects.show import Episode, Season, Show
+from isle.objects.others import (
     Country,
     Credit,
     Genre,
@@ -59,7 +59,9 @@ def test_overview_attr(show: Show):
     assert isinstance(show.overview, dict)
     assert "default" in show.overview
     assert all(len(key) == 2 for key in filter(str.isupper, show.overview))
-    assert all(show.overview[key] for key in filter(str.isupper, show.overview))
+    assert all(
+        show.overview[key] for key in filter(str.isupper, show.overview)
+    )
 
 
 def test_creators_attr(show: Show):

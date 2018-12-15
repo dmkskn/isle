@@ -1,7 +1,7 @@
 import pytest
 
-from themoviedb.objects.company import Company
-from themoviedb.objects.others import Country, Image
+from isle.objects.company import Company
+from isle.objects.others import Country, Image
 
 
 COMPANY_ID = 1

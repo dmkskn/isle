@@ -4,11 +4,11 @@ from datetime import date
 from operator import itemgetter
 from typing import Iterator, List, Optional, Tuple
 
-import themoviedb._urls as URL
-import themoviedb.objects._tmdb as _tmdb_objs
-import themoviedb.objects.company as company_obj
-import themoviedb.objects.others as other_objs
-import themoviedb.objects.person as person_obj
+import isle._urls as URL
+import isle.objects._tmdb as _tmdb_objs
+import isle.objects.company as company_obj
+import isle.objects.others as other_objs
+import isle.objects.person as person_obj
 
 
 class Movie(_tmdb_objs.TMDb):
@@ -136,7 +136,9 @@ class Movie(_tmdb_objs.TMDb):
         """Return the languages spoken in a movie. Each item is
         an instance of the `Language` class."""
         languages = []
-        for code in map(itemgetter("iso_639_1"), self._getdata("spoken_languages")):
+        for code in map(
+            itemgetter("iso_639_1"), self._getdata("spoken_languages")
+        ):
             try:
                 item = self._all_languages[code]
             except AttributeError:
@@ -157,7 +159,9 @@ class Movie(_tmdb_objs.TMDb):
         the `Country` class."""
         countries = []
         for item in self._getdata("production_countries"):
-            countries.append(other_objs.Country(item["iso_3166_1"], item["name"]))
+            countries.append(
+                other_objs.Country(item["iso_3166_1"], item["name"])
+            )
         return countries
 
     @property
@@ -264,7 +268,9 @@ class Movie(_tmdb_objs.TMDb):
         """Return a movie genres."""
         genres = []
         for item in self._getdata("genres"):
-            genres.append(other_objs.Genre(tmdb_id=item["id"], name=item["name"]))
+            genres.append(
+                other_objs.Genre(tmdb_id=item["id"], name=item["name"])
+            )
         return genres
 
     @property
@@ -299,7 +305,9 @@ class Movie(_tmdb_objs.TMDb):
         """Get all information about a movie. This method
         makes only one API request."""
         methods = ",".join(URL.ALL_MOVIE_SECOND_SUFFIXES)
-        all_data = self.get_details(**{"append_to_response": methods, **params})
+        all_data = self.get_details(
+            **{"append_to_response": methods, **params}
+        )
         self.data.update(all_data)
         return all_data
 
@@ -314,7 +322,8 @@ class Movie(_tmdb_objs.TMDb):
     def get_alternative_titles(self, **params) -> dict:
         """Get all of the alternative titles for a movie."""
         alternative_titles = self._request(
-            URL.MOVIE_ALTERNATIVE_TITLES.format(movie_id=self.tmdb_id), **params
+            URL.MOVIE_ALTERNATIVE_TITLES.format(movie_id=self.tmdb_id),
+            **params,
         )
         self.data.update({"alternative_titles": alternative_titles})
         return alternative_titles
@@ -347,7 +356,9 @@ class Movie(_tmdb_objs.TMDb):
 
     def get_images(self, **params) -> dict:
         """Get the images that belong to a movie."""
-        images = self._request(URL.MOVIE_IMAGES.format(movie_id=self.tmdb_id), **params)
+        images = self._request(
+            URL.MOVIE_IMAGES.format(movie_id=self.tmdb_id), **params
+        )
         self.data.update({"images": images})
         return images
 
@@ -370,7 +381,9 @@ class Movie(_tmdb_objs.TMDb):
 
     def get_videos(self, **params) -> dict:
         """Get the videos that have been added to a movie."""
-        videos = self._request(URL.MOVIE_VIDEOS.format(movie_id=self.tmdb_id), **params)
+        videos = self._request(
+            URL.MOVIE_VIDEOS.format(movie_id=self.tmdb_id), **params
+        )
         self.data.update({"videos": videos})
         return videos
 

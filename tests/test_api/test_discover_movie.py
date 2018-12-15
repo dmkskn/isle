@@ -5,8 +5,8 @@ import os
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-import themoviedb
-from themoviedb.objects.movie import Movie
+import isle
+from isle.objects.movie import Movie
 
 
 URL = "https://api.themoviedb.org/3/discover/movie?"
@@ -27,7 +27,7 @@ def n_results():
 
 @pytest.fixture(scope="module")
 def results():
-    results = themoviedb.discover_movies(OPTIONS)
+    results = isle.discover_movies(OPTIONS)
     items = list(results)
     return items, results
 

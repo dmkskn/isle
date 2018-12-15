@@ -1,6 +1,6 @@
 import pytest
 
-from themoviedb.objects.others import Genre
+from isle.objects.others import Genre
 
 
 GENRE_ID = 12

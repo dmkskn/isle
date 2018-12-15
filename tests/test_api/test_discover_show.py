@@ -5,11 +5,14 @@ import json
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-import themoviedb
-from themoviedb.objects.show import Show
+import isle
+from isle.objects.show import Show
 
 URL = "https://api.themoviedb.org/3/discover/tv?"
-OPTIONS = {"sort_by": "popularity.desc", "with_companies": 278}  # Propaganda Films
+OPTIONS = {
+    "sort_by": "popularity.desc",
+    "with_companies": 278,
+}  # Propaganda Films
 
 
 @pytest.fixture(scope="module")
@@ -22,7 +25,7 @@ def n_results():
 
 @pytest.fixture(scope="module")
 def results():
-    results = themoviedb.discover_shows(OPTIONS)
+    results = isle.discover_shows(OPTIONS)
     items = list(results)
     return items, results
 

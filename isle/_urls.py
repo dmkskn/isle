@@ -18,7 +18,9 @@ ACCOUNT_ADD_TO_WATCHLIST = f"{ACCOUNT_DETAILS}/{{account_id}}/watchlist"
 AUTH_GUEST_SESSION = f"{BASE}/{V}/authentication/guest_session/new"
 AUTH_NEW_TOKEN = f"{BASE}/{V}/authentication/token/new"
 AUTH_NEW_SESSION = f"{BASE}/{V}/authentication/session/new"
-AUTH_VALIDATE_WITH_LOGIN = f"{BASE}/{V}/authentication/token/validate_with_login"
+AUTH_VALIDATE_WITH_LOGIN = (
+    f"{BASE}/{V}/authentication/token/validate_with_login"
+)
 AUTH_DELETE_SESSION = f"{BASE}/{V}/authentication/session"
 
 
@@ -41,7 +43,9 @@ IMAGE_CONFIGURATION = f"{BASE}/{V}/configuration"
 COUNTRIES_CONFIGURATION = f"{BASE}/{V}/configuration/countries"
 JOBS_CONFIGURATION = f"{BASE}/{V}/configuration/jobs"
 LANGUAGES_CONFIGURATION = f"{BASE}/{V}/configuration/languages"
-PRIMARY_TRANSLATIONS_CONFIGURATION = f"{BASE}/{V}/configuration/primary_translations"
+PRIMARY_TRANSLATIONS_CONFIGURATION = (
+    f"{BASE}/{V}/configuration/primary_translations"
+)
 TIMEZONES_CONFIGURATION = f"{BASE}/{V}/configuration/timezones"
 
 
@@ -142,9 +146,7 @@ SEASON_VIDEOS = f"{SEASON_DETAILS}/videos"
 ALL_SEASON_SECOND_SUFFIXES = ["credits", "external_ids", "images", "videos"]
 
 
-EPISODE_DETAILS = (
-    f"{BASE}/{V}/tv/{{show_id}}/season/{{season_number}}/episode/{{episode_number}}"
-)
+EPISODE_DETAILS = f"{BASE}/{V}/tv/{{show_id}}/season/{{season_number}}/episode/{{episode_number}}"
 EPISODE_CHANGES = f"{BASE}/{V}/tv/{{episode_id}}/changes"
 EPISODE_CREDITS = f"{EPISODE_DETAILS}/credits"
 EPISODE_EXTERNAL_IDS = f"{EPISODE_DETAILS}/external_ids"

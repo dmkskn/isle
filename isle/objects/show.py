@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Iterator, List, Optional, Tuple
 
-import themoviedb._urls as URL
-import themoviedb.objects._tmdb as _tmdb_obj
-import themoviedb.objects.company as company
-import themoviedb.objects.others as other_objs
-import themoviedb.objects.person as person_obj
+import isle._urls as URL
+import isle.objects._tmdb as _tmdb_obj
+import isle.objects.company as company
+import isle.objects.others as other_objs
+import isle.objects.person as person_obj
 
 from .._config import tmdb_api_key
 
@@ -179,7 +179,9 @@ class Show(_tmdb_obj.TMDb):
                     self._all_countries = self._get_all_countries()
                     english_name = self._all_countries[code]
                 countries.append(
-                    other_objs.Country(iso_3166_1=code, english_name=english_name)
+                    other_objs.Country(
+                        iso_3166_1=code, english_name=english_name
+                    )
                 )
             else:
                 continue
@@ -208,7 +210,9 @@ class Show(_tmdb_obj.TMDb):
         class."""
         seasons = []
         for item in self._getdata("seasons"):
-            seasons.append(Season(item["season_number"], show_id=self.tmdb_id, **item))
+            seasons.append(
+                Season(item["season_number"], show_id=self.tmdb_id, **item)
+            )
         return seasons
 
     @property
@@ -245,7 +249,9 @@ class Show(_tmdb_obj.TMDb):
         """Return a TV show genres."""
         genres = []
         for item in self._getdata("genres"):
-            genres.append(other_objs.Genre(tmdb_id=item["id"], name=item["name"]))
+            genres.append(
+                other_objs.Genre(tmdb_id=item["id"], name=item["name"])
+            )
         return genres
 
     @property
@@ -334,7 +340,9 @@ class Show(_tmdb_obj.TMDb):
         return crew
 
     def _get_all_countries(self):
-        data = self._request(URL.COUNTRIES_CONFIGURATION, **{"api_key": tmdb_api_key()})
+        data = self._request(
+            URL.COUNTRIES_CONFIGURATION, **{"api_key": tmdb_api_key()}
+        )
         countries = {}
         for item in data:
             countries[item["iso_3166_1"]] = item["english_name"]
@@ -344,13 +352,17 @@ class Show(_tmdb_obj.TMDb):
         """Get all information about a TV show. This method
         makes only one API request."""
         methods = ",".join(URL.ALL_SHOW_SECOND_SUFFIXES)
-        all_data = self.get_details(**{"append_to_response": methods, **params})
+        all_data = self.get_details(
+            **{"append_to_response": methods, **params}
+        )
         self.data.update(all_data)
         return all_data
 
     def get_details(self, **params) -> dict:
         """Get the primary information about a TV show."""
-        details = self._request(URL.SHOW_DETAILS.format(show_id=self.tmdb_id), **params)
+        details = self._request(
+            URL.SHOW_DETAILS.format(show_id=self.tmdb_id), **params
+        )
         self.data.update(details)
         return details
 
@@ -365,7 +377,9 @@ class Show(_tmdb_obj.TMDb):
     def get_changes(self, **params) -> dict:
         """Get the changes for a TV show. By default only the
         last 24 hours are returned."""
-        changes = self._request(URL.SHOW_CHANGES.format(show_id=self.tmdb_id), **params)
+        changes = self._request(
+            URL.SHOW_CHANGES.format(show_id=self.tmdb_id), **params
+        )
         self.data.update({"changes": changes})
         return changes
 
@@ -380,7 +394,9 @@ class Show(_tmdb_obj.TMDb):
 
     def get_credits(self, **params) -> dict:
         """Get the cast and crew for a TV show."""
-        credits = self._request(URL.SHOW_CREDITS.format(show_id=self.tmdb_id), **params)
+        credits = self._request(
+            URL.SHOW_CREDITS.format(show_id=self.tmdb_id), **params
+        )
         self.data.update({"credits": credits})
         return credits
 
@@ -404,7 +420,9 @@ class Show(_tmdb_obj.TMDb):
 
     def get_images(self, **params) -> dict:
         """Get the images that belong to a TV show."""
-        images = self._request(URL.SHOW_IMAGES.format(show_id=self.tmdb_id), **params)
+        images = self._request(
+            URL.SHOW_IMAGES.format(show_id=self.tmdb_id), **params
+        )
         self.data.update({"images": images})
         return images
 
@@ -432,7 +450,8 @@ class Show(_tmdb_obj.TMDb):
         """Get a list of seasons or episodes that have been
         screened in a film festival or theatre."""
         screened_theatrically = self._request(
-            URL.SHOW_SCREENED_THEATRICALLY.format(show_id=self.tmdb_id), **params
+            URL.SHOW_SCREENED_THEATRICALLY.format(show_id=self.tmdb_id),
+            **params,
         )
         self.data.update({"screened_theatrically": screened_theatrically})
         return screened_theatrically
@@ -454,7 +473,9 @@ class Show(_tmdb_obj.TMDb):
 
     def get_videos(self, **params) -> dict:
         """Get the videos that have been added to a TV show."""
-        videos = self._request(URL.SHOW_VIDEOS.format(show_id=self.tmdb_id), **params)
+        videos = self._request(
+            URL.SHOW_VIDEOS.format(show_id=self.tmdb_id), **params
+        )
         self.data.update({"videos": videos})
         return videos
 
@@ -580,14 +601,18 @@ class Season(_tmdb_obj.TMDb):
         """Get all information about a TV season in a single
         response."""
         methods = ",".join(URL.ALL_SEASON_SECOND_SUFFIXES)
-        all_data = self.get_details(**{"append_to_response": methods, **params})
+        all_data = self.get_details(
+            **{"append_to_response": methods, **params}
+        )
         self.data.update(all_data)
         return all_data
 
     def get_details(self, **params) -> dict:
         """Get the primary TV season details."""
         details = self._request(
-            URL.SEASON_DETAILS.format(show_id=self.show_id, season_number=self.number),
+            URL.SEASON_DETAILS.format(
+                show_id=self.show_id, season_number=self.number
+            ),
             **params,
         )
         self.data.update(details)
@@ -605,7 +630,9 @@ class Season(_tmdb_obj.TMDb):
     def get_credits(self, **params) -> dict:
         """Get the credits for TV season."""
         movie_credits = self._request(
-            URL.SEASON_CREDITS.format(show_id=self.show_id, season_number=self.number),
+            URL.SEASON_CREDITS.format(
+                show_id=self.show_id, season_number=self.number
+            ),
             **params,
         )
         self.data.update({"credits": movie_credits})
@@ -625,7 +652,9 @@ class Season(_tmdb_obj.TMDb):
     def get_images(self, **params) -> dict:
         """Get the images that belong to a TV season."""
         images = self._request(
-            URL.SEASON_IMAGES.format(show_id=self.show_id, season_number=self.number),
+            URL.SEASON_IMAGES.format(
+                show_id=self.show_id, season_number=self.number
+            ),
             **params,
         )
         self.data.update({"images": images})
@@ -634,7 +663,9 @@ class Season(_tmdb_obj.TMDb):
     def get_videos(self, **params) -> dict:
         """Get the videos that have been added to a TV season."""
         videos = self._request(
-            URL.SEASON_VIDEOS.format(show_id=self.show_id, season_number=self.number),
+            URL.SEASON_VIDEOS.format(
+                show_id=self.show_id, season_number=self.number
+            ),
             **params,
         )
         self.data.update({"videos": videos})
@@ -645,7 +676,11 @@ class Episode(_tmdb_obj.TMDb):
     """Represents a TV show episode."""
 
     def __init__(self, n, *, show_id, season_number, **kwargs):
-        self.data = {"episode_number": n, "season_number": season_number, **kwargs}
+        self.data = {
+            "episode_number": n,
+            "season_number": season_number,
+            **kwargs,
+        }
         self.show_id = show_id
         self.number = self.data["episode_number"]
         self.season_number = self.data["season_number"]
@@ -757,7 +792,11 @@ class Episode(_tmdb_obj.TMDb):
         `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
-            kwargs = {"credit_type": "cast", "department": "Acting", "job": "Actor"}
+            kwargs = {
+                "credit_type": "cast",
+                "department": "Acting",
+                "job": "Actor",
+            }
             credit = other_objs.Credit(
                 item["credit_id"],
                 media_data=self.data,
@@ -793,7 +832,9 @@ class Episode(_tmdb_obj.TMDb):
         guest_stars = []
         for item in self._getdata("credits")["guest_stars"]:
             credit = other_objs.Credit(
-                item["credit_id"], media_data=self.data, character=item.get("character")
+                item["credit_id"],
+                media_data=self.data,
+                character=item.get("character"),
             )
             person = person_obj.Person(item["id"], **item)
             guest_stars.append((person, credit))
@@ -803,7 +844,9 @@ class Episode(_tmdb_obj.TMDb):
         """Get all information about a TV episode in a single
         response."""
         methods = ",".join(URL.ALL_EPISODE_SECOND_SUFFIXES)
-        all_data = self.get_details(**{"append_to_response": methods, **params})
+        all_data = self.get_details(
+            **{"append_to_response": methods, **params}
+        )
         self.data.update(all_data)
         return all_data
 

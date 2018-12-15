@@ -1,8 +1,8 @@
 import pytest
 
-from themoviedb.objects.others import Credit, Image, Video, Vote
-from themoviedb.objects.person import Person
-from themoviedb.objects.show import Episode
+from isle.objects.others import Credit, Image, Video, Vote
+from isle.objects.person import Person
+from isle.objects.show import Episode
 
 
 SHOW_ID = 66732

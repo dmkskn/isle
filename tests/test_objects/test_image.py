@@ -1,6 +1,6 @@
 import pytest
 
-from themoviedb.objects.others import Image
+from isle.objects.others import Image
 
 
 DATA = {

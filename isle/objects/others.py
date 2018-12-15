@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Iterator, List, NamedTuple, Optional, Union
 
-import themoviedb._urls as URL
-import themoviedb.objects._tmdb as _tmdb_obj
-import themoviedb.objects.movie as movie_obj
-import themoviedb.objects.person as person_obj
-import themoviedb.objects.show as show_obj
+import isle._urls as URL
+import isle.objects._tmdb as _tmdb_obj
+import isle.objects.movie as movie_obj
+import isle.objects.person as person_obj
+import isle.objects.show as show_obj
 from .._config import tmdb_api_key
 from .._requests import GET
 
@@ -24,7 +24,9 @@ class Keyword(_tmdb_obj.TMDb):
 
     def get_details(self) -> dict:
         """Get the primary information about a keyword."""
-        details = self._request(URL.KEYWORD_DETAILS.format(keyword_id=self.tmdb_id))
+        details = self._request(
+            URL.KEYWORD_DETAILS.format(keyword_id=self.tmdb_id)
+        )
         self.data.update(details)
         return details
 
@@ -59,7 +61,9 @@ class Image:
         for key in image.keys() - {"vote_average", "vote_count"}:
             setattr(self, key, image[key])
         if {"vote_average", "vote_count"} <= image.keys():
-            self.vote = Vote(average=image["vote_average"], count=image["vote_count"])
+            self.vote = Vote(
+                average=image["vote_average"], count=image["vote_count"]
+            )
 
     @property
     def _configs(self):
@@ -95,7 +99,9 @@ class Image:
             raise ValueError(f"Unknown image type: {self._type}")
 
     def _get_image_configs(self):
-        res = GET(URL.IMAGE_CONFIGURATION, **{"api_key": tmdb_api_key()})["images"]
+        res = GET(URL.IMAGE_CONFIGURATION, **{"api_key": tmdb_api_key()})[
+            "images"
+        ]
         return res
 
     def __repr__(self):
@@ -148,7 +154,13 @@ class Credit(_tmdb_obj.TMDb):
     """Represents a credit."""
 
     def __init__(
-        self, tmdb_id, *, person_data=None, media_data=None, character=None, **kwargs
+        self,
+        tmdb_id,
+        *,
+        person_data=None,
+        media_data=None,
+        character=None,
+        **kwargs,
     ):
         self.data = {"credit_id": tmdb_id, **kwargs}
         self.tmdb_id = self.data["credit_id"]
@@ -193,7 +205,11 @@ class Credit(_tmdb_obj.TMDb):
     def person_known_for(self) -> List[Union[movie_obj.Movie, show_obj.Show]]:
         media = []
         for item in self._getdata("person")["known_for"]:
-            Obj = show_obj.Show if item["media_type"] == "tv" else movie_obj.Movie
+            Obj = (
+                show_obj.Show
+                if item["media_type"] == "tv"
+                else movie_obj.Movie
+            )
             media.append(Obj(item["id"], **item))
         return media
 
@@ -210,6 +226,8 @@ class Credit(_tmdb_obj.TMDb):
 
     def get_details(self) -> dict:
         """Get a movie or TV credit details."""
-        details = self._request(URL.CREDIT_DETAILS.format(credit_id=self.tmdb_id))
+        details = self._request(
+            URL.CREDIT_DETAILS.format(credit_id=self.tmdb_id)
+        )
         self.data.update(details)
         return details

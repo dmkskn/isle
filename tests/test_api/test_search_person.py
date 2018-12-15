@@ -6,8 +6,8 @@ from urllib.request import urlopen
 
 import pytest
 
-import themoviedb
-from themoviedb.objects.person import Person
+import isle
+from isle.objects.person import Person
 
 
 URL = "https://api.themoviedb.org/3/search/person?"
@@ -32,7 +32,7 @@ def n_results():
 
 @pytest.fixture(scope="module")
 def results():
-    results = themoviedb.search_person(NAME)
+    results = isle.search_person(NAME)
     items = list(results)
     return items, results
 
@@ -48,12 +48,12 @@ def test_output_item_is_Person_instance(results):
 
 def test_name_is_required():
     with pytest.raises(TypeError):
-        themoviedb.search_person(**{"language": "en-US"})
+        isle.search_person(**{"language": "en-US"})
 
 
 def test_all_args_except_the_first_one_are_kwargs():
     with pytest.raises(TypeError):
-        themoviedb.search_movie(NAME, True)  # pylint: disable=E1121
+        isle.search_movie(NAME, True)  # pylint: disable=E1121
 
 
 def test_amount_of_results(results, n_results):

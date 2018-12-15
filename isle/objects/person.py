@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Iterator, List, Optional, Tuple, Union
 
-import themoviedb._urls as URL
-import themoviedb.objects._tmdb as _tmdb_obj
-import themoviedb.objects.movie as movie_obj
-import themoviedb.objects.others as other_objs
-import themoviedb.objects.show as show_obj
+import isle._urls as URL
+import isle.objects._tmdb as _tmdb_obj
+import isle.objects.movie as movie_obj
+import isle.objects.others as other_objs
+import isle.objects.show as show_obj
 
 
 class Person(_tmdb_obj.TMDb):
@@ -179,7 +179,11 @@ class Person(_tmdb_obj.TMDb):
                 character=item["character"],
                 **kwargs,
             )
-            Obj = show_obj.Show if item["media_type"] == "tv" else movie_obj.Movie
+            Obj = (
+                show_obj.Show
+                if item["media_type"] == "tv"
+                else movie_obj.Movie
+            )
             obj = Obj(item["id"], **item)
             cast.append((obj, credit))
         return cast
@@ -201,7 +205,11 @@ class Person(_tmdb_obj.TMDb):
             credit = other_objs.Credit(
                 item["credit_id"], person_data=self.data, **kwargs
             )
-            Obj = show_obj.Show if item["media_type"] == "tv" else movie_obj.Movie
+            Obj = (
+                show_obj.Show
+                if item["media_type"] == "tv"
+                else movie_obj.Movie
+            )
             obj = Obj(item["id"], **item)
             crew.append((obj, credit))
         return crew
@@ -255,7 +263,9 @@ class Person(_tmdb_obj.TMDb):
         """Get all information about a person in a single
         response."""
         methods = ",".join(URL.ALL_PERSON_SECOND_SUFFIXES)
-        all_data = self.get_details(**{"append_to_response": methods, **params})
+        all_data = self.get_details(
+            **{"append_to_response": methods, **params}
+        )
         self.data.update(all_data)
         return all_data
 
@@ -296,7 +306,8 @@ class Person(_tmdb_obj.TMDb):
         """Get the movie and TV credits together in a single
         response."""
         combined_credits = self._request(
-            URL.PERSON_COMBINED_CREDITS.format(person_id=self.tmdb_id), **params
+            URL.PERSON_COMBINED_CREDITS.format(person_id=self.tmdb_id),
+            **params,
         )
         self.data.update({"combined_credits": combined_credits})
         return combined_credits

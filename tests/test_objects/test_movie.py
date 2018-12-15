@@ -2,10 +2,10 @@ import inspect
 
 import pytest
 
-from themoviedb.objects.company import Company
-from themoviedb.objects.movie import Movie
-from themoviedb.objects.person import Person
-from themoviedb.objects.others import (
+from isle.objects.company import Company
+from isle.objects.movie import Movie
+from isle.objects.person import Person
+from isle.objects.others import (
     Country,
     Credit,
     Genre,
@@ -83,7 +83,10 @@ def test_releases_attr(movie: Movie):
     releases = movie.releases
     assert isinstance(releases, dict)
     assert all(len(key) == 2 for key in filter(str.isupper, releases))
-    assert all(isinstance(releases[key], list) for key in filter(str.isupper, releases))
+    assert all(
+        isinstance(releases[key], list)
+        for key in filter(str.isupper, releases)
+    )
 
 
 def test_is_adult_attr(movie: Movie):
