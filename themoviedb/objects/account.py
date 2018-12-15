@@ -10,7 +10,6 @@ import themoviedb.objects.others as other_objs
 import themoviedb.objects.person as person_obj
 import themoviedb.objects.show as show_objs
 from .._config import tmdb_api_key
-from .._requests import POST
 
 
 class Account(_tmdb_obj.TMDb):
@@ -81,7 +80,9 @@ class Account(_tmdb_obj.TMDb):
             "password": password,
             "request_token": self._token_id,
         }
-        request = POST(URL.AUTH_VALIDATE_WITH_LOGIN, data, api_key=tmdb_api_key())
+        request = self._post_request(
+            URL.AUTH_VALIDATE_WITH_LOGIN, data, api_key=tmdb_api_key()
+        )
         return request
 
     @property
