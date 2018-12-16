@@ -7,7 +7,7 @@ from urllib.request import urlopen
 import pytest
 
 import isle
-from isle.objects.show import Show
+from isle import Show
 
 
 URL = "https://api.themoviedb.org/3/search/tv?"

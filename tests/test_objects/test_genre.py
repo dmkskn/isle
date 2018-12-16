@@ -1,6 +1,6 @@
 import pytest
 
-from isle.objects.others import Genre
+from isle.objects import Genre
 
 
 GENRE_ID = 12

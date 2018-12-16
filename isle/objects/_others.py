@@ -4,11 +4,23 @@ from typing import Iterator, List, NamedTuple, Optional, Union
 
 import isle._urls as URL
 import isle.objects._tmdb as _tmdb_obj
-import isle.objects.movie as movie_obj
-import isle.objects.person as person_obj
-import isle.objects.show as show_obj
+import isle.objects._movie as movie_obj
+import isle.objects._person as person_obj
+import isle.objects._show as show_obj
 from .._config import tmdb_api_key
 from .._requests import GET
+
+
+__all__ = [
+    "Keyword",
+    "Genre",
+    "Image",
+    "Country",
+    "Language",
+    "Vote",
+    "Video",
+    "Credit",
+]
 
 
 class Keyword(_tmdb_obj.TMDb):

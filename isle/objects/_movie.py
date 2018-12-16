@@ -6,9 +6,12 @@ from typing import Iterator, List, Optional, Tuple
 
 import isle._urls as URL
 import isle.objects._tmdb as _tmdb_objs
-import isle.objects.company as company_obj
-import isle.objects.others as other_objs
-import isle.objects.person as person_obj
+import isle.objects._company as company_obj
+import isle.objects._others as other_objs
+import isle.objects._person as person_obj
+
+
+__all__ = ["Movie"]
 
 
 class Movie(_tmdb_objs.TMDb):

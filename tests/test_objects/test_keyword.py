@@ -2,8 +2,8 @@ import inspect
 
 import pytest
 
-from isle.objects.movie import Movie
-from isle.objects.others import Keyword
+from isle import Movie
+from isle.objects import Keyword
 
 
 KEYWORD_ID = 3417

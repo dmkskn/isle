@@ -1,7 +1,7 @@
 import pytest
 
 import isle
-from isle.objects.others import Country, Language
+from isle.objects import Country, Language
 
 
 def test_get_image_configurations():

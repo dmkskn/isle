@@ -1,6 +1,6 @@
 import pytest
 
-from isle.objects.others import Image
+from isle.objects import Image
 
 
 DATA = {

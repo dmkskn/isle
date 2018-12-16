@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen
 
 import isle
-from isle.objects.movie import Movie
+from isle import Movie
 
 
 URL = "https://api.themoviedb.org/3/discover/movie?"

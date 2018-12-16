@@ -3,9 +3,8 @@ import os
 
 import pytest
 
-from isle.objects.account import Account, TMDbList
-from isle.objects.movie import Movie
-from isle.objects.show import Episode, Show
+from isle import Account, Movie, Episode, Show
+from isle.objects import TMDbList
 
 
 USERNAME = os.getenv("TMDB_USERNAME")

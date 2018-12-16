@@ -1,7 +1,7 @@
 import pytest
 
 import isle
-from isle.objects.others import Genre
+from isle.objects import Genre
 
 
 def test_get_movie_genres():

@@ -6,11 +6,17 @@ from . import _urls as URL
 
 from ._config import tmdb_api_key
 from ._requests import GET, GET_pages
-from .objects.company import Company
-from .objects.movie import Movie
-from .objects.others import Country, Genre, Language
-from .objects.person import Person
-from .objects.show import Episode, Season, Show
+from .objects import (
+    Company,
+    Movie,
+    Country,
+    Genre,
+    Language,
+    Person,
+    Episode,
+    Season,
+    Show,
+)
 
 
 __all__ = [

@@ -2,10 +2,8 @@ import inspect
 
 import pytest
 
-from isle.objects.company import Company
-from isle.objects.movie import Movie
-from isle.objects.person import Person
-from isle.objects.others import (
+from isle import Movie, Person, Company
+from isle.objects import (
     Country,
     Credit,
     Genre,

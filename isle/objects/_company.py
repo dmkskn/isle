@@ -5,9 +5,12 @@ from typing import List
 
 import isle._urls as URL
 import isle.objects._tmdb as _tmdb_obj
-import isle.objects.others as other_objs
+import isle.objects._others as other_objs
 
 from .._config import tmdb_api_key
+
+
+__all__ = ["Company"]
 
 
 class Company(_tmdb_obj.TMDb):

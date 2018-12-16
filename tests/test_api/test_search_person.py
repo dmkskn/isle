@@ -7,7 +7,7 @@ from urllib.request import urlopen
 import pytest
 
 import isle
-from isle.objects.person import Person
+from isle import Person
 
 
 URL = "https://api.themoviedb.org/3/search/person?"

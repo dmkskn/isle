@@ -1,9 +1,7 @@
 import pytest
 
 import isle
-from isle.objects.movie import Movie
-from isle.objects.person import Person
-from isle.objects.show import Episode, Season, Show
+from isle import Movie, Person, Episode, Season, Show
 
 
 URL = "https://api.themoviedb.org/3/find/{}?"

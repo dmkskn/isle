@@ -4,11 +4,14 @@ from typing import Iterator, List, Optional, Tuple
 
 import isle._urls as URL
 import isle.objects._tmdb as _tmdb_obj
-import isle.objects.company as company
-import isle.objects.others as other_objs
-import isle.objects.person as person_obj
+import isle.objects._company as company
+import isle.objects._others as other_objs
+import isle.objects._person as person_obj
 
 from .._config import tmdb_api_key
+
+
+__all__ = ["Show", "Season", "Episode"]
 
 
 class Show(_tmdb_obj.TMDb):

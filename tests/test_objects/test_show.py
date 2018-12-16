@@ -2,10 +2,8 @@ import inspect
 
 import pytest
 
-from isle.objects.company import Company
-from isle.objects.person import Person
-from isle.objects.show import Episode, Season, Show
-from isle.objects.others import (
+from isle import Company, Person, Episode, Season, Show
+from isle.objects import (
     Country,
     Credit,
     Genre,
@@ -131,7 +129,7 @@ def test_seasons_attr(show: Show):
     assert all(isinstance(item, Season) for item in show.seasons)
 
 
-def test_seasons_attr(show: Show):
+def test_status_attr(show: Show):
     assert isinstance(show.status, str)
 
 
