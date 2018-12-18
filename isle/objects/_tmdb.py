@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import copy
 from abc import ABC, abstractmethod
 
@@ -24,7 +22,7 @@ class TMDb(ABC):
             self._init()
         return copy.deepcopy(self.data[key])
 
-    def _request(self, url: str, **params) -> dict:
+    def _request(self, url: str, **params):
         self.n_requests += 1
         return GET(url, **{"api_key": tmdb_api_key(), **params})
 

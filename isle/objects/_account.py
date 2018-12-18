@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import copy
 from typing import NamedTuple
 
@@ -107,29 +105,29 @@ class Account(_tmdb_obj.TMDb):
             raise self.TokenError("No request token ID. Need to log in.")
 
     @property
-    def tmdb_id(self) -> int:
+    def tmdb_id(self):
         return self._getdata("id")
 
     @property
-    def default_language(self) -> str:
+    def default_language(self):
         """It is a ISO 639 1 code."""
         return self._getdata("iso_639_1")
 
     @property
-    def fallback_language(self) -> str:
+    def fallback_language(self):
         """It is a ISO 3166 1 code."""
         return self._getdata("iso_3166_1")
 
     @property
-    def name(self) -> str:
+    def name(self):
         return self._getdata("name")
 
     @property
-    def username(self) -> str:
+    def username(self):
         return self._getdata("username")
 
     @property
-    def include_adult(self) -> bool:
+    def include_adult(self):
         return self._getdata("include_adult")
 
     def get_details(self):
@@ -456,7 +454,7 @@ class TMDbList(_tmdb_obj.TMDb):
         self.data.update(details)
         return details
 
-    def has_movie(self, movie) -> bool:
+    def has_movie(self, movie):
         r = self._request(
             URL.LIST_CHECK_MOVIE_STATUS.format(list_id=self.tmdb_id),
             movie_id=movie.tmdb_id,

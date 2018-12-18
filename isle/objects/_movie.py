@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import date
 from operator import itemgetter
 from typing import Iterator, List, Optional, Tuple
@@ -21,7 +19,7 @@ class Movie(_tmdb_objs.TMDb):
         return self.get_all()
 
     @property
-    def title(self) -> dict:
+    def title(self):
         """Return titles of a movie in different languages.
         Each key is an ISO-3166-1 code (such as `"US"`, `"RU"`,
         etc.), and the value is the corresponding title.
@@ -40,7 +38,7 @@ class Movie(_tmdb_objs.TMDb):
         return titles
 
     @property
-    def overview(self) -> dict:
+    def overview(self):
         """Return the overviews of a movie in different
         languages. Each key is an ISO-3166-1 code (such as `"US"`,
         `"RU"`, etc.), and the value is the corresponding overview.
@@ -54,12 +52,12 @@ class Movie(_tmdb_objs.TMDb):
         return overviews
 
     @property
-    def tagline(self) -> Optional[str]:
+    def tagline(self):
         """Return a movie slogan"""
         return self._getdata("tagline")
 
     @property
-    def homepage(self) -> dict:
+    def homepage(self):
         """Return a movie homepages. Each key is an ISO-3166-1
         code (such as `"US"`, `"RU"`, etc.) and the value is the
         corresponding homepage.
@@ -75,13 +73,13 @@ class Movie(_tmdb_objs.TMDb):
         return pages
 
     @property
-    def year(self) -> Optional[int]:
+    def year(self):
         """Return year of a movie."""
         release_date = self._getdata("release_date")
         return date.fromisoformat(release_date).year if release_date else None
 
     @property
-    def releases(self) -> dict:
+    def releases(self):
         """Return release dates of a movie in different
         countries. Each key is an ISO-3166-1 code (such as `"US"`,
         `"RU"`, etc.) and the value is the corresponding date in
@@ -112,12 +110,12 @@ class Movie(_tmdb_objs.TMDb):
         return dates
 
     @property
-    def is_adult(self) -> bool:
+    def is_adult(self):
         """Return `True` if a movie is for adults."""
         return self._getdata("adult")
 
     @property
-    def backdrops(self) -> List[other_objs.Image]:
+    def backdrops(self):
         """Return backdrops that belong to a movie. Each item
         is an instance of the `Image` class."""
         backdrops = []
@@ -126,7 +124,7 @@ class Movie(_tmdb_objs.TMDb):
         return backdrops
 
     @property
-    def posters(self) -> List[other_objs.Image]:
+    def posters(self):
         """Return posters that belong to a movie. Each item is
         an instance of the `Image` class."""
         posters = []
@@ -135,7 +133,7 @@ class Movie(_tmdb_objs.TMDb):
         return posters
 
     @property
-    def languages(self) -> List[other_objs.Language]:
+    def languages(self):
         """Return the languages spoken in a movie. Each item is
         an instance of the `Language` class."""
         languages = []
@@ -157,7 +155,7 @@ class Movie(_tmdb_objs.TMDb):
         return languages
 
     @property
-    def countries(self) -> List[other_objs.Country]:
+    def countries(self):
         """Return production countries. Each item is an instance of
         the `Country` class."""
         countries = []
@@ -168,7 +166,7 @@ class Movie(_tmdb_objs.TMDb):
         return countries
 
     @property
-    def popularity(self) -> float:
+    def popularity(self):
         """Return popularity of a movie on TMDb.
 
         See more:
@@ -176,29 +174,29 @@ class Movie(_tmdb_objs.TMDb):
         return self._getdata("popularity")
 
     @property
-    def revenue(self) -> int:
+    def revenue(self):
         """Return revenue of a movie."""
         return self._getdata("revenue")
 
     @property
-    def budget(self) -> int:
+    def budget(self):
         """Return budget of a movie."""
         return self._getdata("budget")
 
     @property
-    def runtime(self) -> int:
+    def runtime(self):
         """Return a movie runtime."""
         return self._getdata("runtime")
 
     @property
-    def status(self) -> str:
+    def status(self):
         """Return one of this values: `"Rumored"`, `"Planned"`,
         `"In Production"`, `"Post Production"`, `"Released"`,
         `"Canceled"`."""
         return self._getdata("status")
 
     @property
-    def companies(self) -> List[company_obj.Company]:
+    def companies(self):
         """Return the production companies. Each item is an
         instance of the `Company` class."""
         companies = []
@@ -207,7 +205,7 @@ class Movie(_tmdb_objs.TMDb):
         return companies
 
     @property
-    def cast(self) -> List[Tuple[person_obj.Person, other_objs.Credit]]:
+    def cast(self):
         """Return movie cast as list of tuples `(Person, Credit)`."""
         cast = []
         for item in self._getdata("credits")["cast"]:
@@ -228,7 +226,7 @@ class Movie(_tmdb_objs.TMDb):
         return cast
 
     @property
-    def crew(self) -> List[Tuple[person_obj.Person, other_objs.Credit]]:
+    def crew(self):
         """Return movie crew as list of tuples `(Person, Credit)`."""
         crew = []
         for item in self._getdata("credits")["crew"]:
@@ -246,7 +244,7 @@ class Movie(_tmdb_objs.TMDb):
         return crew
 
     @property
-    def vote(self) -> other_objs.Vote:
+    def vote(self):
         """Return an instance of the `Vote` class. It is like a
         `NamedTuple` object with two attributes: `average` and
         `count`."""
@@ -255,7 +253,7 @@ class Movie(_tmdb_objs.TMDb):
         return other_objs.Vote(average=average, count=count)
 
     @property
-    def videos(self) -> List[other_objs.Video]:
+    def videos(self):
         """Return videos. Each item is an instance of the `Video`
         class."""
         videos = []
@@ -267,7 +265,7 @@ class Movie(_tmdb_objs.TMDb):
         return videos
 
     @property
-    def genres(self) -> List[other_objs.Genre]:
+    def genres(self):
         """Return a movie genres."""
         genres = []
         for item in self._getdata("genres"):
@@ -277,7 +275,7 @@ class Movie(_tmdb_objs.TMDb):
         return genres
 
     @property
-    def keywords(self) -> List[other_objs.Keyword]:
+    def keywords(self):
         """Return a movie keywords."""
         keywords = []
         for item in self._getdata("keywords")["keywords"]:
@@ -285,26 +283,26 @@ class Movie(_tmdb_objs.TMDb):
         return keywords
 
     @property
-    def imdb_id(self) -> Optional[str]:
+    def imdb_id(self):
         """Return the ID of a movie on IMDb."""
         return self._getdata("external_ids")["imdb_id"]
 
     @property
-    def facebook_id(self) -> Optional[str]:
+    def facebook_id(self):
         """Return the ID of a movie on Facebook."""
         return self._getdata("external_ids")["facebook_id"]
 
     @property
-    def instagram_id(self) -> Optional[str]:
+    def instagram_id(self):
         """Return the ID of a movie on Instagram."""
         return self._getdata("external_ids")["instagram_id"]
 
     @property
-    def twitter_id(self) -> Optional[str]:
+    def twitter_id(self):
         """Return the ID of a movie on Twitter."""
         return self._getdata("external_ids")["twitter_id"]
 
-    def get_all(self, **params) -> dict:
+    def get_all(self, **params):
         """Get all information about a movie. This method
         makes only one API request."""
         methods = ",".join(URL.ALL_MOVIE_SECOND_SUFFIXES)
@@ -314,7 +312,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update(all_data)
         return all_data
 
-    def get_details(self, **params) -> dict:
+    def get_details(self, **params):
         """Get the primary information about a movie."""
         details = self._request(
             URL.MOVIE_DETAILS.format(movie_id=self.tmdb_id), **params
@@ -322,7 +320,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update(details)
         return details
 
-    def get_alternative_titles(self, **params) -> dict:
+    def get_alternative_titles(self, **params):
         """Get all of the alternative titles for a movie."""
         alternative_titles = self._request(
             URL.MOVIE_ALTERNATIVE_TITLES.format(movie_id=self.tmdb_id),
@@ -331,7 +329,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"alternative_titles": alternative_titles})
         return alternative_titles
 
-    def get_changes(self, **params) -> dict:
+    def get_changes(self, **params):
         """Get the changes for a movie. By default only the
         last 24 hours are returned."""
         changes = self._request(
@@ -340,7 +338,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"changes": changes})
         return changes
 
-    def get_credits(self, **params) -> dict:
+    def get_credits(self, **params):
         """Get the cast and crew for a movie."""
         credits = self._request(
             URL.MOVIE_CREDITS.format(movie_id=self.tmdb_id), **params
@@ -348,7 +346,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"credits": credits})
         return credits
 
-    def get_external_ids(self, **params) -> dict:
+    def get_external_ids(self, **params):
         """Get the external ids for a movie. Such as
         Facebook, Instagram, Twitter and IMDb"""
         external_ids = self._request(
@@ -357,7 +355,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"external_ids": external_ids})
         return external_ids
 
-    def get_images(self, **params) -> dict:
+    def get_images(self, **params):
         """Get the images that belong to a movie."""
         images = self._request(
             URL.MOVIE_IMAGES.format(movie_id=self.tmdb_id), **params
@@ -365,7 +363,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"images": images})
         return images
 
-    def get_keywords(self, **params) -> dict:
+    def get_keywords(self, **params):
         """Get the keywords that have been added to a movie."""
         keywords = self._request(
             URL.MOVIE_KEYWORDS.format(movie_id=self.tmdb_id), **params
@@ -373,7 +371,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"keywords": keywords})
         return keywords
 
-    def get_release_dates(self, **params) -> dict:
+    def get_release_dates(self, **params):
         """Get the release date along with the certification
         for a movie."""
         release_dates = self._request(
@@ -382,7 +380,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"release_dates": release_dates})
         return release_dates
 
-    def get_videos(self, **params) -> dict:
+    def get_videos(self, **params):
         """Get the videos that have been added to a movie."""
         videos = self._request(
             URL.MOVIE_VIDEOS.format(movie_id=self.tmdb_id), **params
@@ -390,7 +388,7 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"videos": videos})
         return videos
 
-    def get_translations(self, **params) -> dict:
+    def get_translations(self, **params):
         """Get a list of translations that have been created
         for a movie."""
         translations = self._request(
@@ -399,25 +397,25 @@ class Movie(_tmdb_objs.TMDb):
         self.data.update({"translations": translations})
         return translations
 
-    def iter_recommendations(self, **params) -> Iterator[dict]:
+    def iter_recommendations(self, **params):
         """Get a list of recommended movies for a movie."""
         yield from self._iter_request(
             URL.MOVIE_RECOMMENDATIONS.format(movie_id=self.tmdb_id), **params
         )
 
-    def iter_similar_movies(self, **params) -> Iterator[dict]:
+    def iter_similar_movies(self, **params):
         """Get a list of recommended movies for a movie."""
         yield from self._iter_request(
             URL.MOVIE_SIMILAR.format(movie_id=self.tmdb_id), **params
         )
 
-    def iter_reviews(self, **params) -> Iterator[dict]:
+    def iter_reviews(self, **params):
         """Get the user reviews for a movie."""
         yield from self._iter_request(
             URL.MOVIE_REVIEWS.format(movie_id=self.tmdb_id), **params
         )
 
-    def iter_lists(self, **params) -> Iterator[dict]:
+    def iter_lists(self, **params):
         """Get a list of lists that this movie belongs to."""
         yield from self._iter_request(
             URL.MOVIE_LISTS.format(movie_id=self.tmdb_id), **params

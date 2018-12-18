@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Iterator, List, Optional, Tuple, Union
 
 import isle._urls as URL
@@ -19,36 +17,36 @@ class Person(_tmdb_obj.TMDb):
         self.get_all()
 
     @property
-    def name(self) -> str:
+    def name(self):
         """Return the name of the person."""
         return self._getdata("name")
 
     @property
-    def also_known_as(self) -> List[str]:
+    def also_known_as(self):
         """Return other names (in other languages)."""
         return self._getdata("also_known_as")
 
     @property
-    def known_for_department(self) -> str:
+    def known_for_department(self):
         return self._getdata("known_for_department")
 
     @property
-    def birthday(self) -> str:
+    def birthday(self):
         """Return date of birth."""
         return self._getdata("birthday")
 
     @property
-    def deathday(self) -> str:
+    def deathday(self):
         """Return date of birth."""
         return self._getdata("deathday")
 
     @property
-    def gender(self) -> int:
+    def gender(self):
         """Return an integer between 0 and 2. Default 0."""
         return self._getdata("gender")
 
     @property
-    def biography(self) -> dict:
+    def biography(self):
         """Return the biography of a person in different
         languages. Each key is an ISO-3166-1 code (such as `"US"`,
         `"RU"`, etc.), and the value is the corresponding
@@ -63,12 +61,12 @@ class Person(_tmdb_obj.TMDb):
         return biographies
 
     @property
-    def homepage(self) -> str:
+    def homepage(self):
         """Return a person homepage."""
         self._getdata("homepage")
 
     @property
-    def popularity(self) -> float:
+    def popularity(self):
         """Return popularity of a person on TMDb.
 
         See more:
@@ -76,7 +74,7 @@ class Person(_tmdb_obj.TMDb):
         return self._getdata("popularity")
 
     @property
-    def place_of_birth(self) -> str:
+    def place_of_birth(self):
         """Return place of birth."""
         return self._getdata("place_of_birth")
 
@@ -85,7 +83,7 @@ class Person(_tmdb_obj.TMDb):
         return self._getdata("adult")
 
     @property
-    def movie_cast(self) -> List[Tuple[movie_obj.Movie, other_objs.Credit]]:
+    def movie_cast(self):
         """Return movies as list of tuples `(Movie, Credit)`."""
         cast = []
         for item in self._getdata("movie_credits")["cast"]:
@@ -106,7 +104,7 @@ class Person(_tmdb_obj.TMDb):
         return cast
 
     @property
-    def movie_crew(self) -> List[Tuple[movie_obj.Movie, other_objs.Credit]]:
+    def movie_crew(self):
         """Return movies as list of tuples `(Movie, Credit)`."""
         crew = []
         for item in self._getdata("movie_credits")["crew"]:
@@ -124,7 +122,7 @@ class Person(_tmdb_obj.TMDb):
         return crew
 
     @property
-    def show_cast(self) -> List[Tuple[show_obj.Show, other_objs.Credit]]:
+    def show_cast(self):
         """Return shows as list of tuples `(Show, Credit)`."""
         cast = []
         for item in self._getdata("tv_credits")["cast"]:
@@ -145,7 +143,7 @@ class Person(_tmdb_obj.TMDb):
         return cast
 
     @property
-    def show_crew(self) -> List[Tuple[show_obj.Show, other_objs.Credit]]:
+    def show_crew(self):
         """Return shows as list of tuples `(Show, Credit)`."""
         crew = []
         for item in self._getdata("tv_credits")["crew"]:
@@ -163,9 +161,7 @@ class Person(_tmdb_obj.TMDb):
         return crew
 
     @property
-    def cast(
-        self
-    ) -> List[Tuple[Union[movie_obj.Movie, show_obj.Show], other_objs.Credit]]:
+    def cast(self):
         """Return movies and shows as list of tuples
         `(Movie or Show, Credit)`."""
         cast = []
@@ -192,9 +188,7 @@ class Person(_tmdb_obj.TMDb):
         return cast
 
     @property
-    def crew(
-        self
-    ) -> List[Tuple[Union[movie_obj.Movie, show_obj.Show], other_objs.Credit]]:
+    def crew(self):
         """Return movies and shows as list of tuples
         `(Movie or Show, Credit)`."""
         crew = []
@@ -218,7 +212,7 @@ class Person(_tmdb_obj.TMDb):
         return crew
 
     @property
-    def imdb_id(self) -> Optional[str]:
+    def imdb_id(self):
         """Return the ID of a person on IMDb."""
         return self._getdata("external_ids")["imdb_id"]
 
@@ -238,22 +232,22 @@ class Person(_tmdb_obj.TMDb):
         return self._getdata("external_ids")["tvrage_id"]
 
     @property
-    def facebook_id(self) -> Optional[str]:
+    def facebook_id(self):
         """Return the ID of a person on Facebook."""
         return self._getdata("external_ids")["facebook_id"]
 
     @property
-    def instagram_id(self) -> Optional[str]:
+    def instagram_id(self):
         """Return the ID of a person on Instagram."""
         return self._getdata("external_ids")["instagram_id"]
 
     @property
-    def twitter_id(self) -> Optional[str]:
+    def twitter_id(self):
         """Return the ID of a person on Twitter."""
         return self._getdata("external_ids")["twitter_id"]
 
     @property
-    def profiles(self) -> List[other_objs.Image]:
+    def profiles(self):
         """Return images that belong to a person. Each item is
         an instance of the `Image` class."""
 
@@ -272,7 +266,7 @@ class Person(_tmdb_obj.TMDb):
         self.data.update(all_data)
         return all_data
 
-    def get_details(self, **params) -> dict:
+    def get_details(self, **params):
         """Get the primary person details."""
         details = self._request(
             URL.PERSON_DETAILS.format(person_id=self.tmdb_id), **params
@@ -280,7 +274,7 @@ class Person(_tmdb_obj.TMDb):
         self.data.update(details)
         return details
 
-    def get_changes(self, **params) -> dict:
+    def get_changes(self, **params):
         """Get the changes for a person. By default only the
         last 24 hours are returned."""
         changes = self._request(
@@ -289,7 +283,7 @@ class Person(_tmdb_obj.TMDb):
         self.data.update({"changes": changes})
         return changes
 
-    def get_movie_credits(self, **params) -> dict:
+    def get_movie_credits(self, **params):
         """Get the movie credits for a person."""
         movie_credits = self._request(
             URL.PERSON_MOVIE_CREDITS.format(person_id=self.tmdb_id), **params
@@ -297,7 +291,7 @@ class Person(_tmdb_obj.TMDb):
         self.data.update({"movie_credits": movie_credits})
         return movie_credits
 
-    def get_show_credits(self, **params) -> dict:
+    def get_show_credits(self, **params):
         """Get the TV show credits for a person."""
         show_credits = self._request(
             URL.PERSON_SHOW_CREDITS.format(person_id=self.tmdb_id), **params
@@ -305,7 +299,7 @@ class Person(_tmdb_obj.TMDb):
         self.data.update({"tv_credits": show_credits})
         return show_credits
 
-    def get_combined_credits(self, **params) -> dict:
+    def get_combined_credits(self, **params):
         """Get the movie and TV credits together in a single
         response."""
         combined_credits = self._request(
@@ -315,7 +309,7 @@ class Person(_tmdb_obj.TMDb):
         self.data.update({"combined_credits": combined_credits})
         return combined_credits
 
-    def get_external_ids(self, **params) -> dict:
+    def get_external_ids(self, **params):
         """Get the external ids for a person. Such as
         Facebook, Instagram, Twitter and IMDb and others"""
         external_ids = self._request(
@@ -324,7 +318,7 @@ class Person(_tmdb_obj.TMDb):
         self.data.update({"external_ids": external_ids})
         return external_ids
 
-    def get_images(self, **params) -> dict:
+    def get_images(self, **params):
         """Get the images for a person."""
         images = self._request(
             URL.PERSON_IMAGES.format(person_id=self.tmdb_id), **params
@@ -332,14 +326,14 @@ class Person(_tmdb_obj.TMDb):
         self.data.update({"images": images})
         return images
 
-    def iter_tagged_images(self, **params) -> Iterator[dict]:
+    def iter_tagged_images(self, **params):
         """Get the images that this person has been tagged
         in."""
         yield from self._iter_request(
             URL.PERSON_TAGGED_IMAGES.format(person_id=self.tmdb_id), **params
         )
 
-    def get_translations(self, **params) -> dict:
+    def get_translations(self, **params):
         """Get a list of translations that have been created
         for a person."""
         translations = self._request(

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Iterator, List, NamedTuple, Optional, Union
 
 import isle._urls as URL
@@ -30,11 +28,11 @@ class Keyword(_tmdb_obj.TMDb):
         self.get_details()
 
     @property
-    def name(self) -> str:
+    def name(self):
         """Return a keyword's name"""
         return self._getdata("name")
 
-    def get_details(self) -> dict:
+    def get_details(self):
         """Get the primary information about a keyword."""
         details = self._request(
             URL.KEYWORD_DETAILS.format(keyword_id=self.tmdb_id)
@@ -42,7 +40,7 @@ class Keyword(_tmdb_obj.TMDb):
         self.data.update(details)
         return details
 
-    def iter_movies(self, **params) -> Iterator[movie_obj.Movie]:
+    def iter_movies(self, **params):
         """Get the movies that belong to a keyword."""
         results = self._iter_request(
             URL.KEYWORD_MOVIES.format(keyword_id=self.tmdb_id), **params
@@ -84,7 +82,7 @@ class Image:
         return self._configs_data
 
     @property
-    def url(self) -> dict:
+    def url(self):
         urls = {}
         base = self._configs["secure_base_url"]
         for size in self.sizes:
@@ -92,7 +90,7 @@ class Image:
         return urls
 
     @property
-    def sizes(self) -> list:
+    def sizes(self):
         return self._configs[self._image_sizes_key]
 
     @property
@@ -185,36 +183,36 @@ class Credit(_tmdb_obj.TMDb):
         self.get_details()
 
     @property
-    def type(self) -> str:
+    def type(self):
         """Return a credit type"""
         return self._getdata("credit_type")
 
     @property
-    def media_type(self) -> str:
+    def media_type(self):
         """Return a media type"""
         return self._getdata("media_type")
 
     @property
-    def department(self) -> str:
+    def department(self):
         return self._getdata("department")
 
     @property
-    def job(self) -> str:
+    def job(self):
         return self._getdata("job")
 
     @property
-    def character(self) -> Optional[str]:
+    def character(self):
         if self.type == "crew":
             return None
         return self._character or self._getdata("media")["character"]
 
     @property
-    def person(self) -> person_obj.Person:
+    def person(self):
         data = self._person_data or self._getdata("person")
         return person_obj.Person(data["id"], **data)
 
     @property
-    def person_known_for(self) -> List[Union[movie_obj.Movie, show_obj.Show]]:
+    def person_known_for(self):
         media = []
         for item in self._getdata("person")["known_for"]:
             Obj = (
@@ -226,7 +224,7 @@ class Credit(_tmdb_obj.TMDb):
         return media
 
     @property
-    def media(self) -> Union[movie_obj.Movie, show_obj.Show]:
+    def media(self):
         Obj = show_obj.Show if self.media_type == "tv" else movie_obj.Movie
         if self._media_data:
             data = self._media_data
@@ -236,7 +234,7 @@ class Credit(_tmdb_obj.TMDb):
             data.pop("episodes", None)
         return Obj(data["id"], **data)
 
-    def get_details(self) -> dict:
+    def get_details(self):
         """Get a movie or TV credit details."""
         details = self._request(
             URL.CREDIT_DETAILS.format(credit_id=self.tmdb_id)

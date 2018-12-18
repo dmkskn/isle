@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import copy
 from typing import List
 
@@ -30,12 +28,12 @@ class Company(_tmdb_obj.TMDb):
         return copy.deepcopy(self.data[key])
 
     @property
-    def name(self) -> str:
+    def name(self):
         """Return the name of a company."""
         return self._getdata("name")
 
     @property
-    def also_known_as(self) -> List[str]:
+    def also_known_as(self):
         """Return alternative names of a company."""
         names = []
         for item in self._getdata("alternative_names")["results"]:
@@ -43,17 +41,17 @@ class Company(_tmdb_obj.TMDb):
         return names
 
     @property
-    def description(self) -> str:
+    def description(self):
         """Return a company's description."""
         return self._getdata("description")
 
     @property
-    def homepage(self) -> str:
+    def homepage(self):
         """Return a company's homepage."""
         return self._getdata("homepage")
 
     @property
-    def country(self) -> other_objs.Country:
+    def country(self):
         """Return a company's origin country."""
         code = self._getdata("origin_country")
         if code:
@@ -91,7 +89,7 @@ class Company(_tmdb_obj.TMDb):
             countries[item["iso_3166_1"]] = item["english_name"]
         return countries
 
-    def get_details(self, **params) -> dict:
+    def get_details(self, **params):
         """Get a companies details."""
         details = self._request(
             URL.COMPANY_DETAILS.format(company_id=self.tmdb_id), **params
@@ -99,7 +97,7 @@ class Company(_tmdb_obj.TMDb):
         self.data.update(details)
         return details
 
-    def get_alternative_names(self, **params) -> dict:
+    def get_alternative_names(self, **params):
         """Get the alternative names of a company."""
         alternative_names = self._request(
             URL.COMPANY_ALTERNATIVE_NAMES.format(company_id=self.tmdb_id),
@@ -108,7 +106,7 @@ class Company(_tmdb_obj.TMDb):
         self.data.update({"alternative_names": alternative_names})
         return alternative_names
 
-    def get_images(self, **params) -> dict:
+    def get_images(self, **params):
         """Get a companies logos."""
         images = self._request(
             URL.COMPANY_IMAGES.format(company_id=self.tmdb_id), **params
