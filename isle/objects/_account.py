@@ -1,19 +1,43 @@
 import copy
 from typing import NamedTuple
+from importlib import import_module
 
 import isle._urls as URL
-import isle.objects._tmdb as _tmdb_obj
-import isle.objects._movie as movie_obj
-import isle.objects._others as other_objs
-import isle.objects._person as person_obj
-import isle.objects._show as show_objs
+from ._tmdb import TMDb
 from .._config import tmdb_api_key
 
 
 __all__ = ["Account", "TMDbList"]
 
 
-class Account(_tmdb_obj.TMDb):
+def _import_movie():
+    global Movie
+    Movie = import_module("isle.objects._movie").Movie
+
+
+def _import_show():
+    global Show
+    Show = import_module("isle.objects._show").Show
+
+
+def _import_episode():
+    global Episode
+    Episode = import_module("isle.objects._show").Episode
+
+
+def _import_language():
+    global Language
+    Language = import_module("isle.objects._others").Language
+
+
+def _import_all():
+    _import_movie()
+    _import_show()
+    _import_episode()
+    _import_language()
+
+
+class Account(TMDb):
     """Represents an user account."""
 
     class _Token(NamedTuple):
@@ -31,6 +55,7 @@ class Account(_tmdb_obj.TMDb):
         pass
 
     def __init__(self):
+        _import_all()
         self.data = {}
         self._token = None
         self._session = None
@@ -158,7 +183,7 @@ class Account(_tmdb_obj.TMDb):
             **params,
         )
         for item in response:
-            yield movie_obj.Movie(item["id"], **item)
+            yield Movie(item["id"], **item)
 
     def iter_favorite_shows(self, **params):
         """Get your favorite TV shows."""
@@ -168,7 +193,7 @@ class Account(_tmdb_obj.TMDb):
             **params,
         )
         for item in response:
-            yield show_objs.Show(item["id"], **item)
+            yield Show(item["id"], **item)
 
     def iter_rated_movies(self, **params):
         """Get all the movies you have rated."""
@@ -177,7 +202,7 @@ class Account(_tmdb_obj.TMDb):
             URL.ACCOUNT_RATED_MOVIES.format(account_id=self.tmdb_id), **params
         )
         for item in response:
-            yield movie_obj.Movie(item["id"], **item)
+            yield Movie(item["id"], **item)
 
     def iter_rated_shows(self, **params):
         """Get all the TV shows you have rated."""
@@ -186,7 +211,7 @@ class Account(_tmdb_obj.TMDb):
             URL.ACCOUNT_RATED_SHOWS.format(account_id=self.tmdb_id), **params
         )
         for item in response:
-            yield show_objs.Show(item["id"], **item)
+            yield Show(item["id"], **item)
 
     def iter_rated_episodes(self, **params):
         """Get all the TV episodes you have rated."""
@@ -196,7 +221,7 @@ class Account(_tmdb_obj.TMDb):
             **params,
         )
         for item in response:
-            yield show_objs.Episode(item["id"], **item)
+            yield Episode(item["id"], **item)
 
     def iter_movie_watchlist(self, **params):
         """Get all the movies you have added to your watchlist."""
@@ -206,7 +231,7 @@ class Account(_tmdb_obj.TMDb):
             **params,
         )
         for item in response:
-            yield movie_obj.Movie(item["id"], **item)
+            yield Movie(item["id"], **item)
 
     def iter_show_watchlist(self, **params):
         """Get all the TV shows you have added to your
@@ -217,18 +242,16 @@ class Account(_tmdb_obj.TMDb):
             **params,
         )
         for item in response:
-            yield show_objs.Show(item["id"], **item)
+            yield Show(item["id"], **item)
 
     def mark_as_favorite(self, item):
         """Mark a movie or TV show as a favorite item."""
-        if not isinstance(item, (movie_obj.Movie, show_objs.Show)):
+        if not isinstance(item, (Movie, Show)):
             raise TypeError(
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie"
-            if isinstance(item, movie_obj.Movie)
-            else "tv",
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
             "media_id": item.tmdb_id,
             "favorite": True,
         }
@@ -240,14 +263,12 @@ class Account(_tmdb_obj.TMDb):
 
     def remove_from_favorites(self, item):
         """Remove a movie or TV show from your favorites."""
-        if not isinstance(item, (movie_obj.Movie, show_objs.Show)):
+        if not isinstance(item, (Movie, Show)):
             raise TypeError(
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie"
-            if isinstance(item, movie_obj.Movie)
-            else "tv",
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
             "media_id": item.tmdb_id,
             "favorite": False,
         }
@@ -259,14 +280,12 @@ class Account(_tmdb_obj.TMDb):
 
     def add_to_watchlist(self, item):
         """Add a movie or TV show to your watchlist."""
-        if not isinstance(item, (movie_obj.Movie, show_objs.Show)):
+        if not isinstance(item, (Movie, Show)):
             raise TypeError(
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie"
-            if isinstance(item, movie_obj.Movie)
-            else "tv",
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
             "media_id": item.tmdb_id,
             "watchlist": True,
         }
@@ -278,14 +297,12 @@ class Account(_tmdb_obj.TMDb):
 
     def remove_from_watchlist(self, item):
         """Add a movie or TV show to your watchlist."""
-        if not isinstance(item, (movie_obj.Movie, show_objs.Show)):
+        if not isinstance(item, (Movie, Show)):
             raise TypeError(
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         data = {
-            "media_type": "movie"
-            if isinstance(item, movie_obj.Movie)
-            else "tv",
+            "media_type": "movie" if isinstance(item, Movie) else "tv",
             "media_id": item.tmdb_id,
             "watchlist": False,
         }
@@ -298,14 +315,14 @@ class Account(_tmdb_obj.TMDb):
     def rate(self, item, value):
         """Rate a movie, TV show or TV episode. `value` must be
         between `0.5` and `10`"""
-        if not isinstance(item, (movie_obj.Movie, show_objs.Show)):
+        if not isinstance(item, (Movie, Show)):
             raise TypeError(
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
         if not 0.5 <= value <= 10:
             raise TypeError(f"A value must be between 0.5 and 10. Not {value}")
         data = {"value": value}
-        if isinstance(item, movie_obj.Movie):
+        if isinstance(item, Movie):
             return self._post_request(
                 URL.RATE_MOVIE.format(movie_id=item.tmdb_id),
                 data,
@@ -321,11 +338,11 @@ class Account(_tmdb_obj.TMDb):
     def delete_rating(self, item):
         """Remove your rating for a movie, TV show or TV
         episode."""
-        if not isinstance(item, (movie_obj.Movie, show_objs.Show)):
+        if not isinstance(item, (Movie, Show)):
             raise TypeError(
                 f"An `item` must be `Movie` or `Show`, not a `{type(item)}`"
             )
-        if isinstance(item, movie_obj.Movie):
+        if isinstance(item, Movie):
             return self._delete_request(
                 URL.DELETE_MOVIE_RATING.format(movie_id=item.tmdb_id),
                 {},
@@ -387,11 +404,12 @@ class Account(_tmdb_obj.TMDb):
     #     return r
 
 
-class TMDbList(_tmdb_obj.TMDb):
+class TMDbList(TMDb):
     """Represents a list."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        _import_all()
         self._changed = False
 
     def _init(self):
@@ -426,9 +444,9 @@ class TMDbList(_tmdb_obj.TMDb):
         acc = []
         for item in self._getdata("items"):
             if item["media_type"] == "movie":
-                Obj = movie_obj.Movie
+                Obj = Movie
             elif item["media_type"] == "tv":
-                Obj = show_objs.Show
+                Obj = Show
             acc.append(Obj(item["id"], **item))
         return acc
 
@@ -440,7 +458,7 @@ class TMDbList(_tmdb_obj.TMDb):
         except AttributeError:
             self._all_languages = self._get_all_languages()
             item = self._all_languages[code]
-        return other_objs.Language(
+        return Language(
             iso_639_1=code,
             english_name=item["english_name"],
             original_name=item["name"],

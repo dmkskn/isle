@@ -1,10 +1,8 @@
 from typing import Iterator, List, Optional, Tuple
+from importlib import import_module
 
 import isle._urls as URL
-import isle.objects._tmdb as _tmdb_obj
-import isle.objects._company as company
-import isle.objects._others as other_objs
-import isle.objects._person as person_obj
+from ._tmdb import TMDb
 
 from .._config import tmdb_api_key
 
@@ -12,8 +10,75 @@ from .._config import tmdb_api_key
 __all__ = ["Show", "Season", "Episode"]
 
 
-class Show(_tmdb_obj.TMDb):
+def _import_person():
+    global Person
+    Person = import_module("isle.objects._person").Person
+
+
+def _import_image():
+    global Image
+    Image = import_module("isle.objects._others").Image
+
+
+def _import_language():
+    global Language
+    Language = import_module("isle.objects._others").Language
+
+
+def _import_country():
+    global Country
+    Country = import_module("isle.objects._others").Country
+
+
+def _import_company():
+    global Company
+    Company = import_module("isle.objects._company").Company
+
+
+def _import_vote():
+    global Vote
+    Vote = import_module("isle.objects._others").Vote
+
+
+def _import_video():
+    global Video
+    Video = import_module("isle.objects._others").Video
+
+
+def _import_genre():
+    global Genre
+    Genre = import_module("isle.objects._others").Genre
+
+
+def _import_keyword():
+    global Keyword
+    Keyword = import_module("isle.objects._others").Keyword
+
+
+def _import_credit():
+    global Credit
+    Credit = import_module("isle.objects._others").Credit
+
+
+def _import_all():
+    _import_person()
+    _import_image()
+    _import_language()
+    _import_country()
+    _import_company()
+    _import_vote()
+    _import_video()
+    _import_genre()
+    _import_keyword()
+    _import_credit()
+
+
+class Show(TMDb):
     """Represents a TV show."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _import_all()
 
     def _init(self):
         return self.get_all()
@@ -72,7 +137,7 @@ class Show(_tmdb_obj.TMDb):
         """Return the creators of a TV show."""
         creators = []
         for item in self._getdata("created_by"):
-            creators.append(person_obj.Person(item["id"], **item))
+            creators.append(Person(item["id"], **item))
         return creators
 
     @property
@@ -81,7 +146,7 @@ class Show(_tmdb_obj.TMDb):
         is an instance of the `Image` class."""
         backdrops = []
         for item in self._getdata("images")["backdrops"]:
-            backdrops.append(other_objs.Image(item, type_="backdrop"))
+            backdrops.append(Image(item, type_="backdrop"))
         return backdrops
 
     @property
@@ -90,7 +155,7 @@ class Show(_tmdb_obj.TMDb):
         an instance of the `Image` class."""
         posters = []
         for item in self._getdata("images")["posters"]:
-            posters.append(other_objs.Image(item, type_="poster"))
+            posters.append(Image(item, type_="poster"))
         return posters
 
     @property
@@ -126,7 +191,7 @@ class Show(_tmdb_obj.TMDb):
                 self._all_languages = self._get_all_languages()
                 item = self._all_languages[code]
             languages.append(
-                other_objs.Language(
+                Language(
                     iso_639_1=code,
                     english_name=item["english_name"],
                     original_name=item["name"],
@@ -180,9 +245,7 @@ class Show(_tmdb_obj.TMDb):
                     self._all_countries = self._get_all_countries()
                     english_name = self._all_countries[code]
                 countries.append(
-                    other_objs.Country(
-                        iso_3166_1=code, english_name=english_name
-                    )
+                    Country(iso_3166_1=code, english_name=english_name)
                 )
             else:
                 continue
@@ -202,7 +265,7 @@ class Show(_tmdb_obj.TMDb):
         instance of the `Company` class."""
         companies = []
         for item in self._getdata("production_companies"):
-            companies.append(company.Company(item["id"], **item))
+            companies.append(Company(item["id"], **item))
         return companies
 
     @property
@@ -231,7 +294,7 @@ class Show(_tmdb_obj.TMDb):
         `count`."""
         average = self._getdata("vote_average")
         count = self._getdata("vote_count")
-        return other_objs.Vote(average=average, count=count)
+        return Vote(average=average, count=count)
 
     @property
     def videos(self):
@@ -240,9 +303,7 @@ class Show(_tmdb_obj.TMDb):
         videos = []
         for item in self._getdata("videos")["results"]:
             url = f"https://www.youtube.com/watch?v={item['key']}"
-            videos.append(
-                other_objs.Video(name=item["name"], type=item["type"], url=url)
-            )
+            videos.append(Video(name=item["name"], type=item["type"], url=url))
         return videos
 
     @property
@@ -250,9 +311,7 @@ class Show(_tmdb_obj.TMDb):
         """Return a TV show genres."""
         genres = []
         for item in self._getdata("genres"):
-            genres.append(
-                other_objs.Genre(tmdb_id=item["id"], name=item["name"])
-            )
+            genres.append(Genre(tmdb_id=item["id"], name=item["name"]))
         return genres
 
     @property
@@ -260,7 +319,7 @@ class Show(_tmdb_obj.TMDb):
         """Return a TV show keywords."""
         keywords = []
         for item in self._getdata("keywords")["results"]:
-            keywords.append(other_objs.Keyword(item["id"], **item))
+            keywords.append(Keyword(item["id"], **item))
         return keywords
 
     @property
@@ -311,13 +370,13 @@ class Show(_tmdb_obj.TMDb):
                 "department": "Acting",
                 "job": "Actor",
             }
-            credit = other_objs.Credit(
+            credit = Credit(
                 item["credit_id"],
                 media_data=self.data,
                 character=item["character"],
                 **kwargs,
             )
-            person = person_obj.Person(item["id"], **item)
+            person = Person(item["id"], **item)
             cast.append((person, credit))
         return cast
 
@@ -333,10 +392,8 @@ class Show(_tmdb_obj.TMDb):
                 "department": item["department"],
                 "job": item["job"],
             }
-            credit = other_objs.Credit(
-                item["credit_id"], media_data=self.data, **kwargs
-            )
-            person = person_obj.Person(item["id"], **item)
+            credit = Credit(item["credit_id"], media_data=self.data, **kwargs)
+            person = Person(item["id"], **item)
             crew.append((person, credit))
         return crew
 
@@ -481,10 +538,11 @@ class Show(_tmdb_obj.TMDb):
         return videos
 
 
-class Season(_tmdb_obj.TMDb):
+class Season(TMDb):
     """Represents a TV show season."""
 
     def __init__(self, n: int, *, show_id: int, **kwargs):
+        _import_all()
         self.data = {"season_number": n, **kwargs}
         self.show_id = show_id
         self.number = self.data["season_number"]
@@ -543,7 +601,7 @@ class Season(_tmdb_obj.TMDb):
         is an instance of the `Image` class."""
 
         def _i(i):
-            return other_objs.Image(i, type_="poster")
+            return Image(i, type_="poster")
 
         return list(map(_i, self._getdata("images")["posters"]))
 
@@ -554,9 +612,7 @@ class Season(_tmdb_obj.TMDb):
         videos = []
         for item in self._getdata("videos")["results"]:
             url = f"https://www.youtube.com/watch?v={item['key']}"
-            videos.append(
-                other_objs.Video(name=item["name"], type=item["type"], url=url)
-            )
+            videos.append(Video(name=item["name"], type=item["type"], url=url))
         return videos
 
     @property
@@ -570,13 +626,13 @@ class Season(_tmdb_obj.TMDb):
                 "department": "Acting",
                 "job": "Actor",
             }
-            credit = other_objs.Credit(
+            credit = Credit(
                 item["credit_id"],
                 media_data=self.data,
                 character=item["character"],
                 **kwargs,
             )
-            person = person_obj.Person(item["id"], **item)
+            person = Person(item["id"], **item)
             cast.append((person, credit))
         return cast
 
@@ -591,10 +647,8 @@ class Season(_tmdb_obj.TMDb):
                 "department": item["department"],
                 "job": item["job"],
             }
-            credit = other_objs.Credit(
-                item["credit_id"], media_data=self.data, **kwargs
-            )
-            person = person_obj.Person(item["id"], **item)
+            credit = Credit(item["credit_id"], media_data=self.data, **kwargs)
+            person = Person(item["id"], **item)
             crew.append((person, credit))
         return crew
 
@@ -673,10 +727,11 @@ class Season(_tmdb_obj.TMDb):
         return videos
 
 
-class Episode(_tmdb_obj.TMDb):
+class Episode(TMDb):
     """Represents a TV show episode."""
 
     def __init__(self, n, *, show_id, season_number, **kwargs):
+        _import_all()
         self.data = {
             "episode_number": n,
             "season_number": season_number,
@@ -762,7 +817,7 @@ class Episode(_tmdb_obj.TMDb):
         an instance of the `Image` class."""
 
         def _i(i):
-            return other_objs.Image(i, type_="still")
+            return Image(i, type_="still")
 
         return list(map(_i, self._getdata("images")["stills"]))
 
@@ -773,9 +828,7 @@ class Episode(_tmdb_obj.TMDb):
         videos = []
         for item in self._getdata("videos")["results"]:
             url = f"https://www.youtube.com/watch?v={item['key']}"
-            videos.append(
-                other_objs.Video(name=item["name"], type=item["type"], url=url)
-            )
+            videos.append(Video(name=item["name"], type=item["type"], url=url))
         return videos
 
     @property
@@ -785,7 +838,7 @@ class Episode(_tmdb_obj.TMDb):
         `count`."""
         average = self._getdata("vote_average")
         count = self._getdata("vote_average")
-        return other_objs.Vote(average=average, count=count)
+        return Vote(average=average, count=count)
 
     @property
     def cast(self):
@@ -798,13 +851,13 @@ class Episode(_tmdb_obj.TMDb):
                 "department": "Acting",
                 "job": "Actor",
             }
-            credit = other_objs.Credit(
+            credit = Credit(
                 item["credit_id"],
                 media_data=self.data,
                 character=item["character"],
                 **kwargs,
             )
-            person = person_obj.Person(item["id"], **item)
+            person = Person(item["id"], **item)
             cast.append((person, credit))
         return cast
 
@@ -819,10 +872,8 @@ class Episode(_tmdb_obj.TMDb):
                 "department": item["department"],
                 "job": item["job"],
             }
-            credit = other_objs.Credit(
-                item["credit_id"], media_data=self.data, **kwargs
-            )
-            person = person_obj.Person(item["id"], **item)
+            credit = Credit(item["credit_id"], media_data=self.data, **kwargs)
+            person = Person(item["id"], **item)
             crew.append((person, credit))
         return crew
 
@@ -832,12 +883,12 @@ class Episode(_tmdb_obj.TMDb):
         `(Person, Credit)`."""
         guest_stars = []
         for item in self._getdata("credits")["guest_stars"]:
-            credit = other_objs.Credit(
+            credit = Credit(
                 item["credit_id"],
                 media_data=self.data,
                 character=item.get("character"),
             )
-            person = person_obj.Person(item["id"], **item)
+            person = Person(item["id"], **item)
             guest_stars.append((person, credit))
         return guest_stars
 

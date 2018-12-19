@@ -1,9 +1,9 @@
 import copy
 from typing import List
+from importlib import import_module
 
 import isle._urls as URL
-import isle.objects._tmdb as _tmdb_obj
-import isle.objects._others as other_objs
+from ._tmdb import TMDb
 
 from .._config import tmdb_api_key
 
@@ -11,8 +11,23 @@ from .._config import tmdb_api_key
 __all__ = ["Company"]
 
 
-class Company(_tmdb_obj.TMDb):
+def _import_country():
+    global Country
+    Country = import_module("isle.objects._others").Country
+
+
+def _import_image():
+    global Image
+    Image = import_module("isle.objects._others").Image
+
+
+class Company(TMDb):
     """Represents a company."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _import_country()
+        _import_image()
 
     def _init(self):
         self.get_details()
@@ -60,9 +75,7 @@ class Company(_tmdb_obj.TMDb):
             except AttributeError:
                 self._all_countries = self._get_all_countries()
                 english_name = self._all_countries[code]
-            return other_objs.Country(
-                iso_3166_1=code, english_name=english_name
-            )
+            return Country(iso_3166_1=code, english_name=english_name)
         else:
             return code
 
@@ -77,7 +90,7 @@ class Company(_tmdb_obj.TMDb):
         is an instance of the `Image` class."""
         logos = []
         for item in self._getdata("images")["logos"]:
-            logos.append(other_objs.Image(item, type_="logo"))
+            logos.append(Image(item, type_="logo"))
         return logos
 
     def _get_all_countries(self):

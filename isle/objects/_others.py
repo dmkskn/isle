@@ -1,10 +1,8 @@
 from typing import Iterator, List, NamedTuple, Optional, Union
+from importlib import import_module
 
 import isle._urls as URL
-import isle.objects._tmdb as _tmdb_obj
-import isle.objects._movie as movie_obj
-import isle.objects._person as person_obj
-import isle.objects._show as show_obj
+from ._tmdb import TMDb
 from .._config import tmdb_api_key
 from .._requests import GET
 
@@ -21,8 +19,33 @@ __all__ = [
 ]
 
 
-class Keyword(_tmdb_obj.TMDb):
+def _import_movie():
+    global Movie
+    Movie = import_module("isle.objects._movie").Movie
+
+
+def _import_show():
+    global Show
+    Show = import_module("isle.objects._show").Show
+
+
+def _import_person():
+    global Person
+    Person = import_module("isle.objects._person").Person
+
+
+def _import_all():
+    _import_movie()
+    _import_show()
+    _import_person()
+
+
+class Keyword(TMDb):
     """Represents a keyword."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _import_all()
 
     def _init(self):
         self.get_details()
@@ -45,7 +68,7 @@ class Keyword(_tmdb_obj.TMDb):
         results = self._iter_request(
             URL.KEYWORD_MOVIES.format(keyword_id=self.tmdb_id), **params
         )
-        yield from map(lambda x: movie_obj.Movie(x["id"]), results)
+        yield from map(lambda x: Movie(x["id"]), results)
 
     def __str__(self):
         return self._getdata("name")
@@ -160,7 +183,7 @@ class Video(NamedTuple):
         return self.url
 
 
-class Credit(_tmdb_obj.TMDb):
+class Credit(TMDb):
     """Represents a credit."""
 
     def __init__(
@@ -172,6 +195,7 @@ class Credit(_tmdb_obj.TMDb):
         character=None,
         **kwargs,
     ):
+        _import_all()
         self.data = {"credit_id": tmdb_id, **kwargs}
         self.tmdb_id = self.data["credit_id"]
         self._person_data = person_data
@@ -209,23 +233,19 @@ class Credit(_tmdb_obj.TMDb):
     @property
     def person(self):
         data = self._person_data or self._getdata("person")
-        return person_obj.Person(data["id"], **data)
+        return Person(data["id"], **data)
 
     @property
     def person_known_for(self):
         media = []
         for item in self._getdata("person")["known_for"]:
-            Obj = (
-                show_obj.Show
-                if item["media_type"] == "tv"
-                else movie_obj.Movie
-            )
+            Obj = Show if item["media_type"] == "tv" else Movie
             media.append(Obj(item["id"], **item))
         return media
 
     @property
     def media(self):
-        Obj = show_obj.Show if self.media_type == "tv" else movie_obj.Movie
+        Obj = Show if self.media_type == "tv" else Movie
         if self._media_data:
             data = self._media_data
         else:

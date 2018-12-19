@@ -1,17 +1,46 @@
 from typing import Iterator, List, Optional, Tuple, Union
+from importlib import import_module
 
 import isle._urls as URL
-import isle.objects._tmdb as _tmdb_obj
-import isle.objects._movie as movie_obj
-import isle.objects._others as other_objs
-import isle.objects._show as show_obj
+from ._tmdb import TMDb
 
 
 __all__ = ["Person"]
 
 
-class Person(_tmdb_obj.TMDb):
+def _import_movie():
+    global Movie
+    Movie = import_module("isle.objects._movie").Movie
+
+
+def _import_show():
+    global Show
+    Show = import_module("isle.objects._show").Show
+
+
+def _import_credit():
+    global Credit
+    Credit = import_module("isle.objects._others").Credit
+
+
+def _import_image():
+    global Image
+    Image = import_module("isle.objects._others").Image
+
+
+def _import_all():
+    _import_movie()
+    _import_show()
+    _import_credit()
+    _import_image()
+
+
+class Person(TMDb):
     """Represents a person."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _import_all()
 
     def _init(self):
         self.get_all()
@@ -93,13 +122,13 @@ class Person(_tmdb_obj.TMDb):
                 "department": "Acting",
                 "job": "Actor",
             }
-            credit = other_objs.Credit(
+            credit = Credit(
                 item["credit_id"],
                 person_data=self.data,
                 character=item["character"],
                 **kwargs,
             )
-            movie = movie_obj.Movie(item["id"], **item)
+            movie = Movie(item["id"], **item)
             cast.append((movie, credit))
         return cast
 
@@ -114,10 +143,8 @@ class Person(_tmdb_obj.TMDb):
                 "department": item["department"],
                 "job": item["job"],
             }
-            credit = other_objs.Credit(
-                item["credit_id"], person_data=self.data, **kwargs
-            )
-            movie = movie_obj.Movie(item["id"], **item)
+            credit = Credit(item["credit_id"], person_data=self.data, **kwargs)
+            movie = Movie(item["id"], **item)
             crew.append((movie, credit))
         return crew
 
@@ -132,13 +159,13 @@ class Person(_tmdb_obj.TMDb):
                 "department": "Acting",
                 "job": "Actor",
             }
-            credit = other_objs.Credit(
+            credit = Credit(
                 item["credit_id"],
                 person_data=self.data,
                 character=item["character"],
                 **kwargs,
             )
-            show = show_obj.Show(item["id"], **item)
+            show = Show(item["id"], **item)
             cast.append((show, credit))
         return cast
 
@@ -153,10 +180,8 @@ class Person(_tmdb_obj.TMDb):
                 "department": item["department"],
                 "job": item["job"],
             }
-            credit = other_objs.Credit(
-                item["credit_id"], person_data=self.data, **kwargs
-            )
-            show = show_obj.Show(item["id"], **item)
+            credit = Credit(item["credit_id"], person_data=self.data, **kwargs)
+            show = Show(item["id"], **item)
             crew.append((show, credit))
         return crew
 
@@ -172,17 +197,13 @@ class Person(_tmdb_obj.TMDb):
                 "department": "Acting",
                 "job": "Actor",
             }
-            credit = other_objs.Credit(
+            credit = Credit(
                 item["credit_id"],
                 person_data=self.data,
                 character=item["character"],
                 **kwargs,
             )
-            Obj = (
-                show_obj.Show
-                if item["media_type"] == "tv"
-                else movie_obj.Movie
-            )
+            Obj = Show if item["media_type"] == "tv" else Movie
             obj = Obj(item["id"], **item)
             cast.append((obj, credit))
         return cast
@@ -199,14 +220,8 @@ class Person(_tmdb_obj.TMDb):
                 "department": item["department"],
                 "job": item["job"],
             }
-            credit = other_objs.Credit(
-                item["credit_id"], person_data=self.data, **kwargs
-            )
-            Obj = (
-                show_obj.Show
-                if item["media_type"] == "tv"
-                else movie_obj.Movie
-            )
+            credit = Credit(item["credit_id"], person_data=self.data, **kwargs)
+            Obj = Show if item["media_type"] == "tv" else Movie
             obj = Obj(item["id"], **item)
             crew.append((obj, credit))
         return crew
@@ -252,7 +267,7 @@ class Person(_tmdb_obj.TMDb):
         an instance of the `Image` class."""
 
         def _i(i):
-            return other_objs.Image(i, type_="profile")
+            return Image(i, type_="profile")
 
         return list(map(_i, self._getdata("images")["profiles"]))
 
