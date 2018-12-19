@@ -186,21 +186,13 @@ class Video(NamedTuple):
 class Credit(TMDb):
     """Represents a credit."""
 
-    def __init__(
-        self,
-        tmdb_id,
-        *,
-        person_data=None,
-        media_data=None,
-        character=None,
-        **kwargs,
-    ):
+    def __init__(self, tmdb_id, **kwargs):
         _import_all()
         self.data = {"credit_id": tmdb_id, **kwargs}
         self.tmdb_id = self.data["credit_id"]
-        self._person_data = person_data
-        self._media_data = media_data
-        self._character = character
+        self._person_data = kwargs.get("person_data")
+        self._media_data = kwargs.get("media_data")
+        self._character = kwargs.get("character")
         self.n_requests = 0
 
     def _init(self):
