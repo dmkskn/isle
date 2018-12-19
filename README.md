@@ -1,6 +1,8 @@
 # THE MOVIE DATABASE PYTHON WRAPPER
 
-`isle` is a clear and distinct wrapper of the The Movie Database API.
+[![Build Status](https://travis-ci.org/dmkskn/isle.svg?branch=master)](https://travis-ci.org/dmkskn/isle)
+
+`isle` is a clear and distinct wrapper for The Movie Database API.
 
 ## TABLE OF CONTENTS
 
