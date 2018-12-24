@@ -24,6 +24,7 @@ __all__ = [
     "search_show",
     "search_person",
     "search_company",
+    "multi_search",
     "discover_movies",
     "discover_shows",
     "find",
@@ -118,6 +119,26 @@ def search_company(query: str, **kwargs):
     params = {"query": query, "api_key": tmdb_api_key(), **kwargs}
     for item in GET_pages(URL.SEARCH_COMPANY, params):
         yield Company(item["id"], **item)
+
+
+def multi_search(query: str, **kwargs):
+    """Search for movies, TV shows and people in a single request.
+
+    The `query` argument is a text query to search (required).
+
+    Returns a generator. Each element is either a `Movie`, or a
+    `Show`, or a `Person` object.
+    """
+    params = {"query": query, "api_key": tmdb_api_key(), **kwargs}
+    for item in GET_pages(URL.MULTI_SEARCH, params):
+        if item["media_type"] == "tv":
+            yield Show(item["id"], **item)
+        elif item["media_type"] == "movie":
+            yield Movie(item["id"], **item)
+        elif item["media_type"] == "person":
+            yield Person(item["id"], **item)
+        else:
+            raise RuntimeError(f"Unknown media type {item['media_type']}")
 
 
 def discover_movies(options: dict):
