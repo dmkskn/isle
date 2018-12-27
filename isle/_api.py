@@ -3,17 +3,17 @@ from collections import defaultdict
 from urllib.parse import urljoin
 
 from . import _urls as URL
-
 from ._config import tmdb_api_key
 from ._requests import GET, GET_pages
 from .objects import (
     Company,
-    Movie,
     Country,
-    Genre,
-    Language,
-    Person,
     Episode,
+    Genre,
+    Keyword,
+    Language,
+    Movie,
+    Person,
     Season,
     Show,
 )
@@ -24,6 +24,7 @@ __all__ = [
     "search_show",
     "search_person",
     "search_company",
+    "search_keyword",
     "multi_search",
     "discover_movies",
     "discover_shows",
@@ -119,6 +120,18 @@ def search_company(query: str, **kwargs):
     params = {"query": query, "api_key": tmdb_api_key(), **kwargs}
     for item in GET_pages(URL.SEARCH_COMPANY, params):
         yield Company(item["id"], **item)
+
+
+def search_keyword(query: str, **kwargs):
+    """Search for keywords.
+
+    The `query` argument is a text query to search (required).
+
+    Returns a generator. Each item is a `Keyword` object.
+    """
+    params = {"query": query, "api_key": tmdb_api_key(), **kwargs}
+    for item in GET_pages(URL.SEARCH_KEYWORD, params):
+        yield Keyword(item["id"], **item)
 
 
 def multi_search(query: str, **kwargs):

@@ -28,6 +28,7 @@ SEARCH_MOVIE = f"{BASE}/{V}/search/movie"
 SEARCH_SHOW = f"{BASE}/{V}/search/tv"
 SEARCH_PERSON = f"{BASE}/{V}/search/person"
 SEARCH_COMPANY = f"{BASE}/{V}/search/company"
+SEARCH_KEYWORD = f"{BASE}/{V}/search/keyword"
 MULTI_SEARCH = f"{BASE}/{V}/search/multi"
 
 
