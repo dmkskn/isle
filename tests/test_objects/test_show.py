@@ -271,3 +271,12 @@ def test_iter_similar_shows(empty_show: Show):
     assert inspect.isgenerator(similar_shows)
     item = next(similar_shows)
     assert isinstance(item, dict)
+
+
+def test_eq(show: Show, empty_show: Show):
+    assert show == empty_show
+
+
+def test_not_eq(show: Show, empty_show: Show):
+    show.tmdb_id = 1234
+    assert show != empty_show

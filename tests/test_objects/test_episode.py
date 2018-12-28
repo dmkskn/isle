@@ -159,3 +159,12 @@ def test_get_images(empty_episode: Episode):
 def test_get_videos(empty_episode: Episode):
     videos = empty_episode.get_videos()
     assert videos == empty_episode.data["videos"]
+
+
+def test_eq(episode, empty_episode):
+    assert episode == empty_episode
+
+
+def test_not_eq(episode, empty_episode):
+    empty_episode.data["id"] = 1234
+    assert episode != empty_episode

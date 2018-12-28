@@ -68,3 +68,11 @@ def test_get_alternative_names(empty_company: Company):
 def test_get_images(empty_company: Company):
     images = empty_company.get_images()
     assert images == empty_company.data["images"]
+
+
+def test_eq():
+    assert Company(1) == Company(1)
+
+
+def test_not_eq():
+    assert Company(1) != Company(10)

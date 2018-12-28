@@ -54,3 +54,12 @@ def test_iter_movies(keyword_with_name: Keyword):
 def test_keyword_to_str(keyword_with_name, keyword_without_name):
     assert str(keyword_with_name) == keyword_with_name.name
     assert str(keyword_without_name) == keyword_without_name.name
+
+
+def test_eq(keyword_with_name, keyword_without_name):
+    assert keyword_with_name == keyword_without_name
+
+
+def test_not_eq(keyword_with_name, keyword_without_name):
+    keyword_without_name.tmdb_id = 1234
+    assert keyword_with_name != keyword_without_name

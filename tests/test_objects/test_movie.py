@@ -259,3 +259,12 @@ def test_iter_lists(empty_movie: Movie):
     item = next(lists)
     assert isinstance(item, dict)
     assert all(x in item for x in ["description", "item_count"])
+
+
+def test_eq(movie, empty_movie):
+    assert movie == empty_movie
+
+
+def test_not_eq(movie, empty_movie):
+    movie.tmdb_id = 1234
+    assert movie != empty_movie

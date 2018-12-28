@@ -200,3 +200,12 @@ def test_iter_tagged_images(empty_person: Person):
     assert inspect.isgenerator(tagged_images)
     item = next(tagged_images)
     assert isinstance(item, dict)
+
+
+def test_eq(person: Person, empty_person: Person):
+    assert person == empty_person
+
+
+def test_not_eq(person: Person, empty_person: Person):
+    person.tmdb_id = 1234
+    assert person != empty_person

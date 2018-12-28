@@ -95,3 +95,11 @@ def test_person_attr(movie_credit: Credit):
 def test_media_attr(movie_credit: Credit, show_credit: Credit):
     assert isinstance(movie_credit.media, Movie)
     assert isinstance(show_credit.media, Show)
+
+
+def test_eq(movie_credit):
+    assert Credit(MOVIE_CREDIT_ID) == movie_credit
+
+
+def test_not_eq(movie_credit, show_credit):
+    assert movie_credit != show_credit

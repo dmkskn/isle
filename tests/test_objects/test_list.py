@@ -53,3 +53,11 @@ def test_has_movie(tmdb_list):
         if isinstance(item, Movie):
             assert tmdb_list.has_movie(item)
             break
+
+
+def test_eq():
+    assert tmdb_list == tmdb_list
+
+
+def test_not_eq(tmdb_list):
+    assert TMDbList(1234) != tmdb_list

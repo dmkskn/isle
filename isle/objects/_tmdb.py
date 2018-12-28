@@ -55,3 +55,6 @@ class TMDb(ABC):
 
     def __repr__(self):
         return f"{type(self).__name__}({self.tmdb_id})"
+
+    def __eq__(self, other):
+        return (type(self) == type(other)) and (self.tmdb_id == other.tmdb_id)

@@ -152,3 +152,7 @@ def test_delete_rating(once_logged_in_account):
     once_logged_in_account.rate(Movie(18148), 8.5)
     r = once_logged_in_account.delete_rating(Movie(18148))
     assert r["status_code"] == 13
+
+
+def test_eq(logged_in_account, once_logged_in_account):
+    assert logged_in_account == once_logged_in_account

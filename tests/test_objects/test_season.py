@@ -124,3 +124,12 @@ def test_get_external_ids(empty_season: Season):
 def test_get_videos(empty_season: Season):
     videos = empty_season.get_videos()
     assert empty_season.data["videos"] == videos
+
+
+def test_eq(season: Season, empty_season: Season):
+    assert season == empty_season
+
+
+def test_not_eq(season: Season, empty_season: Season):
+    season.data["id"] = 1234
+    assert season != empty_season
