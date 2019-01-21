@@ -51,6 +51,12 @@ PRIMARY_TRANSLATIONS_CONFIGURATION = (
 TIMEZONES_CONFIGURATION = f"{BASE}/{V}/configuration/timezones"
 
 
+MOVIE_GET_LATEST = f"{BASE}/{V}/movie/latest"
+MOVIE_GET_POPULAR = f"{BASE}/{V}/movie/popular"
+MOVIE_GET_NOW_PLAYING = f"{BASE}/{V}/movie/now_playing"
+MOVIE_GET_TOP_RATED = f"{BASE}/{V}/movie/top_rated"
+MOVIE_GET_UPCOMING = f"{BASE}/{V}/movie/upcoming"
+
 MOVIE_DETAILS = f"{BASE}/{V}/movie/{{movie_id}}"
 MOVIE_ALTERNATIVE_TITLES = f"{MOVIE_DETAILS}/alternative_titles"
 MOVIE_CHANGES = f"{MOVIE_DETAILS}/changes"
