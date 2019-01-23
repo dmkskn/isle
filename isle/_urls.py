@@ -90,6 +90,12 @@ ALL_MOVIE_SECOND_SUFFIXES = [
 ]
 
 
+SHOW_GET_LATEST = f"{BASE}/{V}/tv/latest"
+SHOW_GET_AIRING_TODAY = f"{BASE}/{V}/tv/airing_today"
+SHOW_GET_ON_THE_AIR = f"{BASE}/{V}/tv/on_the_air"
+SHOW_GET_POPULAR = f"{BASE}/{V}/tv/popular"
+SHOW_GET_TOP_RATED = f"{BASE}/{V}/tv/top_rated"
+
 SHOW_DETAILS = f"{BASE}/{V}/tv/{{show_id}}"
 SHOW_ALTERNATIVE_TITLES = f"{SHOW_DETAILS}/alternative_titles"
 SHOW_CHANGES = f"{SHOW_DETAILS}/changes"
