@@ -9,8 +9,8 @@ __all__ = [
     "get_latest",
     "get_popular",
     "get_top_rated",
-    # "get_now_playing",
-    # "get_upcoming",
+    "get_now_playing",
+    "get_upcoming",
 ]
 
 
