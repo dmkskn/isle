@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "isle"
-version = "0.4.1"
+version = "0.5.0"
 description = "A clear and distinct wrapper of The Movie Database API."
 authors = ["Dima Koskin <dmksknn@gmail.com>"]
 license = "MIT"
