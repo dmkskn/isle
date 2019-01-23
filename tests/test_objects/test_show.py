@@ -2,17 +2,22 @@ import inspect
 
 import pytest
 
-from isle import Company, Person, Episode, Season, Show
 from isle.objects import (
+    Company,
     Country,
     Credit,
+    Episode,
     Genre,
     Image,
     Keyword,
     Language,
+    Person,
+    Season,
+    Show,
     Video,
     Vote,
 )
+
 
 SHOW_ID = 1399
 

@@ -1,7 +1,6 @@
 import pytest
 
-from isle import Company
-from isle.objects import Country, Image
+from isle.objects import Company, Country, Image
 
 
 COMPANY_ID = 1

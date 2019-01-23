@@ -1,7 +1,6 @@
 import pytest
 
-from isle import Movie, Show, Person
-from isle.objects import Credit
+from isle.objects import Credit, Movie, Person, Show
 
 
 PERSON_ID = 287

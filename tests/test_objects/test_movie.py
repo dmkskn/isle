@@ -2,14 +2,16 @@ import inspect
 
 import pytest
 
-from isle import Movie, Person, Company
 from isle.objects import (
+    Company,
     Country,
     Credit,
     Genre,
     Image,
     Keyword,
     Language,
+    Movie,
+    Person,
     Video,
     Vote,
 )

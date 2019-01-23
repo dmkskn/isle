@@ -2,8 +2,7 @@ import os
 
 import pytest
 
-from isle import Account, Movie, Show
-from isle.objects import TMDbList, Language
+from isle.objects import Account, Language, Movie, Show, TMDbList
 
 
 LIST_ID = os.getenv("TMDB_LIST_ID")

@@ -1,7 +1,7 @@
 import pytest
 import inspect
 
-from isle.objects._tmdb import TMDb
+from isle.objects import TMDb
 
 
 MOVIE_ID = 18148

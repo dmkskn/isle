@@ -1,7 +1,6 @@
 import pytest
 
-from isle import Person, Episode, Season
-from isle.objects import Credit, Image, Video
+from isle.objects import Credit, Episode, Image, Person, Season, Video
 
 
 SHOW_ID = 66732

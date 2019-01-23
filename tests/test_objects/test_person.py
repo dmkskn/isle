@@ -3,8 +3,10 @@ import re
 
 import pytest
 
-from isle import Movie, Person, Show
 from isle.objects import (
+    Movie,
+    Person,
+    Show,
     Country,
     Credit,
     Genre,

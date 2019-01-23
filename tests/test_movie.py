@@ -3,7 +3,7 @@ from itertools import islice
 
 import pytest
 
-import isle
+import isle.movie
 from isle import Movie
 
 
