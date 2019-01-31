@@ -130,6 +130,8 @@ ALL_SHOW_SECOND_SUFFIXES = [
     "videos",
 ]
 
+PERSON_GET_POPULAR = f"{BASE}/{V}/person/popular"
+PERSON_GET_LATEST = f"{BASE}/{V}/person/latest"
 
 PERSON_DETAILS = f"{BASE}/{V}/person/{{person_id}}"
 PERSON_CHANGES = f"{PERSON_DETAILS}/changes"
